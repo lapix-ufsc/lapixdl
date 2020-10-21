@@ -11,7 +11,7 @@ setup(
 
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/johnnv1/lapix",
+    url="https://github.com/lapix-ufsc/lapixdl",
 
     author='LAPIX',
     license='MIT',
