@@ -6,14 +6,14 @@ with open("README.md", "r") as fh:
 setup(
     name='lapixdl',
     packages=find_packages(exclude=['tests']),
-    version='0.3.0',
+    version='0.3.1',
     description='Evaluation metrics for segmentation, detection and classification Deep Learning algorithms',
 
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/lapix-ufsc/lapixdl",
 
-    author='LAPIX',
+    author='LAPiX',
     license='MIT',
 
     install_requires=['numpy'],

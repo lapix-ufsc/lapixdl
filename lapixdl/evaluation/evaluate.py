@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Iterable
 import numpy as np
 
 from .model import *
@@ -12,30 +12,25 @@ def __merge_detection_metrics(acc: DetectionMetrics,
 def evaluate_detection(gt_bboxes: List[List[BBox]],
                        pred_bboxes: List[List[BBox]],
                        iou_threshold=.5) -> DetectionMetrics:
-    acc_metrics = DetectionMetrics()
-
-    for (curr_gt_bboxes, curr_pred_bboxes) in zip(gt_bboxes, pred_bboxes):
-        curr_metrics = evaluate_detection_single_image(
-            curr_gt_bboxes, curr_pred_bboxes, iou_threshold)
-        acc_metrics = __merge_detection_metrics(acc_metrics, curr_metrics)
-
-    return acc_metrics
+    pass
 
 
 def __flat_mask(mask: Mask) -> List[int]:
     return [item for sublist in mask for item in sublist]
 
-
-def evaluate_segmentation(gt_masks: List[Mask],
-                          pred_masks: List[Mask],
+def evaluate_segmentation(gt_masks: Iterable[Mask],
+                          pred_masks: Iterable[Mask],
                           classes: List[str]) -> SegmentationMetrics:
     confusion_matrix = np.zeros((len(classes), len(classes)), np.int)
 
-    flat_gt = [cls for x in gt_masks for cls in __flat_mask(x)]
-    flat_pred = [cls for x in pred_masks for cls in __flat_mask(x)]
-
-    for (curr_gt, curr_pred) in zip(flat_gt, flat_pred):
-        confusion_matrix[curr_pred, curr_gt] += 1
+    i = 0
+    for (curr_gt_mask, curr_pred_mask) in zip(gt_masks, pred_masks):
+        flat_gt = __flat_mask(curr_gt_mask)
+        flat_pred = __flat_mask(curr_pred_mask)
+        for (curr_pred, curr_gt) in zip(flat_pred, flat_gt):
+            confusion_matrix[curr_pred, curr_gt] += 1
+            i += 1
+            print(i)
 
     return SegmentationMetrics(classes, confusion_matrix)
 
