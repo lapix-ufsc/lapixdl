@@ -16,7 +16,7 @@ setup(
     author='LAPiX',
     license='MIT',
 
-    install_requires=['numpy'],
+    install_requires=['numpy', 'progress'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     test_suite='tests',

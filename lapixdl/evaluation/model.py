@@ -63,6 +63,20 @@ class BinaryClassificationMetrics:
     def f_score(self) -> float:
         return 2*self.TP/(self.FP + self.FN + 2*self.TP)
 
+    def __str__(self):
+        return (
+            f'{self.cls}:\n'
+            f'\tTP: {self.TP}\n'
+            f'\tTN: {self.TN}\n'
+            f'\tFP: {self.FP}\n'
+            f'\tFN: {self.FN}\n'
+            f'\tAccuracy: {self.accuracy}\n'
+            f'\tRecall: {self.recall}\n'
+            f'\tPrecision: {self.precision}\n'
+            f'\tSpecificity: {self.specificity}\n'
+            f'\tF-Score: {self.f_score}'
+        )
+
 
 class ClassificationMetrics:
     def __get_by_class_metrics(self):
@@ -121,6 +135,19 @@ class ClassificationMetrics:
     def avg_f_score(self) -> float:
         return reduce(lambda acc, curr: curr.f_score + acc, self.by_class, .0) / len(self.by_class)
 
+    def __str__(self):
+        return (
+            f'Classification Metrics:\n'
+            f'\tSample Count: {self.count}\n'
+            f'\tAccuracy: {self.accuracy}\n'
+            f'\tAvg Recall: {self.avg_recall}\n'
+            f'\tAvg Precision: {self.avg_precision}\n'
+            f'\tAvg Specificity: {self.avg_specificity}\n'
+            f'\tAvg F-Score: {self.avg_f_score}\n\n'
+            f'By Class:\n\n'
+        ) + '\n'.join([cls_metrics.__str__()
+                       for cls_metrics in self.by_class])
+
 
 class BinarySegmentationMetrics(BinaryClassificationMetrics):
     def __init__(self, classification_metrics: BinaryClassificationMetrics):
@@ -134,7 +161,22 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
 
     @property
     def iou(self):
-        return self.TP/(self.FP + self.FN + self.TP)
+        return self.TP / (self.FP + self.FN + self.TP)
+
+    def __str__(self):
+        return (
+            f'{self.cls}:\n'
+            f'\tTP: {self.TP}\n'
+            f'\tTN: {self.TN}\n'
+            f'\tFP: {self.FP}\n'
+            f'\tFN: {self.FN}\n'
+            f'\tIoU: {self.iou}\n'
+            f'\tAccuracy: {self.accuracy}\n'
+            f'\tRecall: {self.recall}\n'
+            f'\tPrecision: {self.precision}\n'
+            f'\tSpecificity: {self.specificity}\n'
+            f'\tF-Score: {self.f_score}\n'
+        )
 
 
 class SegmentationMetrics(ClassificationMetrics):
@@ -145,6 +187,20 @@ class SegmentationMetrics(ClassificationMetrics):
     @property
     def avg_iou(self):
         return reduce(lambda acc, curr: curr.iou + acc, self.by_class, .0) / len(self.by_class)
+
+    def __str__(self):
+        return (
+            f'Segmentation Metrics:\n'
+            f'\tPixel Count: {self.count}\n'
+            f'\tAccuracy: {self.accuracy}\n'
+            f'\tAvg Recall: {self.avg_recall}\n'
+            f'\tAvg Precision: {self.avg_precision}\n'
+            f'\tAvg Specificity: {self.avg_specificity}\n'
+            f'\tAvg F-Score: {self.avg_f_score}\n'
+            f'\tAvg IoU: {self.avg_iou}\n'
+            f'By Class:\n\n'
+        ) + '\n'.join(list([cls_metrics.__str__()
+                            for cls_metrics in self.by_class]))
 
 
 class BinaryDetectionMetrics(BinaryClassificationMetrics):

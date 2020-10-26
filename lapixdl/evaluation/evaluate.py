@@ -1,5 +1,6 @@
 from typing import List, Iterable
 import numpy as np
+from progress.counter import Counter
 
 from .model import *
 
@@ -18,21 +19,25 @@ def evaluate_detection(gt_bboxes: List[List[BBox]],
 def __flat_mask(mask: Mask) -> List[int]:
     return [item for sublist in mask for item in sublist]
 
+
 def evaluate_segmentation(gt_masks: Iterable[Mask],
                           pred_masks: Iterable[Mask],
                           classes: List[str]) -> SegmentationMetrics:
     confusion_matrix = np.zeros((len(classes), len(classes)), np.int)
 
-    i = 0
-    for (curr_gt_mask, curr_pred_mask) in zip(gt_masks, pred_masks):
-        flat_gt = __flat_mask(curr_gt_mask)
-        flat_pred = __flat_mask(curr_pred_mask)
-        for (curr_pred, curr_gt) in zip(flat_pred, flat_gt):
-            confusion_matrix[curr_pred, curr_gt] += 1
-            i += 1
-            print(i)
+    with Counter('Evaluating ') as counter:
+        for (curr_gt_mask, curr_pred_mask) in zip(gt_masks, pred_masks):
+            flat_gt = __flat_mask(curr_gt_mask)
+            flat_pred = __flat_mask(curr_pred_mask)
+            for (curr_pred, curr_gt) in zip(flat_pred, flat_gt):
+                confusion_matrix[curr_pred, curr_gt] += 1
+                counter.next()
 
-    return SegmentationMetrics(classes, confusion_matrix)
+    metrics = SegmentationMetrics(classes, confusion_matrix)
+
+    print(metrics)
+
+    return metrics
 
 
 def evaluate_classification(gt_classifications: List[Classification],
