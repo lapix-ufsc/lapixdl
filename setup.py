@@ -18,7 +18,7 @@ setup(
 
     install_requires=['numpy', 'progress'],
     setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
+    tests_require=['pytest', 'cv2'],
     test_suite='tests',
 
     classifiers=[

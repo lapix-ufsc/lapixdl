@@ -1,16 +1,27 @@
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Tuple
 from functools import reduce
 import numpy as np
 
 
 class BBox:
-    def __init__(self, height: int, width: int, center_x: int, center_y: int, cls: int, score: float):
+    def __init__(self,
+                 upper_left_x: int, upper_left_y: int,
+                 width: int, height: int,
+                 cls: int, score: float = .0):
         self.height = height
         self.width = width
-        self.center_x = center_x
-        self.center_y = center_y
+        self.upper_left_x = upper_left_x
+        self.upper_left_y = upper_left_y
         self.cls = cls
         self.score = score
+
+    @property
+    def upper_left_point(self) -> Tuple[int, int]:
+        return (self.upper_left_x, self.upper_left_y)
+
+    @property
+    def bottom_right_point(self) -> Tuple[int, int]:
+        return (self.upper_left_x + self.width, self.upper_left_y + self.height)
 
 
 Mask = List[List[int]]
@@ -181,12 +192,18 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
 
 class SegmentationMetrics(ClassificationMetrics):
     def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = []):
+        assert len(classes) > 1, \
+            'There should be at least two classes (with background as the first)'
         super().__init__(classes, confusion_matrix)
         self._by_class = [BinarySegmentationMetrics(x) for x in self.by_class]
 
     @property
     def avg_iou(self):
         return reduce(lambda acc, curr: curr.iou + acc, self.by_class, .0) / len(self.by_class)
+
+    @property
+    def avg_iou_no_bkg(self):
+        return reduce(lambda acc, curr: curr.iou + acc, self.by_class[1:], .0) / (len(self.by_class) - 1)
 
     def __str__(self):
         return (
@@ -198,6 +215,7 @@ class SegmentationMetrics(ClassificationMetrics):
             f'\tAvg Specificity: {self.avg_specificity}\n'
             f'\tAvg F-Score: {self.avg_f_score}\n'
             f'\tAvg IoU: {self.avg_iou}\n'
+            f'\tAvg IoU w/o Background: {self.avg_iou_no_bkg}\n'
             f'By Class:\n\n'
         ) + '\n'.join(list([cls_metrics.__str__()
                             for cls_metrics in self.by_class]))
