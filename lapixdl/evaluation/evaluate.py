@@ -23,6 +23,24 @@ def __flat_mask(mask: Mask) -> List[int]:
 def evaluate_segmentation(gt_masks: Iterable[Mask],
                           pred_masks: Iterable[Mask],
                           classes: List[str]) -> SegmentationMetrics:
+    """Evaluates segmentation predictions
+
+    The iterables should return one mask per iterations and the itens of
+    `gt_masks` and `pred_masks` with same index should correspond to the
+    same sample.
+
+    Masks should be 2D arrays where each value corresponds to the class 
+    index of the pixel the sample image.
+
+    Args:
+        gt_masks (Iterable[Mask]): Iterable of ground truth masks.
+        pred_masks (Iterable[Mask]): Iterable of predicted masks.
+        classes (List[str]): Class names.
+
+    Returns:
+        SegmentationMetrics: Pixel-based classification and segmentation metrics.
+    """
+
     confusion_matrix = np.zeros((len(classes), len(classes)), np.int)
 
     with Counter('Evaluating ') as counter:
@@ -40,9 +58,24 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
     return metrics
 
 
-def evaluate_classification(gt_classifications: List[Classification],
-                            pred_classifications: List[Classification],
+def evaluate_classification(gt_classifications: Iterable[Classification],
+                            pred_classifications: Iterable[Classification],
                             classes: List[str]) -> ClassificationMetrics:
+    """Evaluates classification predictions
+
+    The iterables should return one classification per iterations and 
+    the itens of `gt_classifications` and `pred_classifications` with 
+    same index should correspond to the same sample.
+
+    Args:
+        gt_classifications (Iterable[Classification]): Ground truth classifications.
+        pred_classifications (Iterable[Classification]): Predicted classifications.
+        classes (List[str]): Class names.
+
+    Returns:
+        ClassificationMetrics: Classification metrics.
+    """
+
     confusion_matrix = np.zeros((len(classes), len(classes)), np.int)
 
     for (curr_gt_classification, curr_pred_classification) in zip(gt_classifications, pred_classifications):

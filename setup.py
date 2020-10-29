@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name='lapixdl',
     packages=find_packages(exclude=['tests']),
-    version='0.3.2',
+    version='0.3.3',
     description='Evaluation metrics for segmentation, detection and classification Deep Learning algorithms',
 
     long_description=long_description,

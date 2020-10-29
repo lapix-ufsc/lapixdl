@@ -2,12 +2,35 @@ from typing import Optional, Union, List, Tuple
 from functools import reduce
 import numpy as np
 
+# A Mask is a 2D array representing the class index of each pixel of an image as values
+Mask = List[List[int]]
+
 
 class BBox:
+    """Bounding Box data structure
+
+    Attributes:
+        upper_left_x (int): Uper left X position of the Bounding Box.
+        upper_left_y (int): Upper left Y position of the Bounding Box.
+        width (int): Width of the Bounding Box.
+        height (int): Height of the Bounding Box.
+        cls (int): Bounding Box class index.
+        score (Optional[float]): Bounding Box prediction score.
+    """
+
     def __init__(self,
                  upper_left_x: int, upper_left_y: int,
                  width: int, height: int,
-                 cls: int, score: float = .0):
+                 cls: int, score: Optional[float] = None):
+        """
+        Args:
+            upper_left_x (int): Uper left X position of the Bounding Box.
+            upper_left_y (int): Upper left Y position of the Bounding Box.
+            width (int): Width of the Bounding Box.
+            height (int): Height of the Bounding Box.
+            cls (int): Bounding Box class index.
+            score (Optional[float], optional): Prediction score. Defaults to None.
+        """
         self.height = height
         self.width = width
         self.upper_left_x = upper_left_x
@@ -17,29 +40,52 @@ class BBox:
 
     @property
     def upper_left_point(self) -> Tuple[int, int]:
+        """Tuple[int, int]: (X,Y) of the upper left point of the Bounding Box."""
         return (self.upper_left_x, self.upper_left_y)
 
     @property
     def bottom_right_point(self) -> Tuple[int, int]:
+        """Tuple[int, int]: (X,Y) of the bottom right point of the Bounding Box."""
         return (self.upper_left_x + self.width, self.upper_left_y + self.height)
 
 
-Mask = List[List[int]]
-
-
 class Classification:
+    """Represents a classification
+
+    Attributes:
+        cls (int): Class index.
+        score (Optional[float], optional): Prediction score.
+    """
+
     def __init__(self, cls: int, score: Optional[float] = None):
+        """
+        Args:
+            cls (int): Class index.
+            score (Optional[float], optional): Prediction score. Defaults to None.
+        """
         self.cls = cls
         self.score = score
 
 
 class BinaryClassificationMetrics:
-    TP: int = 0
-    FP: int = 0
-    TN: int = 0
-    FN: int = 0
+    """Binary classification metrics
+
+    Attributes:
+        TP (int): True Positive count.
+        FP (int): False Positive count.
+        TN (int): True Negative count.
+        FN (int): False Negative count.
+    """
 
     def __init__(self, cls: str, tp: int = 0, fp: int = 0, tn: int = 0, fn: int = 0):
+        """
+        Args:
+            cls (str): Class name.
+            tp (int, optional): True Positive count. Defaults to 0.
+            fp (int, optional): False Positive count. Defaults to 0.
+            tn (int, optional): True Negative count. Defaults to 0.
+            fn (int, optional): False Negative count. Defaults to 0.
+        """
         self._cls = cls
         self.TP = tp
         self.FP = fp
@@ -48,30 +94,37 @@ class BinaryClassificationMetrics:
 
     @property
     def cls(self) -> str:
+        """str: Class name."""
         return self._cls
 
     @property
-    def count(self) -> float:
+    def count(self) -> int:
+        """int: Total count of classified instances."""
         return self.TP + self.TN + self.FP + self.FN
 
     @property
     def accuracy(self) -> float:
+        """int: Total count of classified instances."""
         return (self.TP + self.TN)/self.count
 
     @property
     def recall(self) -> float:
+        """float: Recall metric - TP / (TP + FN)."""
         return self.TP/(self.TP + self.FN)
 
     @property
     def specificity(self) -> float:
+        """float: Specificity metric - TN / (FP + TN)."""
         return self.TN/(self.FP + self.TN)
 
     @property
     def precision(self) -> float:
+        """float: Precision metric - TP / (FP + TP)."""
         return self.TP/(self.FP + self.TP)
 
     @property
     def f_score(self) -> float:
+        """float: F-Score/Dice metric - 2*TP / (FP + FN + 2*TP)."""
         return 2*self.TP/(self.FP + self.FN + 2*self.TP)
 
     def __str__(self):
@@ -90,6 +143,67 @@ class BinaryClassificationMetrics:
 
 
 class ClassificationMetrics:
+    """Multiclass classification metrics
+
+    Attributes:
+        classes (List[str]): Class names.
+        confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
+    """
+
+    def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = []):
+        """
+        Args:
+            classes (List[str]): Class names.
+            confusion_matrix (List[List[int]], optional): Confusion matrix of all the classes. Defaults to [].
+        
+        Raises:
+            AssertException: If the confusion matrix is not a square matrix of order `len(classes)`
+        """
+        self._confusion_matrix = np.array(confusion_matrix)
+
+        assert self._confusion_matrix.shape == (len(classes), len(
+            classes)), 'The confusion matrix must be a square matrix of order len(classes)'
+
+        self._classes = classes
+
+        self._by_class = self.__get_by_class_metrics()
+        self._count = self._confusion_matrix.sum()
+
+    @property
+    def by_class(self) -> List[BinaryClassificationMetrics]:
+        """List[BinaryClassificationMetrics]: Binary metrics calculated for each class index."""
+        return self._by_class
+
+    @property
+    def count(self) -> int:
+        """int: Total count of classified instances."""
+        return self._count
+
+    @property
+    def accuracy(self) -> float:
+        """float: Accuracy metric - correct classifications / count."""
+        return np.diagonal(self._confusion_matrix).sum() / self.count
+
+    @property
+    def avg_recall(self) -> float:
+        """float: Macro average recall metric."""
+        return reduce(lambda acc, curr: curr.recall + acc, self.by_class, .0) / len(self.by_class)
+
+    @property
+    def avg_precision(self) -> float:
+        """float: Macro average precision metric."""
+        return reduce(lambda acc, curr: curr.precision + acc, self.by_class, .0) / len(self.by_class)
+
+    @property
+    def avg_specificity(self) -> float:
+        """float: Macro average specificity metric."""
+        return reduce(lambda acc, curr: curr.specificity + acc, self.by_class, .0) / len(self.by_class)
+
+    @property
+    def avg_f_score(self) -> float:
+        """float: Macro average F-Score/Dice metric."""
+        return reduce(lambda acc, curr: curr.f_score + acc, self.by_class, .0) / len(self.by_class)
+
     def __get_by_class_metrics(self):
         by_class = []
         for i in range(0, len(self._classes)):
@@ -107,45 +221,6 @@ class ClassificationMetrics:
             ))
         return by_class
 
-    def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = []):
-        self._confusion_matrix = np.array(confusion_matrix)
-
-        assert self._confusion_matrix.shape == (len(classes), len(
-            classes)), 'The confusion matrix must be a square matrix of order len(classes)'
-
-        self._classes = classes
-
-        self._by_class = self.__get_by_class_metrics()
-        self._count = self._confusion_matrix.sum()
-
-    @property
-    def by_class(self) -> List[BinaryClassificationMetrics]:
-        return self._by_class
-
-    @property
-    def count(self) -> int:
-        return self._count
-
-    @property
-    def accuracy(self) -> float:
-        return np.diagonal(self._confusion_matrix).sum() / self.count
-
-    @property
-    def avg_recall(self) -> float:
-        return reduce(lambda acc, curr: curr.recall + acc, self.by_class, .0) / len(self.by_class)
-
-    @property
-    def avg_precision(self) -> float:
-        return reduce(lambda acc, curr: curr.precision + acc, self.by_class, .0) / len(self.by_class)
-
-    @property
-    def avg_specificity(self) -> float:
-        return reduce(lambda acc, curr: curr.specificity + acc, self.by_class, .0) / len(self.by_class)
-
-    @property
-    def avg_f_score(self) -> float:
-        return reduce(lambda acc, curr: curr.f_score + acc, self.by_class, .0) / len(self.by_class)
-
     def __str__(self):
         return (
             f'Classification Metrics:\n'
@@ -161,7 +236,20 @@ class ClassificationMetrics:
 
 
 class BinarySegmentationMetrics(BinaryClassificationMetrics):
+    """Binary pixel-based classification metrics
+
+    Attributes:
+        TP (int): True Positive pixels count.
+        FP (int): False Positive pixels count.
+        TN (int): True Negative pixels count.
+        FN (int): False Negative pixels count.
+    """
+
     def __init__(self, classification_metrics: BinaryClassificationMetrics):
+        """
+        Args:
+            classification_metrics (BinaryClassificationMetrics): Pixel-based binary classification metrics 
+        """
         super().__init__(
             classification_metrics.cls,
             tp=classification_metrics.TP,
@@ -171,7 +259,8 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
         )
 
     @property
-    def iou(self):
+    def iou(self) -> float:
+        """float: IoU/Jaccard Index metric - TP / (FP + FN + TP)."""
         return self.TP / (self.FP + self.FN + self.TP)
 
     def __str__(self):
@@ -191,19 +280,37 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
 
 
 class SegmentationMetrics(ClassificationMetrics):
+    """Multiclass pixel-based classification metrics
+
+    Attributes:
+        classes (List[str]): Class names with `classes[0]` as the background class.
+        confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
+    """
+
     def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = []):
+        """
+        Args:
+            classes (List[str]): Class names. It is expected the first class to be the background class.
+            confusion_matrix (List[List[int]], optional): Confusion matrix of all the classes. Defaults to [].
+
+        Raises:
+            AssertException: If the confusion matrix is not a square matrix of order `len(classes)`.
+            AssertException: If the number of classes is less than 2.
+        """
         assert len(classes) > 1, \
             'There should be at least two classes (with background as the first)'
         super().__init__(classes, confusion_matrix)
         self._by_class = [BinarySegmentationMetrics(x) for x in self.by_class]
 
     @property
-    def avg_iou(self):
-        return reduce(lambda acc, curr: curr.iou + acc, self.by_class, .0) / len(self.by_class)
+    def avg_iou(self) -> float:
+        """float: Macro average IoU/Jaccard Index metric."""
+        return reduce(lambda acc, curr: curr.iou + acc, self._by_class, .0) / len(self.by_class)
 
     @property
-    def avg_iou_no_bkg(self):
-        return reduce(lambda acc, curr: curr.iou + acc, self.by_class[1:], .0) / (len(self.by_class) - 1)
+    def avg_iou_no_bkg(self) -> float:
+        """float: Macro average IoU/Jaccard Index metric without `background` class (index 0)."""
+        return reduce(lambda acc, curr: curr.iou + acc, self._by_class[1:], .0) / (len(self.by_class) - 1)
 
     def __str__(self):
         return (
@@ -222,33 +329,52 @@ class SegmentationMetrics(ClassificationMetrics):
 
 
 class BinaryDetectionMetrics(BinaryClassificationMetrics):
+    """Binary instance-based classification metrics
+
+    Attributes:
+        TP (int): True Positive instances count.
+        FP (int): False Positive instances count.
+        TN (int): Not used in object detection. Always 0.
+        FN (int): False Negative instances count.
+    """
+
     def __init__(self, classification_metrics: BinaryClassificationMetrics):
         super().__init__(
             classification_metrics.cls,
             tp=classification_metrics.TP,
-            tn=classification_metrics.TN,
             fp=classification_metrics.FP,
             fn=classification_metrics.FN
         )
 
     @property
     def iou(self):
+        """float: IoU/Jaccard Index metric."""
         pass
 
     @property
     def avg_precision(self):
+        """float: Average Precision metric."""
         pass
 
 
 class DetectionMetrics(ClassificationMetrics):
+    """Multiclass instance-based classification metrics
+
+    Attributes:
+        classes (List[str]): Class names.
+        confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
+    """
+
     def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = []):
         super().__init__(classes, confusion_matrix)
         self._by_class = [BinarySegmentationMetrics(x) for x in self.by_class]
 
     @property
     def avg_iou(self):
+        """float: Macro average IoU/Jaccard Index metric."""
         return reduce(lambda acc, curr: curr.iou + acc, self.by_class, .0) / len(self.by_class)
 
     @property
     def mean_avg_precision(self):
+        """float: Mean Average Precision metric."""
         return reduce(lambda acc, curr: curr.avg_precision + acc, self.by_class, .0) / len(self.by_class)
