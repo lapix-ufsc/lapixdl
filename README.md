@@ -47,5 +47,5 @@ pred_masks = pred_mask_iterator_from_dl(validation_dl, prediction_function)
 eval = evaluate_segmentation(gt_masks, pred_masks, classes)
 
 # Shows confusion matrix and returns its Figure and Axes
-fig, axes = metrics.show_confusion_matrix()
+fig, axes = eval.show_confusion_matrix()
 ```
