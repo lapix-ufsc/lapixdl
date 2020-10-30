@@ -43,13 +43,13 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
 
     confusion_matrix = np.zeros((len(classes), len(classes)), np.int)
 
-    with Counter('Evaluating ') as counter:
+    with Counter('Evaluating ', suffix=' pixels') as counter:
         for (curr_gt_mask, curr_pred_mask) in zip(gt_masks, pred_masks):
             flat_gt = __flat_mask(curr_gt_mask)
             flat_pred = __flat_mask(curr_pred_mask)
             for (curr_pred, curr_gt) in zip(flat_pred, flat_gt):
                 confusion_matrix[curr_pred, curr_gt] += 1
-                counter.next()
+            counter.next()
 
     metrics = SegmentationMetrics(classes, confusion_matrix)
 
@@ -78,11 +78,17 @@ def evaluate_classification(gt_classifications: Iterable[Classification],
 
     confusion_matrix = np.zeros((len(classes), len(classes)), np.int)
 
-    for (curr_gt_classification, curr_pred_classification) in zip(gt_classifications, pred_classifications):
-        confusion_matrix[curr_pred_classification.cls,
-                         curr_gt_classification.cls] += 1
+    with Counter('Evaluating ') as counter:
+        for (curr_gt_classification, curr_pred_classification) in zip(gt_classifications, pred_classifications):
+            confusion_matrix[curr_pred_classification.cls,
+                             curr_gt_classification.cls] += 1
+            counter.next()
 
-    return ClassificationMetrics(classes, confusion_matrix)
+    metrics = ClassificationMetrics(classes, confusion_matrix)
+
+    print(metrics)
+
+    return metrics
 
 
 def evaluate_detection_single_image(gt_bboxes: List[BBox],
