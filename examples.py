@@ -70,6 +70,9 @@ def evaluate_segmentation_example():
     # Shows confusion matrix and returns its Figure and Axes
     fig, axes = metrics.show_confusion_matrix()
 
+    # Shows confusion matrix for class `a`
+    metrics.by_class[0].show_confusion_matrix()
+
 
 def evaluate_classification_example():
     # Class names
@@ -87,6 +90,9 @@ def evaluate_classification_example():
 
     # Shows confusion matrix and returns its Figure and Axes
     fig, axes = metrics.show_confusion_matrix()
+
+    # Shows confusion matrix for class `a`
+    metrics.by_class[0].show_confusion_matrix()
 
 
 def identity_iterator(value):

@@ -129,6 +129,19 @@ class BinaryClassificationMetrics:
         """float: F-Score/Dice metric - 2*TP / (FP + FN + 2*TP)."""
         return 2*self.TP/(self.FP + self.FN + 2*self.TP)
 
+    @property
+    def confusion_matrix(self) -> List[List[int]]:
+        """List[List[int]]: Confusion matrix of all the classes"""
+        return [[self.TP, self.FP], [self.FN, self.TN]]
+
+    def show_confusion_matrix(self):
+        """Plots de confusion matrix
+
+        Return:
+            Tuple[Figure, Axes]: Figure and Axes of the ploted confusion matrix
+        """
+        return plot.confusion_matrix(self.confusion_matrix, ['P', 'N'], f'Confusion Matrix for \"{self.cls}\" Class')
+
     def __str__(self):
         return (
             f'{self.cls}:\n'
