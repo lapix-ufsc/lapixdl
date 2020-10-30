@@ -2,6 +2,8 @@ from typing import Optional, Union, List, Tuple
 from functools import reduce
 import numpy as np
 
+from . import plot
+
 # A Mask is a 2D array representing the class index of each pixel of an image as values
 Mask = List[List[int]]
 
@@ -155,7 +157,7 @@ class ClassificationMetrics:
         Args:
             classes (List[str]): Class names.
             confusion_matrix (List[List[int]], optional): Confusion matrix of all the classes. Defaults to [].
-        
+
         Raises:
             AssertException: If the confusion matrix is not a square matrix of order `len(classes)`
         """
@@ -203,6 +205,19 @@ class ClassificationMetrics:
     def avg_f_score(self) -> float:
         """float: Macro average F-Score/Dice metric."""
         return reduce(lambda acc, curr: curr.f_score + acc, self.by_class, .0) / len(self.by_class)
+
+    @property
+    def confusion_matrix(self) -> List[List[int]]:
+        """List[List[int]]: Confusion matrix of all the classes"""
+        return self._confusion_matrix
+
+    def show_confusion_matrix(self):
+        """Plots de confusion matrix
+
+        Return:
+            Tuple[Figure, Axes]: Figure and Axes of the ploted confusion matrix
+        """
+        return plot.confusion_matrix(self._confusion_matrix, self._classes)
 
     def __get_by_class_metrics(self):
         by_class = []

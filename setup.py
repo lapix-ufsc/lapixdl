@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name='lapixdl',
     packages=find_packages(exclude=['tests']),
-    version='0.3.3',
+    version='0.4.0',
     description='Evaluation metrics for segmentation, detection and classification Deep Learning algorithms',
 
     long_description=long_description,
@@ -16,7 +16,7 @@ setup(
     author='LAPiX',
     license='MIT',
 
-    install_requires=['numpy', 'progress'],
+    install_requires=['numpy', 'progress', 'seaborn', 'pandas', 'matplotlib'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest', 'cv2'],
     test_suite='tests',

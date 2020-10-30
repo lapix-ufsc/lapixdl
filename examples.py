@@ -67,6 +67,9 @@ def evaluate_segmentation_example():
     # Calculates and shows metrics
     metrics = evaluate_segmentation(it_gt_masks, it_pred_masks, classes)
 
+    # Shows confusion matrix and returns its Figure and Axes
+    fig, axes = metrics.show_confusion_matrix()
+
 
 def evaluate_classification_example():
     # Class names
@@ -81,6 +84,9 @@ def evaluate_classification_example():
 
     # Calculates and shows metrics
     metrics = evaluate_classification(gt_class, pred_class, classes)
+
+    # Shows confusion matrix and returns its Figure and Axes
+    fig, axes = metrics.show_confusion_matrix()
 
 
 def identity_iterator(value):
