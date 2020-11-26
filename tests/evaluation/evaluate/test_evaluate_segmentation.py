@@ -52,8 +52,8 @@ def test_evalution_iou_with_image():
     metrics = evaluate_segmentation([mask_bin_GT], [mask_bin_pred], classes)
 
     assert metrics.count == 480 * 640
-    assert round(metrics.by_class[1].iou, 3) == .291
-    assert round(metrics.avg_iou_no_bkg, 3) == .291
+    assert round(metrics.by_class[1].iou, 3) == .290
+    assert round(metrics.avg_iou_no_bkg, 3) == .290
     assert round(metrics.avg_iou, 3) == .502
 
 
@@ -93,5 +93,5 @@ def test_evalution_iou_multiclass_with_images():
     assert metrics.count == 480 * 640
 
     assert metrics.by_class[1].iou == 1.0
-    assert round(metrics.by_class[2].iou, 3) == .291
-    assert round(metrics.avg_iou_no_bkg, 3) == .646
+    assert round(metrics.by_class[2].iou, 3) == .290
+    assert round(metrics.avg_iou_no_bkg, 3) == .645
