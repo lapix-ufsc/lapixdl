@@ -5,17 +5,6 @@ from tqdm import tqdm
 from .model import *
 
 
-def __merge_detection_metrics(acc: DetectionMetrics,
-                              curr: DetectionMetrics) -> DetectionMetrics:
-    pass
-
-
-def evaluate_detection(gt_bboxes: List[List[BBox]],
-                       pred_bboxes: List[List[BBox]],
-                       iou_threshold=.5) -> DetectionMetrics:
-    pass
-
-
 def __flat_mask(mask: Mask) -> List[int]:
     return [item for sublist in mask for item in sublist]
 
@@ -25,7 +14,7 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
                           classes: List[str]) -> SegmentationMetrics:
     """Evaluates segmentation predictions
 
-    The iterables should return one mask per iterations and the itens of
+    The iterables should return one mask per iteration and the itens of
     `gt_masks` and `pred_masks` with same index should correspond to the
     same sample.
 
@@ -61,7 +50,7 @@ def evaluate_classification(gt_classifications: Iterable[Classification],
                             classes: List[str]) -> ClassificationMetrics:
     """Evaluates classification predictions
 
-    The iterables should return one classification per iterations and 
+    The iterables should return one classification per iteration and 
     the itens of `gt_classifications` and `pred_classifications` with 
     same index should correspond to the same sample.
 
@@ -91,3 +80,100 @@ def evaluate_detection_single_image(gt_bboxes: List[BBox],
                                     pred_bboxes: List[BBox],
                                     iou_threshold=.5) -> DetectionMetrics:
     pass
+
+
+def __merge_detection_metrics(acc: DetectionMetrics,
+                              curr: DetectionMetrics) -> DetectionMetrics:
+    pass
+
+
+def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
+                       pred_bboxes: Iterable[List[BBox]],
+                       classes: List[str],
+                       iou_threshold: float = .5) -> DetectionMetrics:
+    """Evaluates detection predictions
+
+    The iterables should return the bboxes of one image per iteration 
+    and the itens of `gt_bboxes` and `pred_bboxes` with same index 
+    should correspond to the same image.
+
+    Args:
+        gt_bboxes (Iterable[List[BBox]]): Ground truth classifications.
+        pred_bboxes (Iterable[List[BBox]]): Predicted classifications.
+        classes (List[str]): Class names.
+        iou_threshold (float): Minimum IoU threshold to consider a detection as a True Positive.
+
+    Returns:
+        DetectionMetrics: Detection metrics.
+    """
+
+    confusion_matrix = np.zeros((len(classes), len(classes)), np.int)
+
+    for (curr_gt_bboxes, curr_pred_bboxes) in tqdm(zip(gt_bboxes, pred_bboxes), unit=' samples'):
+        pairwise_bbox_ious = calculate_pairwise_bbox_ious(
+            curr_gt_bboxes, curr_pred_bboxes)
+        #TODO: Evaluate IoU results
+
+    metrics = DetectionMetrics(classes, confusion_matrix)
+
+    print(metrics)
+
+    return metrics
+
+
+def calculate_pairwise_bbox_ious(gt_bboxes: List[BBox],
+                                 pred_bboxes: List[BBox]) -> List[List[float]]:
+    """Calculates the [gt x pred] matrix of pairwise IoUs of GT and predicted bboxes of an image.
+    Bboxes of distinct classes have IoU = 0.
+
+    Args:
+        gt_bboxes (List[BBox]): GT bboxes
+        pred_bboxes (List[BBox]): Predicted bboxes
+
+    Returns:
+        List[List[float]]: [gt x pred] matrix of pairwise IoUs of GT and predicted bboxes
+    """
+
+    ious = np.zeros((len(gt_bboxes), len(pred_bboxes)), np.float)
+
+    for i, gt_bbox in enumerate(gt_bboxes):
+        for j, pred_bbox in enumerate(pred_bboxes):
+            ious[i, j] = calculate_bbox_iou(gt_bbox, pred_bbox)
+
+    return ious
+
+
+def calculate_bbox_iou(bbox_a: BBox, bbox_b: BBox) -> float:
+    """Calculates the IoU between 2 bboxes.
+
+    Args:
+        bbox_a (BBox): BBox.
+        bbox_b (BBox): BBox.
+
+    Returns:
+        float: IoU between the two bboxes.
+    """
+    if bbox_a.cls != bbox_b.cls:
+        return 0.0
+
+    (upr_lft_x_a, upr_lft_y_a) = bbox_a.upper_left_point
+    (btm_rgt_x_a, btm_rgt_y_a) = bbox_a.bottom_right_point
+
+    (upr_lft_x_b, upr_lft_y_b) = bbox_b.upper_left_point
+    (btm_rgt_x_b, btm_rgt_y_b) = bbox_b.bottom_right_point
+
+    (upr_lft_x_intersect, upr_lft_y_intersect) = (
+        max(upr_lft_x_a, upr_lft_x_b), max(upr_lft_y_a, upr_lft_y_b))
+    (btm_rgt_x_intersect, btm_rgt_y_intersect) = (
+        min(btm_rgt_x_a, btm_rgt_x_b), min(btm_rgt_y_a, btm_rgt_y_b))
+
+    (w_intersect, h_intersect) = (btm_rgt_x_intersect -
+                                  upr_lft_x_intersect + 1, btm_rgt_y_intersect - upr_lft_y_intersect + 1)
+
+    if (w_intersect <= 0) or (h_intersect <= 0):
+        return 0.0
+
+    intersect_area = float(w_intersect * h_intersect)
+    union_area = float(bbox_a.area + bbox_b.area - intersect_area)
+
+    return intersect_area / union_area

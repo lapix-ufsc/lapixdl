@@ -48,7 +48,12 @@ class BBox:
     @property
     def bottom_right_point(self) -> Tuple[int, int]:
         """Tuple[int, int]: (X,Y) of the bottom right point of the Bounding Box."""
-        return (self.upper_left_x + self.width, self.upper_left_y + self.height)
+        return (self.upper_left_x + self.width - 1, self.upper_left_y + self.height - 1)
+
+    @property
+    def area(self) -> int:
+        """int: Area of the Bounding Box."""
+        return self.width * self.height
 
 
 class Classification:
