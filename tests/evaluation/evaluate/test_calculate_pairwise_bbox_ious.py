@@ -17,7 +17,7 @@ def test_calculate_pairwise_bbox_ious():
     ]
     pred_bboxes = [
         BBox(54, 66, 198-54+1, 114-66+1, 0),
-        BBox(42, 78, 186-42+1, 126-78+1, 1),
+        BBox(42, 78, 186-42+1, 126-78+1, 0),
         BBox(18, 63, 235-18+1, 135-63+1, 0),
         BBox(54, 72, 198-54+1, 120-72+1, 0),
         BBox(36, 60, 180-36+1, 108-60+1, 0),
@@ -27,9 +27,8 @@ def test_calculate_pairwise_bbox_ious():
 
     ious = calculate_pairwise_bbox_ious(gt_bboxes, pred_bboxes)
 
-    assert ious[1, 1] == 0
-
     assert round(ious[0, 0], 3) == .798
+    assert round(ious[1, 1], 3) == .79
     assert round(ious[2, 2], 3) == .612
     assert round(ious[3, 3], 3) == .947
     assert round(ious[4, 4], 3) == .731

@@ -124,7 +124,6 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
 def calculate_pairwise_bbox_ious(gt_bboxes: List[BBox],
                                  pred_bboxes: List[BBox]) -> List[List[float]]:
     """Calculates the [gt x pred] matrix of pairwise IoUs of GT and predicted bboxes of an image.
-    Bboxes of distinct classes have IoU = 0.
 
     Args:
         gt_bboxes (List[BBox]): GT bboxes
@@ -153,23 +152,25 @@ def calculate_bbox_iou(bbox_a: BBox, bbox_b: BBox) -> float:
     Returns:
         float: IoU between the two bboxes.
     """
-    if bbox_a.cls != bbox_b.cls:
-        return 0.0
-
+    
+    # Gets each box upper left and bottom right coordinates
     (upr_lft_x_a, upr_lft_y_a) = bbox_a.upper_left_point
     (btm_rgt_x_a, btm_rgt_y_a) = bbox_a.bottom_right_point
 
     (upr_lft_x_b, upr_lft_y_b) = bbox_b.upper_left_point
     (btm_rgt_x_b, btm_rgt_y_b) = bbox_b.bottom_right_point
 
+    # Calculates the intersection box upper left and bottom right coordinates
     (upr_lft_x_intersect, upr_lft_y_intersect) = (
         max(upr_lft_x_a, upr_lft_x_b), max(upr_lft_y_a, upr_lft_y_b))
     (btm_rgt_x_intersect, btm_rgt_y_intersect) = (
         min(btm_rgt_x_a, btm_rgt_x_b), min(btm_rgt_y_a, btm_rgt_y_b))
 
+    # Calculates the height and width of the intersection box
     (w_intersect, h_intersect) = (btm_rgt_x_intersect -
                                   upr_lft_x_intersect + 1, btm_rgt_y_intersect - upr_lft_y_intersect + 1)
 
+    # IoU = 0 if there is no intersection
     if (w_intersect <= 0) or (h_intersect <= 0):
         return 0.0
 
