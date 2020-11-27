@@ -391,16 +391,17 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
 
 
 class DetectionMetrics(ClassificationMetrics):
-    """Multiclass instance-based classification metrics
+    """Multiclass detection metrics
 
     Attributes:
         classes (List[str]): Class names.
-        confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
+        confusion_matrix (List[List[int]]): Confusion matrix of all the classes. 
+        The last colunm and line must correspond to the "undetected" class.
     """
 
     def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = []):
         super().__init__(classes, confusion_matrix)
-        self._by_class = [BinarySegmentationMetrics(x) for x in self.by_class]
+        self._by_class = [BinaryDetectionMetrics(x) for x in self.by_class]
 
     @property
     def avg_iou(self):

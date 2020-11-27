@@ -3,20 +3,18 @@ Module use examples
 
 Requires:
     opencv-python, numpy
-
-TODO:
-    Detection example
 """
 import cv2
 import numpy as np
 
-from lapixdl.evaluation.evaluate import evaluate_segmentation, evaluate_classification
+from lapixdl.evaluation.evaluate import evaluate_segmentation, evaluate_classification, evaluate_detection
 from lapixdl.evaluation.model import BBox, Classification
 
 
 def main():
     # Model evaluation examples
     evaluate_segmentation_example()
+    evaluate_detection_example()
     evaluate_classification_example()
 
 
@@ -73,6 +71,34 @@ def evaluate_segmentation_example():
     # Shows confusion matrix for class `a`
     metrics.by_class[0].show_confusion_matrix()
 
+def evaluate_detection_example():
+    # Class names
+    classes = ['kite', 'person']
+
+    # Image shape
+    mask_shape = (480, 640)
+
+    # Creating fake data    
+    gt_bbox_1 = BBox(10, 10, 10, 10, 0)
+    pred_bbox_1 = BBox(10, 10, 10, 10, 0)
+
+    gt_bbox_2 = BBox(110, 110, 320, 280, 1)
+    pred_bbox_2 = BBox(70, 50, 240, 220, 1)
+
+    # Creating data suplier iterator
+    # It is not necessary here, but it's useful if you want to yield data
+    # from the disk i.e. from a Pytorch DataLoader
+    it_gt_masks = identity_iterator([gt_bbox_1, gt_bbox_2])
+    it_pred_masks = identity_iterator([pred_bbox_1, pred_bbox_2])
+
+    # Calculates and shows metrics
+    metrics = evaluate_detection(it_gt_masks, it_pred_masks, classes)
+
+    # Shows confusion matrix and returns its Figure and Axes
+    fig, axes = metrics.show_confusion_matrix()
+
+    # Shows confusion matrix for class `a`
+    metrics.by_class[0].show_confusion_matrix()
 
 def evaluate_classification_example():
     # Class names
