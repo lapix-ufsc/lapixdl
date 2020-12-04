@@ -1,6 +1,7 @@
 from typing import List, Iterable
 import numpy as np
 from tqdm import tqdm
+import cv2
 
 from .model import *
 
@@ -76,17 +77,6 @@ def evaluate_classification(gt_classifications: Iterable[Classification],
     return metrics
 
 
-def evaluate_detection_single_image(gt_bboxes: List[BBox],
-                                    pred_bboxes: List[BBox],
-                                    iou_threshold=.5) -> DetectionMetrics:
-    pass
-
-
-def __merge_detection_metrics(acc: DetectionMetrics,
-                              curr: DetectionMetrics) -> DetectionMetrics:
-    pass
-
-
 def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
                        pred_bboxes: Iterable[List[BBox]],
                        classes: List[str],
@@ -108,32 +98,46 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
     Returns:
         DetectionMetrics: Detection metrics.
     """
+    tot_images = 0
+    classes_count = len(classes)
 
-    confusion_matrix = np.zeros((len(classes) + 1, len(classes) + 1), np.int)
-    undetected_idx = len(classes)
+    cls_ious_sum = np.zeros(classes_count)
+    confusion_matrix = np.zeros((classes_count + 1, classes_count + 1), np.int)
+    undetected_idx = classes_count
 
     for (curr_gt_bboxes, curr_pred_bboxes) in tqdm(zip(gt_bboxes, pred_bboxes), unit=' samples'):
         pairwise_bbox_ious = calculate_pairwise_bbox_ious(
             curr_gt_bboxes, curr_pred_bboxes)
+
+        curr_img_cls_ious = calculate_iou_by_class(
+            curr_gt_bboxes, curr_pred_bboxes, classes_count)
+        cls_ious_sum = np.add(cls_ious_sum, curr_img_cls_ious)
+        tot_images += 1
 
         no_hit_idxs = set(range(0, len(curr_pred_bboxes)))
 
         for i, gt_ious in enumerate(pairwise_bbox_ious):
             gt_cls_idx = curr_gt_bboxes[i].cls
 
-            hits_idxs = [i for i, iou in enumerate(gt_ious) if iou >= iou_threshold]
+            hits_idxs = [i for i, iou in enumerate(
+                gt_ious) if iou >= iou_threshold]
             no_hit_idxs.difference_update(hits_idxs)
 
             if len(hits_idxs) == 0:
                 confusion_matrix[undetected_idx, gt_cls_idx] += 1
-            else: 
+            else:
                 for hit_idx in hits_idxs:
-                    confusion_matrix[curr_pred_bboxes[hit_idx].cls, gt_cls_idx] += 1
+                    confusion_matrix[curr_pred_bboxes[hit_idx].cls,
+                                     gt_cls_idx] += 1
 
         for no_hit_idx in no_hit_idxs:
-            confusion_matrix[curr_pred_bboxes[no_hit_idx].cls, undetected_idx] += 1
+            confusion_matrix[curr_pred_bboxes[no_hit_idx].cls,
+                             undetected_idx] += 1
 
-    metrics = DetectionMetrics(classes + [undetected_cls_name], confusion_matrix)
+    metrics = DetectionMetrics(
+        classes + [undetected_cls_name],
+        confusion_matrix,
+        cls_ious_sum / tot_images)
 
     print(metrics)
 
@@ -172,28 +176,68 @@ def calculate_bbox_iou(bbox_a: BBox, bbox_b: BBox) -> float:
         float: IoU between the two bboxes.
     """
 
-    # Gets each box upper left and bottom right coordinates
-    (upr_lft_x_a, upr_lft_y_a) = bbox_a.upper_left_point
-    (btm_rgt_x_a, btm_rgt_y_a) = bbox_a.bottom_right_point
+    intersect_area = bbox_a.intersection_area_with(bbox_b)
+    union_area = bbox_a.union_area_with(bbox_b, intersect_area)
 
-    (upr_lft_x_b, upr_lft_y_b) = bbox_b.upper_left_point
-    (btm_rgt_x_b, btm_rgt_y_b) = bbox_b.bottom_right_point
+    return float(intersect_area) / float(union_area)
 
-    # Calculates the intersection box upper left and bottom right coordinates
-    (upr_lft_x_intersect, upr_lft_y_intersect) = (
-        max(upr_lft_x_a, upr_lft_x_b), max(upr_lft_y_a, upr_lft_y_b))
-    (btm_rgt_x_intersect, btm_rgt_y_intersect) = (
-        min(btm_rgt_x_a, btm_rgt_x_b), min(btm_rgt_y_a, btm_rgt_y_b))
 
-    # Calculates the height and width of the intersection box
-    (w_intersect, h_intersect) = (btm_rgt_x_intersect -
-                                  upr_lft_x_intersect + 1, btm_rgt_y_intersect - upr_lft_y_intersect + 1)
+def calculate_iou_by_class(gt_bboxes: List[BBox],
+                           pred_bboxes: List[BBox],
+                           classes_count: int) -> List[float]:
+    """Calculates the array of IoUs between GT and predicted bboxes of an image by class.
+    This method considers bbox as segmentation masks to calculate the IoUs.
 
-    # IoU = 0 if there is no intersection
-    if (w_intersect <= 0) or (h_intersect <= 0):
-        return 0.0
+    Args:
+        gt_bboxes (List[BBox]): GT bboxes
+        pred_bboxes (List[BBox]): Predicted bboxes
+        classes_count (int): Classes count
 
-    intersect_area = float(w_intersect * h_intersect)
-    union_area = float(bbox_a.area + bbox_b.area - intersect_area)
+    Returns:
+        List[float]: IoUs of an image indexed by class
+    """
 
-    return intersect_area / union_area
+    ious = np.zeros(classes_count, np.float)
+
+    for i in range(classes_count):
+        ious[i] = calculate_binary_iou([gt_bbox for gt_bbox in gt_bboxes if gt_bbox.cls == i],
+                                       [pred_bbox for pred_bbox in pred_bboxes if pred_bbox.cls == i])
+
+    return ious
+
+
+def calculate_binary_iou(gt_bboxes: List[BBox],
+                         pred_bboxes: List[BBox]) -> float:
+
+    bboxes_btm_right_points = [bbox.bottom_right_point for bbox in gt_bboxes]\
+        + [bbox.bottom_right_point for bbox in pred_bboxes]
+    max_x = max([point[0] for point in bboxes_btm_right_points])
+    max_y = max([point[1] for point in bboxes_btm_right_points])
+
+    gt_mask = draw_bboxes((max_x + 1, max_y + 1), gt_bboxes)
+    pred_mask = draw_bboxes((max_x + 1, max_y + 1), pred_bboxes)
+
+    tp, fp, fn = (0, 0, 0)
+    flat_gt = __flat_mask(gt_mask)
+    flat_pred = __flat_mask(pred_mask)
+    for (curr_pred, curr_gt) in zip(flat_pred, flat_gt):
+        if curr_gt and curr_pred:
+            tp += 1
+        if not curr_gt and curr_pred:
+            fp += 1
+        if curr_gt and not curr_pred:
+            fn += 1
+
+    return tp / (fp + fn + tp)
+
+
+def draw_bboxes(mask_shape: Tuple[int, int], bboxes: List[BBox]) -> List[List[int]]:
+    mask = np.zeros(mask_shape, np.int)
+
+    for bbox in bboxes:
+        mask = cv2.rectangle(mask,
+                             bbox.upper_left_point,
+                             bbox.bottom_right_point,
+                             1, -1)
+
+    return mask

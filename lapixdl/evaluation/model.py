@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Optional, Union, List, Tuple
 from functools import reduce
 import numpy as np
@@ -54,6 +55,54 @@ class BBox:
     def area(self) -> int:
         """int: Area of the Bounding Box."""
         return self.width * self.height
+
+    def intersection_area_with(self: BBox, bbox: BBox) -> int:
+        """Calculates the intersection area with another bbox
+
+        Args:
+            self (BBox): This bbox
+            bbox (BBox): Bbox to intersect with
+
+        Returns:
+            int: The intersection area with the bbox
+        """
+
+        # Gets each box upper left and bottom right coordinates
+        (upr_lft_x_a, upr_lft_y_a) = self.upper_left_point
+        (btm_rgt_x_a, btm_rgt_y_a) = self.bottom_right_point
+
+        (upr_lft_x_b, upr_lft_y_b) = bbox.upper_left_point
+        (btm_rgt_x_b, btm_rgt_y_b) = bbox.bottom_right_point
+
+        # Calculates the intersection box upper left and bottom right coordinates
+        (upr_lft_x_intersect, upr_lft_y_intersect) = (
+            max(upr_lft_x_a, upr_lft_x_b), max(upr_lft_y_a, upr_lft_y_b))
+        (btm_rgt_x_intersect, btm_rgt_y_intersect) = (
+            min(btm_rgt_x_a, btm_rgt_x_b), min(btm_rgt_y_a, btm_rgt_y_b))
+
+        # Calculates the height and width of the intersection box
+        (w_intersect, h_intersect) = (btm_rgt_x_intersect -
+                                    upr_lft_x_intersect + 1, btm_rgt_y_intersect - upr_lft_y_intersect + 1)
+
+        # If H or W <= 0, there is no intersection
+        if (w_intersect <= 0) or (h_intersect <= 0):
+            return 0
+
+        return w_intersect * h_intersect
+    
+    def union_area_with(self: BBox, bbox: BBox, intersection_area: Optional[int] = None) -> int:
+        """Calculates the union area with another bbox
+
+        Args:
+            self (BBox): This bbox
+            bbox (BBox): Bbox to union with
+            intersection_area (Optional[int], optional): The intersection area between this and bbox. Defaults to None.
+
+        Returns:
+            int: The union area with the bbox
+        """
+
+        return self.area + bbox.area - (intersection_area or self.intersection_area_with(bbox))
 
 
 class Classification:
@@ -371,23 +420,43 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         FN (int): False Negative instances count.
     """
 
-    def __init__(self, classification_metrics: BinaryClassificationMetrics):
+    def __init__(self, classification_metrics: BinaryClassificationMetrics, iou: float):
         super().__init__(
             classification_metrics.cls,
             tp=classification_metrics.TP,
             fp=classification_metrics.FP,
             fn=classification_metrics.FN
         )
+        self._iou = iou
 
     @property
     def iou(self):
-        """float: IoU/Jaccard Index metric."""
-        pass
+        """float: IoU/Jaccard Index metric.
+
+        This metric is calculated as for segmentation, considering bboxes as pixel masks.
+        """
+        return self._iou
 
     @property
     def avg_precision(self):
         """float: Average Precision metric."""
         pass
+
+    def __str__(self):
+        return (
+            f'{self.cls}:\n'
+            f'\tAverage Precision: {self.avg_precision}\n'
+            f'\tTP: {self.TP}\n'
+            f'\tFP: {self.FP}\n'
+            f'\tFN: {self.FN}\n'
+            f'\tTN: [NA]\n'
+            f'\tIoU: {self.iou}\n'
+            f'\tAccuracy: {self.accuracy}\n'
+            f'\tRecall: {self.recall}\n'
+            f'\tPrecision: {self.precision}\n'
+            f'\tSpecificity: {self.specificity}\n'
+            f'\tF-Score: {self.f_score}\n'
+        )
 
 
 class DetectionMetrics(ClassificationMetrics):
@@ -395,17 +464,23 @@ class DetectionMetrics(ClassificationMetrics):
 
     Attributes:
         classes (List[str]): Class names.
-        confusion_matrix (List[List[int]]): Confusion matrix of all the classes. 
-        The last colunm and line must correspond to the "undetected" class.
+        confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
+        iou_by_class (List[float]): IoU values indexed by class.
+
+        The last column and line must correspond to the "undetected" class.
     """
 
-    def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = []):
+    def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = [], iou_by_class: List[float] = []):
         super().__init__(classes, confusion_matrix)
-        self._by_class = [BinaryDetectionMetrics(x) for x in self.by_class]
+        self._by_class = [BinaryDetectionMetrics(
+            x, iou_by_class[i] if i < len(iou_by_class) else 0) for i, x in enumerate(self.by_class)]
 
     @property
     def avg_iou(self):
-        """float: Macro average IoU/Jaccard Index metric."""
+        """float: Macro average IoU/Jaccard Index metric.
+
+        This metric is calculated as for segmentation, considering bboxes as pixel masks.
+        """
         return reduce(lambda acc, curr: curr.iou + acc, self.by_class, .0) / len(self.by_class)
 
     @property
