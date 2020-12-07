@@ -1,13 +1,8 @@
 from typing import List, Iterable
 import numpy as np
 from tqdm import tqdm
-import cv2
 
 from .model import *
-
-
-def __flat_mask(mask: Mask) -> List[int]:
-    return [item for sublist in mask for item in sublist]
 
 
 def evaluate_segmentation(gt_masks: Iterable[Mask],
@@ -200,44 +195,46 @@ def calculate_iou_by_class(gt_bboxes: List[BBox],
     ious = np.zeros(classes_count, np.float)
 
     for i in range(classes_count):
-        ious[i] = calculate_binary_iou([gt_bbox for gt_bbox in gt_bboxes if gt_bbox.cls == i],
-                                       [pred_bbox for pred_bbox in pred_bboxes if pred_bbox.cls == i])
+        ious[i] = __calculate_binary_iou([gt_bbox for gt_bbox in gt_bboxes if gt_bbox.cls == i],
+                                         [pred_bbox for pred_bbox in pred_bboxes if pred_bbox.cls == i])
 
     return ious
 
 
-def calculate_binary_iou(gt_bboxes: List[BBox],
-                         pred_bboxes: List[BBox]) -> float:
+def __calculate_binary_iou(gt_bboxes: List[BBox],
+                           pred_bboxes: List[BBox]) -> float:
 
     bboxes_btm_right_points = [bbox.bottom_right_point for bbox in gt_bboxes]\
         + [bbox.bottom_right_point for bbox in pred_bboxes]
     max_x = max([point[0] for point in bboxes_btm_right_points])
     max_y = max([point[1] for point in bboxes_btm_right_points])
 
-    gt_mask = draw_bboxes((max_x + 1, max_y + 1), gt_bboxes)
-    pred_mask = draw_bboxes((max_x + 1, max_y + 1), pred_bboxes)
+    gt_mask = __draw_bboxes((max_x + 1, max_y + 1), gt_bboxes)
+    pred_mask = __draw_bboxes((max_x + 1, max_y + 1), pred_bboxes)
 
-    tp, fp, fn = (0, 0, 0)
+    tp, f = (0, 0)
     flat_gt = __flat_mask(gt_mask)
     flat_pred = __flat_mask(pred_mask)
     for (curr_pred, curr_gt) in zip(flat_pred, flat_gt):
-        if curr_gt and curr_pred:
+        if curr_gt == 1 and curr_pred == 1:
             tp += 1
-        if not curr_gt and curr_pred:
-            fp += 1
-        if curr_gt and not curr_pred:
-            fn += 1
+        elif curr_gt != curr_pred:
+            f += 1
 
-    return tp / (fp + fn + tp)
+    return tp / (f + tp)
 
 
-def draw_bboxes(mask_shape: Tuple[int, int], bboxes: List[BBox]) -> List[List[int]]:
+def __draw_bboxes(mask_shape: Tuple[int, int], bboxes: List[BBox]) -> List[List[int]]:
     mask = np.zeros(mask_shape, np.int)
 
     for bbox in bboxes:
-        mask = cv2.rectangle(mask,
-                             bbox.upper_left_point,
-                             bbox.bottom_right_point,
-                             1, -1)
+        mask[
+            bbox.upper_left_point[0]:bbox.bottom_right_point[0] + 1,
+            bbox.upper_left_point[1]:bbox.bottom_right_point[1] + 1
+        ] = 1
 
     return mask
+
+
+def __flat_mask(mask: Mask) -> List[int]:
+    return [item for sublist in mask for item in sublist]

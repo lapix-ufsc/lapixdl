@@ -17,6 +17,5 @@ def test_evaluation_detection_iou_metric():
 
     metrics = evaluate_detection([[gt_bbox]], [[pred_bbox]], classes)
 
+    assert round(metrics.avg_iou, 3) == .290
     assert round(metrics.by_class[0].iou, 3) == .290
-    assert round(metrics.avg_iou_no_bkg, 3) == .290
-    assert round(metrics.avg_iou, 3) == .502

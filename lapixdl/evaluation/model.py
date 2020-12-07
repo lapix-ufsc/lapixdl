@@ -82,14 +82,14 @@ class BBox:
 
         # Calculates the height and width of the intersection box
         (w_intersect, h_intersect) = (btm_rgt_x_intersect -
-                                    upr_lft_x_intersect + 1, btm_rgt_y_intersect - upr_lft_y_intersect + 1)
+                                      upr_lft_x_intersect + 1, btm_rgt_y_intersect - upr_lft_y_intersect + 1)
 
         # If H or W <= 0, there is no intersection
         if (w_intersect <= 0) or (h_intersect <= 0):
             return 0
 
         return w_intersect * h_intersect
-    
+
     def union_area_with(self: BBox, bbox: BBox, intersection_area: Optional[int] = None) -> int:
         """Calculates the union area with another bbox
 
@@ -463,17 +463,20 @@ class DetectionMetrics(ClassificationMetrics):
     """Multiclass detection metrics
 
     Attributes:
-        classes (List[str]): Class names.
+        classes (List[str]): Class names. The last must be the "undetected" class.
         confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
         iou_by_class (List[float]): IoU values indexed by class.
 
         The last column and line must correspond to the "undetected" class.
     """
 
-    def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = [], iou_by_class: List[float] = []):
+    def __init__(self, classes: List[str],
+                 confusion_matrix: List[List[int]] = [],
+                 iou_by_class: List[float] = []):
         super().__init__(classes, confusion_matrix)
-        self._by_class = [BinaryDetectionMetrics(
-            x, iou_by_class[i] if i < len(iou_by_class) else 0) for i, x in enumerate(self.by_class)]
+        by_class_wo_undetected = self.by_class[slice(0, -1)]
+        self._by_class = [BinaryDetectionMetrics(by_class, iou)
+                          for by_class, iou in zip(by_class_wo_undetected, iou_by_class)]
 
     @property
     def avg_iou(self):
