@@ -169,6 +169,11 @@ class BinaryClassificationMetrics:
         return self.TP/(self.TP + self.FN)
 
     @property
+    def false_positive_rate(self) -> float:
+        """float: False Positive Rate (FPR) metric - FP / (FP + TN)."""
+        return self.FP/(self.FP + self.TN)
+
+    @property
     def specificity(self) -> float:
         """float: Specificity metric - TN / (FP + TN)."""
         return self.TN/(self.FP + self.TN)

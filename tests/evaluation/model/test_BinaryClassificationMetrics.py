@@ -27,6 +27,13 @@ def test_recall():
     assert bin_class.recall == 0.25
 
 
+def test_fpr():
+    bin_class = BinaryClassificationMetrics(cls=['a', 'b'])
+    bin_class.FP = 2
+    bin_class.TN = 6
+
+    assert bin_class.false_positive_rate == 0.25
+
 def test_specificity():
     bin_class = BinaryClassificationMetrics(cls=['a', 'b'])
     bin_class.TN = 6
