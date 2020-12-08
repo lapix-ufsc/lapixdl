@@ -7,7 +7,7 @@ setup(
     name='lapixdl',
     packages=find_packages(exclude=['tests']),
     version='0.5.2',
-    description='Evaluation metrics for segmentation, detection and classification Deep Learning algorithms',
+    description='Utils for Computer Vision Deep Learning research',
 
     long_description=long_description,
     long_description_content_type="text/markdown",
