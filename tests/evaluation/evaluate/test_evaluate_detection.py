@@ -6,8 +6,6 @@ from lapixdl.evaluation.model import BBox
 from ... import utils
 
 
-#TODO: Implement other detection metrics tests
-
 def test_evaluation_detection_iou_metric():
     classes = ['kite']
 

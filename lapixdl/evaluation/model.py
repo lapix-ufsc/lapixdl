@@ -208,6 +208,7 @@ class BinaryClassificationMetrics:
             f'\tTN: {self.TN}\n'
             f'\tFP: {self.FP}\n'
             f'\tFN: {self.FN}\n'
+            f'\tFPR: {self.false_positive_rate}\n'
             f'\tAccuracy: {self.accuracy}\n'
             f'\tRecall: {self.recall}\n'
             f'\tPrecision: {self.precision}\n'
@@ -279,6 +280,11 @@ class ClassificationMetrics:
         return reduce(lambda acc, curr: curr.f_score + acc, self.by_class, .0) / len(self.by_class)
 
     @property
+    def avg_false_positive_rate(self) -> float:
+        """float: Macro average False Positive Rate metric."""
+        return reduce(lambda acc, curr: curr.false_positive_rate + acc, self.by_class, .0) / len(self.by_class)
+
+    @property
     def confusion_matrix(self) -> List[List[int]]:
         """List[List[int]]: Confusion matrix of all the classes"""
         return self._confusion_matrix
@@ -316,6 +322,7 @@ class ClassificationMetrics:
             f'\tAvg Recall: {self.avg_recall}\n'
             f'\tAvg Precision: {self.avg_precision}\n'
             f'\tAvg Specificity: {self.avg_specificity}\n'
+            f'\tAvg FPR: {self.avg_false_positive_rate}\n'
             f'\tAvg F-Score: {self.avg_f_score}\n\n'
             f'By Class:\n\n'
         ) + '\n'.join([cls_metrics.__str__()
@@ -362,6 +369,7 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
             f'\tRecall: {self.recall}\n'
             f'\tPrecision: {self.precision}\n'
             f'\tSpecificity: {self.specificity}\n'
+            f'\tFPR: {self.false_positive_rate}\n'
             f'\tF-Score: {self.f_score}\n'
         )
 
@@ -408,6 +416,7 @@ class SegmentationMetrics(ClassificationMetrics):
             f'\tAvg Precision: {self.avg_precision}\n'
             f'\tAvg Specificity: {self.avg_specificity}\n'
             f'\tAvg F-Score: {self.avg_f_score}\n'
+            f'\tAvg FPR: {self.avg_false_positive_rate}\n'
             f'\tAvg IoU: {self.avg_iou}\n'
             f'\tAvg IoU w/o Background: {self.avg_iou_no_bkg}\n'
             f'By Class:\n\n'
@@ -442,15 +451,9 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         """
         return self._iou
 
-    @property
-    def avg_precision(self):
-        """float: Average Precision metric."""
-        pass
-
     def __str__(self):
         return (
             f'{self.cls}:\n'
-            f'\tAverage Precision: {self.avg_precision}\n'
             f'\tTP: {self.TP}\n'
             f'\tFP: {self.FP}\n'
             f'\tFN: {self.FN}\n'
@@ -459,7 +462,6 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
             f'\tAccuracy: {self.accuracy}\n'
             f'\tRecall: {self.recall}\n'
             f'\tPrecision: {self.precision}\n'
-            f'\tSpecificity: {self.specificity}\n'
             f'\tF-Score: {self.f_score}\n'
         )
 
@@ -491,7 +493,15 @@ class DetectionMetrics(ClassificationMetrics):
         """
         return reduce(lambda acc, curr: curr.iou + acc, self.by_class, .0) / len(self.by_class)
 
-    @property
-    def mean_avg_precision(self):
-        """float: Mean Average Precision metric."""
-        return reduce(lambda acc, curr: curr.avg_precision + acc, self.by_class, .0) / len(self.by_class)
+    def __str__(self):
+        return (
+            f'Detection Metrics:\n'
+            f'\tBboxes Count: {self.count}\n'
+            f'\tAccuracy: {self.accuracy}\n'
+            f'\tAvg Recall: {self.avg_recall}\n'
+            f'\tAvg Precision: {self.avg_precision}\n'
+            f'\tAvg F-Score: {self.avg_f_score}\n'
+            f'\tAvg IoU: {self.avg_iou}\n'
+            f'By Class:\n\n'
+        ) + '\n'.join(list([cls_metrics.__str__()
+                            for cls_metrics in self.by_class]))
