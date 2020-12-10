@@ -8,7 +8,8 @@ import cv2
 import numpy as np
 
 from lapixdl.evaluation.evaluate import evaluate_segmentation, evaluate_classification, evaluate_detection
-from lapixdl.evaluation.model import BBox, Classification
+from lapixdl.evaluation.visualize import show_segmentation, show_classifications, show_detections
+from lapixdl.evaluation.model import BBox, Classification, Result
 
 
 def main():
@@ -16,6 +17,8 @@ def main():
     evaluate_segmentation_example()
     evaluate_detection_example()
     evaluate_classification_example()
+
+    show_classification_example()
 
 
 def evaluate_segmentation_example():
@@ -71,6 +74,7 @@ def evaluate_segmentation_example():
     # Shows confusion matrix for class `a`
     metrics.by_class[0].show_confusion_matrix()
 
+
 def evaluate_detection_example():
     # Class names
     classes = ['kite', 'person']
@@ -78,7 +82,7 @@ def evaluate_detection_example():
     # Image shape
     mask_shape = (480, 640)
 
-    # Creating fake data    
+    # Creating fake data
     gt_bbox_1 = BBox(10, 10, 10, 10, 0)
     pred_bbox_1 = BBox(10, 10, 10, 10, 0)
 
@@ -100,6 +104,7 @@ def evaluate_detection_example():
     # Shows confusion matrix for class `a`
     metrics.by_class[0].show_confusion_matrix()
 
+
 def evaluate_classification_example():
     # Class names
     classes = ['a', 'b', 'c']
@@ -119,6 +124,25 @@ def evaluate_classification_example():
 
     # Shows confusion matrix for class `a`
     metrics.by_class[0].show_confusion_matrix()
+
+
+def show_classification_example():
+    # Class names
+    classes = ['a', 'b', 'c']
+
+    # Classifications based in array
+    gt_class = [Classification(x) for x in [
+        0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2]]
+    # All predictions with .8 score
+    pred_class = [Classification(x, .8) for x in [
+        0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2, 2, 2, 2, 2]]
+
+    # Calculates and shows metrics
+    results = [Result((np.random.rand(200, 400, 3) * 125).astype(np.int8), gt, pred)
+               for gt, pred in zip(gt_class, pred_class)]
+
+    # Shows confusion matrix and returns its Figure and Axes
+    fig, axes = show_classifications(results, classes, 5)
 
 
 def identity_iterator(value):

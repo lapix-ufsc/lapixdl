@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Union, List, Tuple
+from typing import Optional, Union, List, Tuple, Generic, TypeVar
 from functools import reduce
 import numpy as np
 
@@ -7,6 +7,36 @@ from . import plot
 
 # A Mask is a 2D array representing the class index of each pixel of an image as values
 Mask = List[List[int]]
+
+# A Image is a 3D array representing RGB values or a 2D array representing grayscale values
+Image = Union[List[List[List[int]]], List[List[int]]]
+
+TResult = TypeVar('TResult')
+
+
+class Result(Generic[TResult]):
+    """Result of a GT versus Predictions
+
+    Args:
+        Generic (Result type): Type of the results.
+
+    Attributes:
+        image (Image): Image that the GT and predictions are based. Format: (Rows, Cols, Chanels) or (Rows, Cols) for grayscale.
+        gt (TResult): Ground truth results.
+        prediction (Optional[TResult]): Prediction results. None if only GT must be shown.
+    """
+
+    def __init__(self, image: Image, gt: TResult, prediction: Optional[TResult] = None):
+        """
+
+        Args:
+            image (Image): Image that the GT and predictions are based. Format: (Rows, Cols, Chanels) or (Rows, Cols) for grayscale.
+            gt (TResult): Ground truth results.
+            prediction (Optional[TResult], optional): Prediction results. Pass None if only GT must be shown. Defaults to None.
+        """
+        self.image = image
+        self.gt = gt
+        self.prediction = prediction
 
 
 class BBox:

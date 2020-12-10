@@ -31,7 +31,6 @@ def confusion_matrix(confusion_matrix: List[List[int]], classes: List[str], titl
 
     ax.set_xlabel("Actual")
     ax.set_ylabel("Predicted")
-
     plt.show()
 
     return fig, ax
