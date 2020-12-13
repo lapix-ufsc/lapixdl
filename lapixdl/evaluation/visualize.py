@@ -8,6 +8,9 @@ import seaborn as sn
 
 from .model import BBox, Mask, Classification, Result
 
+correct_color = sn.color_palette("Paired")[3]
+incorrect_color = sn.color_palette("Paired")[5]
+
 
 def show_classifications(
         results: List[Result[Classification]],
@@ -21,9 +24,12 @@ def show_classifications(
     for i, result in enumerate(results):
         axis = axes[i // cols][i % cols]
         axis.set_title(
-            f'GT: {class_names[result.gt.cls]}'
-            f'\nPred: {class_names[result.prediction.cls]} ({result.prediction.score})' if not result.prediction is None else '',
-            fontsize='small'
+            f'GT: {class_names[result.gt.cls]}' +
+            (f'\nPred: {class_names[result.prediction.cls]} ({result.prediction.score})' if not result.prediction is None else ''),
+            fontsize='small',
+            color='#333' if result.prediction is None
+            else (correct_color if result.prediction.cls ==
+                  result.gt.cls else incorrect_color)
         )
         axis.axis('off')
         axis.imshow(result.image)
@@ -32,7 +38,7 @@ def show_classifications(
         axis = axes[i // cols][i % cols]
         axis.axis('off')
 
-    plt.tight_layout(pad=.2)
+    plt.tight_layout(w_pad=.2, h_pad=1.5)
     plt.show()
     return fig, axes
 

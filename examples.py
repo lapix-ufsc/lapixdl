@@ -138,8 +138,11 @@ def show_classification_example():
         0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2, 2, 2, 2, 2]]
 
     # Calculates and shows metrics
-    results = [Result((np.random.rand(200, 400, 3) * 125).astype(np.int8), gt, pred)
+    results = [Result(random_image(), gt, pred)
                for gt, pred in zip(gt_class, pred_class)]
+
+    # GT only result
+    results = [Result(random_image(), Classification(2))] + results
 
     # Shows confusion matrix and returns its Figure and Axes
     fig, axes = show_classifications(results, classes, 5)
@@ -147,6 +150,10 @@ def show_classification_example():
 
 def identity_iterator(value):
     yield value
+
+
+def random_image():
+    return (np.random.rand(200, 400, 3) * 125).astype(np.int8)
 
 
 main()
