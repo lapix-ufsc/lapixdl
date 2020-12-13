@@ -132,10 +132,10 @@ def show_classification_example():
 
     # Classifications based in array
     gt_class = [Classification(x) for x in [
-        0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2]]
+        0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 ]]
     # All predictions with .8 score
     pred_class = [Classification(x, .8) for x in [
-        0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2, 2, 2, 2, 2]]
+        0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2 ]]
 
     # Calculates and shows metrics
     results = [Result(random_image(), gt, pred)

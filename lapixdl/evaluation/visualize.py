@@ -15,7 +15,20 @@ incorrect_color = sn.color_palette("Paired")[5]
 def show_classifications(
         results: List[Result[Classification]],
         class_names: List[str],
-        cols: int = 3) -> Tuple[Figure, Axes]:
+        cols: int = 3,
+        diff_correct_incorect: bool = True) -> Tuple[Figure, Axes]:
+    """Shows multiple classification results.
+
+    Args:
+        results (List[Result[Classification]]): List of classification results.
+        class_names (List[str]): Class names.
+        cols (int, optional): Number of colunms to show. Defaults to 3.
+        diff_correct_incorect (bool, optional): Indicates if correct and incorrect 
+        results should be differentiated by color. Defaults to True.
+
+    Returns:
+        Tuple[Figure, Axes]: Figure and Axes of the ploted results.
+    """
 
     rows = math.ceil(len(results) / cols)
     fig, axes = plt.subplots(rows, cols)
@@ -27,7 +40,7 @@ def show_classifications(
             f'GT: {class_names[result.gt.cls]}' +
             (f'\nPred: {class_names[result.prediction.cls]} ({result.prediction.score})' if not result.prediction is None else ''),
             fontsize='small',
-            color='#333' if result.prediction is None
+            color='#333' if result.prediction is None or not diff_correct_incorect
             else (correct_color if result.prediction.cls ==
                   result.gt.cls else incorrect_color)
         )
