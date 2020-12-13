@@ -85,10 +85,10 @@ def test_evalution_iou_multiclass_with_images():
     pred_bbox_2 = BBox(70, 50, 240, 220, 2)
     mask_bin_pred_2 = utils.bin_mask_from_bb(mask_shape, pred_bbox_2)
 
-    mask_bin_GT = np.maximum(mask_bin_GT_1, mask_bin_GT_2 * 2)
-    mask_bin_pred = np.maximum(mask_bin_pred_1, mask_bin_pred_2 * 2)
+    mask_multi_GT = np.maximum(mask_bin_GT_1, mask_bin_GT_2 * 2)
+    mask_multi_pred = np.maximum(mask_bin_pred_1, mask_bin_pred_2 * 2)
 
-    metrics = evaluate_segmentation([mask_bin_GT], [mask_bin_pred], classes)
+    metrics = evaluate_segmentation([mask_multi_GT], [mask_multi_pred], classes)
 
     assert metrics.count == 480 * 640
 

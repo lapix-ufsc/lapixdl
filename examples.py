@@ -1,5 +1,5 @@
 """
-Module use examples
+Module examples
 
 Requires:
     opencv-python, numpy
@@ -18,7 +18,9 @@ def main():
     evaluate_detection_example()
     evaluate_classification_example()
 
+    # Results visualization examples
     show_classification_example()
+    show_segmentation_example()
 
 
 def evaluate_segmentation_example():
@@ -137,23 +139,68 @@ def show_classification_example():
     pred_class = [Classification(x, .8) for x in [
         0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2 ]]
 
-    # Calculates and shows metrics
+    # Convert to results
     results = [Result(random_image(), gt, pred)
                for gt, pred in zip(gt_class, pred_class)]
 
     # GT only result
     results = [Result(random_image(), Classification(2))] + results
 
-    # Shows confusion matrix and returns its Figure and Axes
+    # Shows results and returns its Figure and Axes
     fig, axes = show_classifications(results, classes, 5)
+
+def show_segmentation_example():
+    # Class names
+    classes = ['bkg', 'kite', 'person', 'car']
+
+    # Image/mask shape
+    mask_shape = (480, 640)
+
+    # Multiclass mask creation
+    gt_bbox_1 = BBox(10, 10, 100, 100, 1)
+    mask_bin_GT_1 = draw_bboxes(mask_shape, [gt_bbox_1])
+
+    pred_bbox_1 = BBox(10, 10, 100, 100, 1)
+    mask_bin_pred_1 = draw_bboxes(mask_shape, [pred_bbox_1])
+
+    gt_bbox_2 = BBox(110, 110, 320, 280, 2)
+    mask_bin_GT_2 = draw_bboxes(mask_shape, [gt_bbox_2])
+
+    pred_bbox_2 = BBox(70, 50, 240, 220, 2)
+    mask_bin_pred_2 = draw_bboxes(mask_shape, [pred_bbox_2])
+
+    gt_bbox_3 = BBox(300, 300, 100, 100, 3)
+    mask_bin_GT_3 = draw_bboxes(mask_shape, [gt_bbox_3])
+
+    mask_multi_GT = np.maximum(np.maximum(mask_bin_GT_1, mask_bin_GT_2 * 2), mask_bin_GT_3 * 3)
+    mask_multi_pred = np.maximum(mask_bin_pred_1, mask_bin_pred_2 * 2)
+
+    # Convert to results
+    results = [Result(random_image(mask_shape[0], mask_shape[1]), mask_multi_GT, mask_multi_pred)]
+
+    # GT only result
+    results = [Result(random_image(mask_shape[0], mask_shape[1]), mask_multi_GT)] + results
+
+    # Shows results and returns its Figure and Axes
+    fig, axes = show_segmentation(results, classes)
 
 
 def identity_iterator(value):
     yield value
 
 
-def random_image():
-    return (np.random.rand(200, 400, 3) * 125).astype(np.int8)
+def random_image(h = None, w = None):
+    return (np.random.rand(h or 200, w or 400, 3) * 125).astype(np.int8)
 
+def draw_bboxes(mask_shape, bboxes):
+    mask = np.zeros(mask_shape, np.int)
+
+    for bbox in bboxes:
+        mask[
+            bbox.upper_left_point[0]:bbox.bottom_right_point[0] + 1,
+            bbox.upper_left_point[1]:bbox.bottom_right_point[1] + 1
+        ] = 1
+
+    return mask
 
 main()
