@@ -49,3 +49,14 @@ eval = evaluate_segmentation(gt_masks, pred_masks, classes)
 # Shows confusion matrix and returns its Figure and Axes
 fig, axes = eval.show_confusion_matrix()
 ```
+
+### For Results Visualization
+
+This module exports the following functions for results visualization:
+```
+from lapixdl.evaluation.visualize import show_segmentations
+from lapixdl.evaluation.visualize import show_classifications
+from lapixdl.evaluation.visualize import show_detections
+```
+
+The available color maps are the [ones from matplotlib](https://matplotlib.org/3.1.1/gallery/color/colormap_reference.html).
