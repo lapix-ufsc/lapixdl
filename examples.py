@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 from lapixdl.evaluation.evaluate import evaluate_segmentation, evaluate_classification, evaluate_detection
-from lapixdl.evaluation.visualize import show_segmentation, show_classifications, show_detections
+from lapixdl.evaluation.visualize import show_segmentations, show_classifications, show_detections
 from lapixdl.evaluation.model import BBox, Classification, Result
 
 
@@ -21,6 +21,7 @@ def main():
     # Results visualization examples
     show_classification_example()
     show_segmentation_example()
+    show_detection_example()
 
 
 def evaluate_segmentation_example():
@@ -134,10 +135,10 @@ def show_classification_example():
 
     # Classifications based in array
     gt_class = [Classification(x) for x in [
-        0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 ]]
+        0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2]]
     # All predictions with .8 score
     pred_class = [Classification(x, .8) for x in [
-        0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2 ]]
+        0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2]]
 
     # Convert to results
     results = [Result(random_image(), gt, pred)
@@ -148,6 +149,7 @@ def show_classification_example():
 
     # Shows results and returns its Figure and Axes
     fig, axes = show_classifications(results, classes, 5)
+
 
 def show_segmentation_example():
     # Class names
@@ -172,25 +174,57 @@ def show_segmentation_example():
     gt_bbox_3 = BBox(300, 300, 100, 100, 3)
     mask_bin_GT_3 = draw_bboxes(mask_shape, [gt_bbox_3])
 
-    mask_multi_GT = np.maximum(np.maximum(mask_bin_GT_1, mask_bin_GT_2 * 2), mask_bin_GT_3 * 3)
+    mask_multi_GT = np.maximum(np.maximum(
+        mask_bin_GT_1, mask_bin_GT_2 * 2), mask_bin_GT_3 * 3)
     mask_multi_pred = np.maximum(mask_bin_pred_1, mask_bin_pred_2 * 2)
 
     # Convert to results
-    results = [Result(random_image(mask_shape[0], mask_shape[1]), mask_multi_GT, mask_multi_pred)]
+    results = [Result(random_image(mask_shape[0], mask_shape[1]),
+                      mask_multi_GT, mask_multi_pred)]
 
     # GT only result
-    results = [Result(random_image(mask_shape[0], mask_shape[1]), mask_multi_GT)] + results
+    results = [
+        Result(random_image(mask_shape[0], mask_shape[1]), mask_multi_GT)] + results
 
     # Shows results and returns its Figure and Axes
-    fig, axes = show_segmentation(results, classes)
+    fig, axes = show_segmentations(results, classes)
+
+
+def show_detection_example():
+    # Class names
+    classes = ['kite', 'person', 'car']
+
+    # Image shape
+    img_shape = (480, 640)
+
+    # Bboxes creation
+    gt_bbox_1 = BBox(10, 10, 100, 100, 0)
+    pred_bbox_1 = BBox(10, 10, 100, 100, 0, .8)
+
+    gt_bbox_2 = BBox(110, 110, 320, 280, 1)
+    pred_bbox_2 = BBox(70, 50, 240, 220, 1, .3)
+
+    gt_bbox_3 = BBox(300, 300, 100, 100, 2)
+
+    # Convert to results
+    results = [Result(random_image(img_shape[0], img_shape[1]), [
+                      gt_bbox_1, gt_bbox_2, gt_bbox_3], [pred_bbox_1, pred_bbox_2])]
+
+    # GT only result
+    results = [Result(random_image(img_shape[0], img_shape[1]), [
+                      gt_bbox_1, gt_bbox_2, gt_bbox_3])] + results
+
+    # Shows results and returns its Figure and Axes
+    fig, axes = show_detections(results, classes, show_bbox_label=False)
 
 
 def identity_iterator(value):
     yield value
 
 
-def random_image(h = None, w = None):
+def random_image(h=None, w=None):
     return (np.random.rand(h or 200, w or 400, 3) * 125).astype(np.int8)
+
 
 def draw_bboxes(mask_shape, bboxes):
     mask = np.zeros(mask_shape, np.int)
@@ -202,5 +236,6 @@ def draw_bboxes(mask_shape, bboxes):
         ] = 1
 
     return mask
+
 
 main()

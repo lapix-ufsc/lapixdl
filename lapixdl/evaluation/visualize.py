@@ -59,7 +59,7 @@ def show_classifications(
     return fig, axes
 
 
-def show_segmentation(
+def show_segmentations(
         results: List[Result[Mask]],
         class_names: List[str],
         cmap: Optional[str] = 'tab10',
@@ -81,7 +81,7 @@ def show_segmentation(
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
 
-    fig.suptitle(' ', fontsize=40) # To keep space for the legend
+    fig.suptitle(' ', fontsize=40)  # To keep space for the legend
     lengend_handles = [mpatches.Patch(color=cmap_colors[i], label=code)
                        for i, code in enumerate(class_names)]
     fig.legend(handles=lengend_handles, fontsize='small',
@@ -99,8 +99,8 @@ def show_segmentation(
         axe_GT.set_title('GT', fontsize='small')
         axe_GT.axis('off')
         axe_GT.imshow(result.image)
-        im = axe_GT.imshow(result.gt, cmap=cmap, alpha=mask_alpha,
-                           interpolation='none', vmin=0, vmax=len(cmap_colors) - 1)
+        axe_GT.imshow(result.gt, cmap=cmap, alpha=mask_alpha,
+                      interpolation='none', vmin=0, vmax=len(cmap_colors) - 1)
 
         axe_pred.axis('off')
         if not result.prediction is None:
@@ -115,9 +115,78 @@ def show_segmentation(
     return fig, axes
 
 
-def show_detections(results: List[Result[List[BBox]]]) -> Tuple[Figure, Axes]:
-    fig, ax = plt.subplots()
-    fig.suptitle('Detections')
+def show_detections(results: List[Result[List[BBox]]],
+                    class_names: List[str],
+                    cmap: Optional[str] = 'tab10',
+                    show_bbox_label: bool = True) -> Tuple[Figure, Axes]:
+    """Shows detection results.
 
+    Args:
+        results (List[Result[List[BBox]]]): Detection results.
+        class_names (List[str]): Class names.
+        cmap (Optional[str], optional): Matplotlib color map for the bboxes. Defaults to 'tab10'.
+        show_bbox_label (bool, optional): Indicates if the class label should be shown for each bbox. Defaults to True.
+
+    Returns:
+        Tuple[Figure, Axes]: Figure and Axes of the ploted results.
+    """
+
+    cmap_colors = cm.get_cmap(cmap).colors
+
+    rows = len(results)
+    fig, axes = plt.subplots(rows, 3)
+
+    fig.suptitle(' ', fontsize=40)  # To keep space for the legend
+    lengend_handles = [mpatches.Patch(color=cmap_colors[i], label=code)
+                       for i, code in enumerate(class_names)]
+    fig.legend(handles=lengend_handles, fontsize='small',
+               ncol=len(class_names), loc='upper center')
+
+    for i, result in enumerate(results):
+        axe_img = axes[i][0]
+        axe_GT = axes[i][1]
+        axe_pred = axes[i][2]
+
+        axe_img.set_title('Image', fontsize='small')
+        axe_img.imshow(result.image)
+        axe_img.axis('off')
+
+        axe_GT.set_title('GT', fontsize='small')
+        axe_GT.axis('off')
+        axe_GT.imshow(result.image)
+        __draw_bboxes(axe_GT, result.gt, cmap_colors,
+                      class_names, show_bbox_label)
+
+        axe_pred.axis('off')
+        if not result.prediction is None:
+            axe_pred.set_title('Prediction', fontsize='small')
+            axe_pred.imshow(result.image)
+            __draw_bboxes(axe_pred, result.prediction,
+                          cmap_colors, class_names, show_bbox_label)
+
+    plt.tight_layout(w_pad=.2, h_pad=3)
     plt.show()
-    return fig, ax
+
+    return fig, axes
+
+
+def __draw_bboxes(axe: plt.Axes, bboxes: List[BBox], cmap_colors: List, class_names: List[str], show_bbox_label: bool):
+    for bbox in bboxes:
+        color = cmap_colors[bbox.cls]
+        label = (f'{class_names[bbox.cls]}' if show_bbox_label else '') + \
+            (f' ({bbox.score})' if bbox.score else '')
+        rect = mpatches.Rectangle(bbox.upper_left_point,
+                                  bbox.width, bbox.height,
+                                  linewidth=2,
+                                  edgecolor=color,
+                                  facecolor='none',
+                                  label='teste')
+        axe.add_patch(rect)
+        axe.annotate(label.strip(),
+                     (bbox.upper_left_point[0] + 5,
+                      bbox.upper_left_point[1] + 5),
+                     color='w',
+                     weight='bold',
+                     fontsize=8,
+                     ha='left', va='top',
+                     bbox=dict(facecolor=color, edgecolor='none', pad=1.5))
