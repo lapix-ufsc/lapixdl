@@ -1,4 +1,5 @@
 from typing import List, Iterable
+
 import numpy as np
 from tqdm import tqdm
 
@@ -99,40 +100,51 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
     cls_ious_sum = np.zeros(classes_count)
     confusion_matrix = np.zeros((classes_count + 1, classes_count + 1), np.int)
     undetected_idx = classes_count
+    # Tracks detection scores to calculate the Precision x Recall curve and the Average Precision metric
+    predictions_by_class: List[List[PredictionResult]] = [[] for i in range(len(classes))] 
 
+    # For each image GT and predicted bbox set
     for (curr_gt_bboxes, curr_pred_bboxes) in tqdm(zip(gt_bboxes, pred_bboxes), unit=' samples'):
         pairwise_bbox_ious = calculate_pairwise_bbox_ious(
             curr_gt_bboxes, curr_pred_bboxes)
 
+        # Sums classes' IoUs by image to calculate the average at the end
         curr_img_cls_ious = calculate_iou_by_class(
             curr_gt_bboxes, curr_pred_bboxes, classes_count)
         cls_ious_sum = np.add(cls_ious_sum, curr_img_cls_ious)
         tot_images += 1
 
-        # To identify FPs
+        # Tracks prediction bboxes that does not correspond to any GT bbox to identify FPs
         no_hit_idxs = set(range(0, len(curr_pred_bboxes)))
 
+        # Iterate through lines of predictions bbox IoUs for each GT bbox
         for i, gt_ious in enumerate(pairwise_bbox_ious):
             gt_cls_idx = curr_gt_bboxes[i].cls
             max_iou_idx = np.argmax(gt_ious)
+            # Only the max IoU is considered TP, the others are FPs
             max_iou = gt_ious[max_iou_idx]
 
-            if max_iou < iou_threshold:
+            if max_iou < iou_threshold: # FN - GT bbox not detected
                 confusion_matrix[undetected_idx, gt_cls_idx] += 1
-            else:
-                no_hit_idxs.remove(max_iou_idx)
+            else: # TP - GT bbox detected
+                no_hit_idxs.remove(max_iou_idx) # Remove from FPs
                 
-                pred_class = curr_pred_bboxes[max_iou_idx].cls
-                confusion_matrix[pred_class, gt_cls_idx] += 1
+                pred_cls_idx = curr_pred_bboxes[max_iou_idx].cls
+                confusion_matrix[pred_cls_idx, gt_cls_idx] += 1
+                predictions_by_class[pred_cls_idx]\
+                    .append(PredictionResult(curr_pred_bboxes[max_iou_idx].score, PredictionResultType.TP))
 
-        for no_hit_idx in no_hit_idxs:
-            pred_class = curr_pred_bboxes[no_hit_idx].cls
-            confusion_matrix[pred_class, undetected_idx] += 1
+        for no_hit_idx in no_hit_idxs: # FPs - Predictions that do not match any GT
+            pred_cls_idx = curr_pred_bboxes[no_hit_idx].cls
+            confusion_matrix[pred_cls_idx, undetected_idx] += 1
+            predictions_by_class[pred_cls_idx]\
+                .append(PredictionResult(curr_pred_bboxes[no_hit_idx].score, PredictionResultType.FP))
 
     metrics = DetectionMetrics(
         classes + [undetected_cls_name],
         confusion_matrix,
-        cls_ious_sum / tot_images)
+        cls_ious_sum / tot_images,
+        predictions_by_class)
 
     print(metrics)
 

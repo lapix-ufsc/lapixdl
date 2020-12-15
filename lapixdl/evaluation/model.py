@@ -1,6 +1,9 @@
 from __future__ import annotations
 from typing import Optional, Union, List, Tuple, Generic, TypeVar
+from enum import Enum
+from dataclasses import dataclass
 from functools import reduce
+
 import numpy as np
 
 from . import plot
@@ -13,6 +16,8 @@ Image = Union[List[List[List[int]]], List[List[int]]]
 
 TResult = TypeVar('TResult')
 
+
+@dataclass
 class Result(Generic[TResult]):
     """Result of a GT versus Predictions
 
@@ -24,20 +29,25 @@ class Result(Generic[TResult]):
         gt (TResult): Ground truth results.
         prediction (Optional[TResult]): Prediction results. None if only GT must be shown.
     """
-
-    def __init__(self, image: Image, gt: TResult, prediction: Optional[TResult] = None):
-        """
-
-        Args:
-            image (Image): Image that the GT and predictions are based. Format: (Rows, Cols, Chanels) or (Rows, Cols) for grayscale.
-            gt (TResult): Ground truth results.
-            prediction (Optional[TResult], optional): Prediction results. Pass None if only GT must be shown. Defaults to None.
-        """
-        self.image = image
-        self.gt = gt
-        self.prediction = prediction
+    image: Image
+    gt: TResult
+    prediction: Optional[TResult] = None
 
 
+class PredictionResultType(Enum):
+    TP = 0
+    FP = 1
+    TN = 2
+    FN = 3
+
+
+@dataclass
+class PredictionResult:
+    score: float
+    type: PredictionResultType
+
+
+@dataclass
 class BBox:
     """Bounding Box data structure
 
@@ -49,26 +59,12 @@ class BBox:
         cls (int): Bounding Box class index.
         score (Optional[float]): Bounding Box prediction score.
     """
-
-    def __init__(self,
-                 upper_left_x: int, upper_left_y: int,
-                 width: int, height: int,
-                 cls: int, score: Optional[float] = None):
-        """
-        Args:
-            upper_left_x (int): Uper left X position of the Bounding Box.
-            upper_left_y (int): Upper left Y position of the Bounding Box.
-            width (int): Width of the Bounding Box.
-            height (int): Height of the Bounding Box.
-            cls (int): Bounding Box class index.
-            score (Optional[float], optional): Prediction score. Defaults to None.
-        """
-        self.height = height
-        self.width = width
-        self.upper_left_x = upper_left_x
-        self.upper_left_y = upper_left_y
-        self.cls = cls
-        self.score = score
+    upper_left_x: int
+    upper_left_y: int
+    width: int
+    height: int
+    cls: int
+    score: Optional[float] = None
 
     @property
     def upper_left_point(self) -> Tuple[int, int]:
@@ -79,7 +75,7 @@ class BBox:
     def bottom_right_point(self) -> Tuple[int, int]:
         """Tuple[int, int]: (X,Y) of the bottom right point of the Bounding Box."""
         return (self.upper_left_x + self.width - 1, self.upper_left_y + self.height - 1)
-    
+
     @property
     def center_point(self) -> Tuple[int, int]:
         """Tuple[int, int]: (X,Y) of the center point of the Bounding Box."""
@@ -139,53 +135,35 @@ class BBox:
         return self.area + bbox.area - (intersection_area or self.intersection_area_with(bbox))
 
 
+@dataclass
 class Classification:
     """Represents a classification
 
     Attributes:
         cls (int): Class index.
-        score (Optional[float], optional): Prediction score.
+        score (Optional[float], optional): Prediction score. Defaults to None.
     """
-
-    def __init__(self, cls: int, score: Optional[float] = None):
-        """
-        Args:
-            cls (int): Class index.
-            score (Optional[float], optional): Prediction score. Defaults to None.
-        """
-        self.cls = cls
-        self.score = score
+    cls: int
+    score: Optional[float] = None
 
 
+@dataclass
 class BinaryClassificationMetrics:
     """Binary classification metrics
 
     Attributes:
-        TP (int): True Positive count.
-        FP (int): False Positive count.
-        TN (int): True Negative count.
-        FN (int): False Negative count.
+        cls (str): Class name.
+        TP (int): True Positive count. Defaults to 0.
+        FP (int): False Positive count. Defaults to 0.
+        TN (int): True Negative count. Defaults to 0.
+        FN (int): False Negative count. Defaults to 0.
     """
 
-    def __init__(self, cls: str, tp: int = 0, fp: int = 0, tn: int = 0, fn: int = 0):
-        """
-        Args:
-            cls (str): Class name.
-            tp (int, optional): True Positive count. Defaults to 0.
-            fp (int, optional): False Positive count. Defaults to 0.
-            tn (int, optional): True Negative count. Defaults to 0.
-            fn (int, optional): False Negative count. Defaults to 0.
-        """
-        self._cls = cls
-        self.TP = tp
-        self.FP = fp
-        self.TN = tn
-        self.FN = fn
-
-    @property
-    def cls(self) -> str:
-        """str: Class name."""
-        return self._cls
+    cls: str
+    TP: int = 0
+    FP: int = 0
+    TN: int = 0
+    FN: int = 0
 
     @property
     def count(self) -> int:
@@ -341,10 +319,10 @@ class ClassificationMetrics:
 
             by_class.append(BinaryClassificationMetrics(
                 cls=self._classes[i],
-                tp=tp,
-                tn=tn,
-                fp=fp,
-                fn=fn
+                TP=tp,
+                TN=tn,
+                FP=fp,
+                FN=fn
             ))
         return by_class
 
@@ -379,11 +357,11 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
             classification_metrics (BinaryClassificationMetrics): Pixel-based binary classification metrics 
         """
         super().__init__(
-            classification_metrics.cls,
-            tp=classification_metrics.TP,
-            tn=classification_metrics.TN,
-            fp=classification_metrics.FP,
-            fn=classification_metrics.FN
+            cls=classification_metrics.cls,
+            TP=classification_metrics.TP,
+            TN=classification_metrics.TN,
+            FP=classification_metrics.FP,
+            FN=classification_metrics.FN
         )
 
     @property
@@ -468,22 +446,62 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         FN (int): False Negative instances count.
     """
 
-    def __init__(self, classification_metrics: BinaryClassificationMetrics, iou: float):
+    def __init__(self, classification_metrics: BinaryClassificationMetrics,
+                 iou: float,
+                 predictions: List[PredictionResult]):
         super().__init__(
-            classification_metrics.cls,
-            tp=classification_metrics.TP,
-            fp=classification_metrics.FP,
-            fn=classification_metrics.FN
+            cls=classification_metrics.cls,
+            TP=classification_metrics.TP,
+            FP=classification_metrics.FP,
+            FN=classification_metrics.FN
         )
         self._iou = iou
+        self._precision_recall_curve = BinaryDetectionMetrics.__calculate_precision_recall_curve(
+            predictions, classification_metrics.TP + classification_metrics.FN)
 
     @property
-    def iou(self):
+    def iou(self) -> float:
         """float: IoU/Jaccard Index metric.
 
         This metric is calculated as for segmentation, considering bboxes as pixel masks.
         """
         return self._iou
+
+    @property
+    def precision_recall_curve(self) -> List[Tuple[float, float]]:
+        """List[Tuple[float, float]]: Precision x Recall curve as a list of (Recall, Precision) tuples."""
+        return self._precision_recall_curve
+
+    def show_precision_recall_curve(self):
+        """Plots de Precision x Recall curve.
+
+        Return:
+            Tuple[Figure, Axes]: Figure and Axes of the ploted Precision x Recall curve.
+        """
+        return plot.precision_recall_curve([self._precision_recall_curve], [self.cls])
+
+    @staticmethod
+    def __calculate_precision_recall_curve(predictions: List[PredictionResult], gt_count: int) -> List[Tuple[float, float]]:
+        assert gt_count > 0, "The GT count must be greater than 0."
+
+        sorted_predictions = sorted(
+            predictions, key=lambda p: p.score, reverse=True)
+
+        curve: List[Tuple[float, float]] = []
+        tp = 0
+        fp = 0
+
+        def calc_precision(tp, fp): return tp/(tp + fp)
+        def calc_recall(tp): return tp/gt_count
+
+        for prediction in predictions:
+            if prediction.type == PredictionResultType.TP:
+                tp += 1
+            elif prediction.type == PredictionResultType.FP:
+                fp += 1
+            curve.append((calc_recall(tp), calc_precision(tp, fp)))
+
+        return curve
 
     def __str__(self):
         return (
@@ -512,12 +530,13 @@ class DetectionMetrics(ClassificationMetrics):
     """
 
     def __init__(self, classes: List[str],
-                 confusion_matrix: List[List[int]] = [],
-                 iou_by_class: List[float] = []):
+                 confusion_matrix: List[List[int]],
+                 iou_by_class: List[float],
+                 predictions_by_class: List[List[PredictionResult]]):
         super().__init__(classes, confusion_matrix)
         by_class_wo_undetected = self.by_class[slice(0, -1)]
-        self._by_class = [BinaryDetectionMetrics(by_class, iou)
-                          for by_class, iou in zip(by_class_wo_undetected, iou_by_class)]
+        self._by_class = [BinaryDetectionMetrics(by_class, iou, predictions)
+                          for by_class, iou, predictions in zip(by_class_wo_undetected, iou_by_class, predictions_by_class)]
 
     @property
     def avg_iou(self):

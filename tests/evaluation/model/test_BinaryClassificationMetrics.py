@@ -14,7 +14,7 @@ def test_count():
 
 
 def test_accuracy():
-    bin_class = BinaryClassificationMetrics(cls=['a', 'b'], fn=2, tn=2, tp=2, fp=2)
+    bin_class = BinaryClassificationMetrics(cls=['a', 'b'], FN=2, TN=2, TP=2, FP=2)
 
     assert bin_class.accuracy == 0.5
 
