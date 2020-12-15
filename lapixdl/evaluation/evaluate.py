@@ -109,25 +109,25 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
         cls_ious_sum = np.add(cls_ious_sum, curr_img_cls_ious)
         tot_images += 1
 
+        # To identify FPs
         no_hit_idxs = set(range(0, len(curr_pred_bboxes)))
 
         for i, gt_ious in enumerate(pairwise_bbox_ious):
             gt_cls_idx = curr_gt_bboxes[i].cls
+            max_iou_idx = np.argmax(gt_ious)
+            max_iou = gt_ious[max_iou_idx]
 
-            hits_idxs = [i for i, iou in enumerate(
-                gt_ious) if iou >= iou_threshold]
-            no_hit_idxs.difference_update(hits_idxs)
-
-            if len(hits_idxs) == 0:
+            if max_iou < iou_threshold:
                 confusion_matrix[undetected_idx, gt_cls_idx] += 1
             else:
-                for hit_idx in hits_idxs:
-                    confusion_matrix[curr_pred_bboxes[hit_idx].cls,
-                                     gt_cls_idx] += 1
+                no_hit_idxs.remove(max_iou_idx)
+                
+                pred_class = curr_pred_bboxes[max_iou_idx].cls
+                confusion_matrix[pred_class, gt_cls_idx] += 1
 
         for no_hit_idx in no_hit_idxs:
-            confusion_matrix[curr_pred_bboxes[no_hit_idx].cls,
-                             undetected_idx] += 1
+            pred_class = curr_pred_bboxes[no_hit_idx].cls
+            confusion_matrix[pred_class, undetected_idx] += 1
 
     metrics = DetectionMetrics(
         classes + [undetected_cls_name],

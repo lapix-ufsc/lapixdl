@@ -13,7 +13,6 @@ Image = Union[List[List[List[int]]], List[List[int]]]
 
 TResult = TypeVar('TResult')
 
-
 class Result(Generic[TResult]):
     """Result of a GT versus Predictions
 
