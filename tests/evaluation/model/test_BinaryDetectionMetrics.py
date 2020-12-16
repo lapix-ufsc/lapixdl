@@ -91,3 +91,10 @@ def test_precision_recall_curve():
     ]
 
     assert rounded_pr_curve == expected_curve
+
+def test_average_precision():
+    bin_class = BinaryClassificationMetrics(cls='a', FN=FN, TP=TP, FP=FP)
+    metrics = BinaryDetectionMetrics(bin_class, 10, predictions)
+
+    assert round(metrics.average_precision(11), 4) == .2684
+    assert round(metrics.average_precision(), 4) == .2457

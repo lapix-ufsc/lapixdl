@@ -456,7 +456,8 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
             FN=classification_metrics.FN
         )
         self._iou = iou
-        self._precision_recall_curve = self.__calculate_precision_recall_curve(predictions)
+        self._precision_recall_curve = self.__calculate_precision_recall_curve(
+            predictions)
 
     @property
     def gt_count(self) -> int:
@@ -480,6 +481,21 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
     def precision_recall_curve(self) -> List[Tuple[float, float]]:
         """List[Tuple[float, float]]: Precision x Recall curve as a list of (Recall, Precision) tuples."""
         return self._precision_recall_curve
+
+    def average_precision(self, interpolation_points: Optional[int] = None) -> float:
+        """Calculates the Average Precision metric.
+
+        Args:
+            interpolation_points (Optional[int], optional): Number of points to use for interpolation. 
+            Uses all points if None. Defaults to None.
+
+        Returns:
+            float: Average Precision metric.
+        """
+        if not interpolation_points is None:
+            return self._interpolated_average_precision(interpolation_points)
+        else:
+            return self._average_precision()
 
     def show_precision_recall_curve(self):
         """Plots de Precision x Recall curve.
@@ -512,6 +528,30 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
 
         return curve
 
+    def _interpolated_average_precision(self, interpolation_points: int) -> float:
+        precision_sum = .0
+        recall_interpolation = np.linspace(0, 1, interpolation_points)
+
+        for point in recall_interpolation:
+            precision_sum += max([rp[1]
+                                  for rp in self._precision_recall_curve if rp[0] >= point] + [0])
+
+        return precision_sum / interpolation_points
+
+    def _average_precision(self) -> float:
+        ap_sum = .0
+        prev_max_recall = .0
+
+        greater_recall_points = self._precision_recall_curve
+        while len(greater_recall_points) > 0:
+            max_point = max(greater_recall_points, key=lambda rp: rp[1])
+            ap_sum += (max_point[0] - prev_max_recall) * max_point[1]
+            prev_max_recall = max_point[0]
+            greater_recall_points = [
+                rp for rp in greater_recall_points if rp[0] > prev_max_recall]
+
+        return ap_sum
+
     def __str__(self):
         return (
             f'{self.cls}:\n'
@@ -524,6 +564,8 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
             f'\tRecall: {self.recall}\n'
             f'\tPrecision: {self.precision}\n'
             f'\tF-Score: {self.f_score}\n'
+            f'\tAverage Precision: {self.average_precision()}\n'
+            f'\t11-point Average Precision: {self.average_precision(11)}\n'
         )
 
 
@@ -554,6 +596,18 @@ class DetectionMetrics(ClassificationMetrics):
         This metric is calculated as for segmentation, considering bboxes as pixel masks.
         """
         return reduce(lambda acc, curr: curr.iou + acc, self.by_class, .0) / len(self.by_class)
+
+    def mean_average_precision(self, interpolation_points: Optional[int] = None) -> float:
+        """Calculates the mean of Average Precision metrics of all classes.
+
+        Args:
+            interpolation_points (Optional[int], optional): Number of points to use for interpolation. 
+            Uses all points if None. Defaults to None.
+
+        Returns:
+            float: Mean Average Precision metric.
+        """
+        return reduce(lambda acc, curr: curr.average_precision(interpolation_points) + acc, self._by_class, .0) / len(self._by_class)
 
     def __str__(self):
         return (
