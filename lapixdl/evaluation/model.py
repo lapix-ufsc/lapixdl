@@ -456,8 +456,17 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
             FN=classification_metrics.FN
         )
         self._iou = iou
-        self._precision_recall_curve = BinaryDetectionMetrics.__calculate_precision_recall_curve(
-            predictions, classification_metrics.TP + classification_metrics.FN)
+        self._precision_recall_curve = self.__calculate_precision_recall_curve(predictions)
+
+    @property
+    def gt_count(self) -> int:
+        """int: Total count of GT bboxes."""
+        return self.TP + self.FN
+
+    @property
+    def predicted_count(self) -> int:
+        """int: Total count of predicted bboxes."""
+        return self.TP + self.FP
 
     @property
     def iou(self) -> float:
@@ -480,9 +489,8 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         """
         return plot.precision_recall_curve([self._precision_recall_curve], [self.cls])
 
-    @staticmethod
-    def __calculate_precision_recall_curve(predictions: List[PredictionResult], gt_count: int) -> List[Tuple[float, float]]:
-        assert gt_count > 0, "The GT count must be greater than 0."
+    def __calculate_precision_recall_curve(self, predictions: List[PredictionResult]) -> List[Tuple[float, float]]:
+        assert self.gt_count > 0, "The GT count must be greater than 0."
 
         sorted_predictions = sorted(
             predictions, key=lambda p: p.score, reverse=True)
@@ -490,11 +498,12 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         curve: List[Tuple[float, float]] = []
         tp = 0
         fp = 0
+        gt_count = self.gt_count
 
         def calc_precision(tp, fp): return tp/(tp + fp)
         def calc_recall(tp): return tp/gt_count
 
-        for prediction in predictions:
+        for prediction in sorted_predictions:
             if prediction.type == PredictionResultType.TP:
                 tp += 1
             elif prediction.type == PredictionResultType.FP:
