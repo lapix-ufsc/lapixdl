@@ -1,16 +1,30 @@
 
+from typing import List, Optional, Tuple
 import numpy as np
 import itertools
 
 
-def __generate_coco_annotations(img_labels, img_id, annotation_first_id, classes):
+def __bounding_rect_from_polygon(polygon: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    arr = np.array(polygon)
+
+    max = arr.max(axis=0)
+    min = arr.min(axis=0)
+    
+    return [
+        (min[0], min[1]),
+        (min[0], max[1]),
+        (max[0], max[1]),
+        (max[0], min[1]),
+    ]
+
+def __generate_coco_annotations(img_labels: List[dict], img_id: int, annotation_first_id: int, classes: List[str]) -> List[dict]:
     annotations = []
 
     for img_label in img_labels:
         class_name = img_label['value']
         polygon = img_label['polygon']
         poly_convert = [(p['x'], p['y']) for p in polygon]
-        bbox = cv2.boundingRect(np.array(poly_convert, np.int32))
+        bbox = __bounding_rect_from_polygon(poly_convert)
         segmentation = list(itertools.chain.from_iterable(poly_convert))
         if class_name not in classes:
             classes.append(class_name)
@@ -29,14 +43,18 @@ def __generate_coco_annotations(img_labels, img_id, annotation_first_id, classes
     return annotations
 
 
-def __generate_coco_file(lblbox_annotations, img_names_to_include):
+def __generate_coco_file(lblbox_annotations: dict, img_names_to_include: Optional[List[str]] = None) -> dict:
     annotation_id = 1
     image_id = 1
-    annotations = []
-    images = []
-    classes = []
 
-    for images_labels in filter(lambda ant: ant['External ID'] in img_names_to_include, lblbox_annotations):
+    annotations: List[dict] = []
+    images: List[dict] = []
+    classes: List[str] = []
+
+    ftr_lblbox_annotations = (filter(lambda ant: ant['External ID'] in (img_names_to_include or []),
+                                     lblbox_annotations)) if img_names_to_include is not None else lblbox_annotations
+
+    for images_labels in ftr_lblbox_annotations:
         img_filename = images_labels['External ID']
         img_labels = images_labels['Label']['objects'] if 'objects' in images_labels['Label'] else [
         ]
@@ -71,5 +89,5 @@ def __generate_coco_file(lblbox_annotations, img_names_to_include):
     return final_json
 
 
-def labelbox_to_coco(lblbox_annotations, img_names_to_include):
+def labelbox_to_coco(lblbox_annotations: dict, img_names_to_include: Optional[List[str]] = None):
     return __generate_coco_file(lblbox_annotations, img_names_to_include)
