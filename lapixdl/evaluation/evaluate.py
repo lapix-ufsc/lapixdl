@@ -101,7 +101,8 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
     confusion_matrix = np.zeros((classes_count + 1, classes_count + 1), np.int)
     undetected_idx = classes_count
     # Tracks detection scores to calculate the Precision x Recall curve and the Average Precision metric
-    predictions_by_class: List[List[PredictionResult]] = [[] for i in range(len(classes))] 
+    predictions_by_class: List[List[PredictionResult]] = [
+        [] for i in range(len(classes))]
 
     # For each image GT and predicted bbox set
     for (curr_gt_bboxes, curr_pred_bboxes) in tqdm(zip(gt_bboxes, pred_bboxes), unit=' samples'):
@@ -124,17 +125,17 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
             # Only the max IoU is considered TP, the others are FPs
             max_iou = gt_ious[max_iou_idx]
 
-            if max_iou < iou_threshold: # FN - GT bbox not detected
+            if max_iou < iou_threshold:  # FN - GT bbox not detected
                 confusion_matrix[undetected_idx, gt_cls_idx] += 1
-            else: # TP - GT bbox detected
-                no_hit_idxs.remove(max_iou_idx) # Remove from FPs
-                
+            else:  # TP - GT bbox detected
+                no_hit_idxs.remove(max_iou_idx)  # Remove from FPs
+
                 pred_cls_idx = curr_pred_bboxes[max_iou_idx].cls
                 confusion_matrix[pred_cls_idx, gt_cls_idx] += 1
                 predictions_by_class[pred_cls_idx]\
                     .append(PredictionResult(curr_pred_bboxes[max_iou_idx].score, PredictionResultType.TP))
 
-        for no_hit_idx in no_hit_idxs: # FPs - Predictions that do not match any GT
+        for no_hit_idx in no_hit_idxs:  # FPs - Predictions that do not match any GT
             pred_cls_idx = curr_pred_bboxes[no_hit_idx].cls
             confusion_matrix[pred_cls_idx, undetected_idx] += 1
             predictions_by_class[pred_cls_idx]\
@@ -215,6 +216,8 @@ def calculate_iou_by_class(gt_bboxes: List[BBox],
 
 def __calculate_binary_iou(gt_bboxes: List[BBox],
                            pred_bboxes: List[BBox]) -> float:
+    if len(gt_bboxes) == 0 or len(pred_bboxes) == 0:
+        return .0
 
     bboxes_btm_right_points = [bbox.bottom_right_point for bbox in gt_bboxes]\
         + [bbox.bottom_right_point for bbox in pred_bboxes]

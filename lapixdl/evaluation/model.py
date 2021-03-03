@@ -166,6 +166,11 @@ class BinaryClassificationMetrics:
     FN: int = 0
 
     @property
+    def has_instances(self) -> bool:
+        """int: Indicates if the class has any ground truth or predicted instances."""
+        return self.count > 0
+
+    @property
     def count(self) -> int:
         """int: Total count of classified instances."""
         return self.TP + self.TN + self.FP + self.FN
@@ -214,8 +219,9 @@ class BinaryClassificationMetrics:
         return plot.confusion_matrix(self.confusion_matrix, ['P', 'N'], f'Confusion Matrix for \"{self.cls}\" Class')
 
     def __str__(self):
+        no_instances_string = ' [NO INSTANCES]' if not self.has_instances else ''
         return (
-            f'{self.cls}:\n'
+            f'{self.cls}{no_instances_string}:\n'
             f'\tTP: {self.TP}\n'
             f'\tTN: {self.TN}\n'
             f'\tFP: {self.FP}\n'
@@ -254,12 +260,19 @@ class ClassificationMetrics:
         self._classes = classes
 
         self._by_class = self.__get_by_class_metrics()
+        self._by_class_w_instances = list(filter(
+            lambda c: c.has_instances, self._by_class))
         self._count = self._confusion_matrix.sum()
 
     @property
     def by_class(self) -> List[BinaryClassificationMetrics]:
         """List[BinaryClassificationMetrics]: Binary metrics calculated for each class index."""
         return self._by_class
+
+    @property
+    def by_class_w_instances(self) -> List[BinaryClassificationMetrics]:
+        """List[BinaryClassificationMetrics]: Binary metrics calculated for each class index with instances."""
+        return self._by_class_w_instances
 
     @property
     def count(self) -> int:
@@ -274,27 +287,27 @@ class ClassificationMetrics:
     @property
     def avg_recall(self) -> float:
         """float: Macro average recall metric."""
-        return reduce(lambda acc, curr: curr.recall + acc, self.by_class, .0) / len(self.by_class)
+        return reduce(lambda acc, curr: curr.recall + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
 
     @property
     def avg_precision(self) -> float:
         """float: Macro average precision metric."""
-        return reduce(lambda acc, curr: curr.precision + acc, self.by_class, .0) / len(self.by_class)
+        return reduce(lambda acc, curr: curr.precision + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
 
     @property
     def avg_specificity(self) -> float:
         """float: Macro average specificity metric."""
-        return reduce(lambda acc, curr: curr.specificity + acc, self.by_class, .0) / len(self.by_class)
+        return reduce(lambda acc, curr: curr.specificity + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
 
     @property
     def avg_f_score(self) -> float:
         """float: Macro average F-Score/Dice metric."""
-        return reduce(lambda acc, curr: curr.f_score + acc, self.by_class, .0) / len(self.by_class)
+        return reduce(lambda acc, curr: curr.f_score + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
 
     @property
     def avg_false_positive_rate(self) -> float:
         """float: Macro average False Positive Rate metric."""
-        return reduce(lambda acc, curr: curr.false_positive_rate + acc, self.by_class, .0) / len(self.by_class)
+        return reduce(lambda acc, curr: curr.false_positive_rate + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
 
     @property
     def confusion_matrix(self) -> List[List[int]]:
@@ -408,16 +421,18 @@ class SegmentationMetrics(ClassificationMetrics):
             'There should be at least two classes (with background as the first)'
         super().__init__(classes, confusion_matrix)
         self._by_class = [BinarySegmentationMetrics(x) for x in self.by_class]
+        self._by_class_w_instances = [
+            x for x in self.by_class if x.has_instances]
 
     @property
     def avg_iou(self) -> float:
         """float: Macro average IoU/Jaccard Index metric."""
-        return reduce(lambda acc, curr: curr.iou + acc, self._by_class, .0) / len(self.by_class)
+        return reduce(lambda acc, curr: curr.iou + acc, self._by_class_w_instances, .0) / len(self._by_class_w_instances)
 
     @property
     def avg_iou_no_bkg(self) -> float:
         """float: Macro average IoU/Jaccard Index metric without `background` class (index 0)."""
-        return reduce(lambda acc, curr: curr.iou + acc, self._by_class[1:], .0) / (len(self.by_class) - 1)
+        return reduce(lambda acc, curr: curr.iou + acc, self._by_class_w_instances[1:], .0) / (len(self._by_class_w_instances) - 1)
 
     def __str__(self):
         return (
@@ -457,7 +472,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         )
         self._iou = iou
         self._precision_recall_curve = self.__calculate_precision_recall_curve(
-            predictions)
+            predictions) if self.gt_count > 0 else []
 
     @property
     def gt_count(self) -> int:
@@ -480,6 +495,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
     @property
     def precision_recall_curve(self) -> List[Tuple[float, float]]:
         """List[Tuple[float, float]]: Precision x Recall curve as a list of (Recall, Precision) tuples."""
+        assert self.gt_count > 0, "This class does not have instances."
         return self._precision_recall_curve
 
     def average_precision(self, interpolation_points: Optional[int] = None) -> float:
@@ -588,6 +604,8 @@ class DetectionMetrics(ClassificationMetrics):
         by_class_wo_undetected = self.by_class[slice(0, -1)]
         self._by_class = [BinaryDetectionMetrics(by_class, iou, predictions)
                           for by_class, iou, predictions in zip(by_class_wo_undetected, iou_by_class, predictions_by_class)]
+        self._by_class_w_instances = [
+            x for x in self.by_class if x.has_instances]
 
     @property
     def avg_iou(self):
@@ -595,7 +613,7 @@ class DetectionMetrics(ClassificationMetrics):
 
         This metric is calculated as for segmentation, considering bboxes as pixel masks.
         """
-        return reduce(lambda acc, curr: curr.iou + acc, self.by_class, .0) / len(self.by_class)
+        return reduce(lambda acc, curr: curr.iou + acc, self._by_class_w_instances, .0) / len(self._by_class_w_instances)
 
     def mean_average_precision(self, interpolation_points: Optional[int] = None) -> float:
         """Calculates the mean of Average Precision metrics of all classes.
@@ -607,7 +625,7 @@ class DetectionMetrics(ClassificationMetrics):
         Returns:
             float: Mean Average Precision metric.
         """
-        return reduce(lambda acc, curr: curr.average_precision(interpolation_points) + acc, self._by_class, .0) / len(self._by_class)
+        return reduce(lambda acc, curr: curr.average_precision(interpolation_points) + acc, self._by_class_w_instances, .0) / len(self._by_class_w_instances)
 
     def __str__(self):
         return (
