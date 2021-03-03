@@ -1,21 +1,18 @@
-
 from typing import List, Optional, Tuple
 import numpy as np
 import itertools
 
 
-def __bounding_rect_from_polygon(polygon: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+def __bounding_rect_from_polygon(polygon: List[Tuple[int, int]]) -> List[int]:
     arr = np.array(polygon)
 
     max = arr.max(axis=0)
     min = arr.min(axis=0)
-    
-    return [
-        (min[0], min[1]),
-        (min[0], max[1]),
-        (max[0], max[1]),
-        (max[0], min[1]),
-    ]
+    h = max[1] - min[1]
+    w = max[0] - min[0]
+
+    return [min[0], max[1], w, h]
+
 
 def __generate_coco_annotations(img_labels: List[dict], img_id: int, annotation_first_id: int, classes: List[str]) -> List[dict]:
     annotations = []
@@ -89,5 +86,14 @@ def __generate_coco_file(lblbox_annotations: dict, img_names_to_include: Optiona
     return final_json
 
 
-def labelbox_to_coco(lblbox_annotations: dict, img_names_to_include: Optional[List[str]] = None):
+def labelbox_to_coco(lblbox_annotations: dict, img_names_to_include: Optional[List[str]] = None) -> dict:
+    """Converts from Labelbox format to the COCO format
+
+    Args:
+        lblbox_annotations (dict): Dict of labelbox annotations parsed from the exported json.
+        img_names_to_include (Optional[List[str]], optional): Image names (External IDs) to include in the converted file. Defaults to None.
+
+    Returns:
+        dict: Dict in the COCO format.
+    """
     return __generate_coco_file(lblbox_annotations, img_names_to_include)
