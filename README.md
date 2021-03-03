@@ -72,7 +72,7 @@ from lapixdl.convert.labelbox import labelbox_to_coco
 
 ```
 import json
-from lapixdl.evaluation.evaluate import evaluate_segmentation
+from lapixdl.convert.labelbox import labelbox_to_coco
 
 # Loads Labelbox json
 with open('./labelbox.json') as in_file:
