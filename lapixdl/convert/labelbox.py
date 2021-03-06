@@ -11,7 +11,7 @@ def __bounding_rect_from_polygon(polygon: List[Tuple[int, int]]) -> List[int]:
     h = max[1] - min[1]
     w = max[0] - min[0]
 
-    return [min[0], max[1], w, h]
+    return [min[0], min[1], w, h]
 
 
 def __generate_coco_annotations(img_labels: List[dict], img_id: int, annotation_first_id: int, classes: List[str]) -> List[dict]:
