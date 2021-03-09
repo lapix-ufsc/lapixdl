@@ -121,9 +121,13 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
         # Iterate through lines of predictions bbox IoUs for each GT bbox
         for i, gt_ious in enumerate(pairwise_bbox_ious):
             gt_cls_idx = curr_gt_bboxes[i].cls
-            max_iou_idx = np.argmax(gt_ious)
-            # Only the max IoU is considered TP, the others are FPs
-            max_iou = gt_ious[max_iou_idx]
+
+            if len(gt_ious) > 0:
+                max_iou_idx = np.argmax(gt_ious)
+                # Only the max IoU is considered TP, the others are FPs
+                max_iou = gt_ious[max_iou_idx]
+            else:
+                max_iou = 0
 
             if max_iou < iou_threshold:  # FN - GT bbox not detected
                 confusion_matrix[undetected_idx, gt_cls_idx] += 1
