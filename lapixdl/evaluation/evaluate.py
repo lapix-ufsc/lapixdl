@@ -122,6 +122,9 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
         for i, gt_ious in enumerate(pairwise_bbox_ious):
             gt_cls_idx = curr_gt_bboxes[i].cls
 
+            # Removes already matched predictions
+            gt_ious = [0 if i not in no_hit_idxs else iou for i, iou in enumerate(gt_ious)]
+
             if len(gt_ious) > 0:
                 max_iou_idx = np.argmax(gt_ious)
                 # Only the max IoU is considered TP, the others are FPs
