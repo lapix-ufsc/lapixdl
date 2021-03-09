@@ -174,19 +174,18 @@ def __draw_bboxes(axe: plt.Axes, bboxes: List[BBox], cmap_colors: List, class_na
     for bbox in bboxes:
         color = cmap_colors[bbox.cls]
         label = (f'{class_names[bbox.cls]}' if show_bbox_label else '') + \
-            (f' ({bbox.score})' if bbox.score else '')
+            (f' ({round(bbox.score, 3)})' if bbox.score else '')
         rect = mpatches.Rectangle(bbox.upper_left_point,
                                   bbox.width, bbox.height,
                                   linewidth=2,
                                   edgecolor=color,
-                                  facecolor='none',
-                                  label='teste')
+                                  facecolor='none')
         axe.add_patch(rect)
         axe.annotate(label.strip(),
                      (bbox.upper_left_point[0] + 5,
-                      bbox.upper_left_point[1] + 5),
+                      bbox.upper_left_point[1] - 5),
                      color='w',
                      weight='bold',
-                     fontsize=8,
-                     ha='left', va='top',
+                     fontsize=10,
+                     ha='left', va='bottom',
                      bbox=dict(facecolor=color, edgecolor='none', pad=1.5))
