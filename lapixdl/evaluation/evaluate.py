@@ -123,7 +123,8 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
             gt_cls_idx = curr_gt_bboxes[i].cls
 
             # Removes already matched predictions
-            gt_ious = [0 if i not in no_hit_idxs else iou for i, iou in enumerate(gt_ious)]
+            gt_ious = [0 if i not in no_hit_idxs else iou for i,
+                       iou in enumerate(gt_ious)]
 
             if len(gt_ious) > 0:
                 max_iou_idx = np.argmax(gt_ious)
@@ -231,8 +232,8 @@ def __calculate_binary_iou(gt_bboxes: List[BBox],
     max_x = max([point[0] for point in bboxes_btm_right_points])
     max_y = max([point[1] for point in bboxes_btm_right_points])
 
-    gt_mask = __draw_bboxes((max_x + 1, max_y + 1), gt_bboxes)
-    pred_mask = __draw_bboxes((max_x + 1, max_y + 1), pred_bboxes)
+    gt_mask = __draw_bboxes((int(max_x + 1), int(max_y + 1)), gt_bboxes)
+    pred_mask = __draw_bboxes((int(max_x + 1), int(max_y + 1)), pred_bboxes)
 
     tp, f = (0, 0)
     flat_gt = __flat_mask(gt_mask)
