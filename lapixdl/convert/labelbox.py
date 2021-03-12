@@ -33,11 +33,18 @@ def __generate_coco_annotations(img_labels: List[dict], img_id: int, annotation_
             'category_id': classes.index(class_name),
             'id': annotation_first_id,
             'bbox': bbox,
+            'area': __calculate_area(segmentation)
         })
 
         annotation_first_id += 1
 
     return annotations
+
+
+def __calculate_area(segmentation: List[float]) -> float:
+    x = segmentation[0:-1:2]
+    y = segmentation[1::2]
+    return 0.5*np.abs(np.dot(x, np.roll(y, 1))-np.dot(y, np.roll(x, 1))) #Shoelace
 
 
 def __generate_coco_file(lblbox_annotations: dict, img_names_to_include: Optional[List[str]] = None) -> dict:

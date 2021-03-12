@@ -199,10 +199,10 @@ def show_detection_example():
 
     # Bboxes creation
     gt_bbox_1 = BBox(10, 10, 100, 100, 0)
-    pred_bbox_1 = BBox(10, 10, 100, 100, 0, .8)
+    pred_bbox_1 = BBox(10, 10, 100, 100, 0, .8212158464)
 
     gt_bbox_2 = BBox(110, 110, 320, 280, 1)
-    pred_bbox_2 = BBox(70, 50, 240, 220, 1, .3)
+    pred_bbox_2 = BBox(70, 50, 240, 220, 1, .34844545)
 
     gt_bbox_3 = BBox(300, 300, 100, 100, 2)
 
