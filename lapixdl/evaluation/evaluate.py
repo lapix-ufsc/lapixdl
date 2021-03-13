@@ -140,8 +140,12 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
 
                 pred_cls_idx = curr_pred_bboxes[max_iou_idx].cls
                 confusion_matrix[pred_cls_idx, gt_cls_idx] += 1
-                predictions_by_class[pred_cls_idx]\
-                    .append(PredictionResult(curr_pred_bboxes[max_iou_idx].score, PredictionResultType.TP))
+                if pred_cls_idx == gt_cls_idx:
+                    predictions_by_class[pred_cls_idx]\
+                        .append(PredictionResult(curr_pred_bboxes[max_iou_idx].score, PredictionResultType.TP))
+                else:
+                    predictions_by_class[pred_cls_idx]\
+                        .append(PredictionResult(curr_pred_bboxes[max_iou_idx].score, PredictionResultType.FP))
 
         for no_hit_idx in no_hit_idxs:  # FPs - Predictions that do not match any GT
             pred_cls_idx = curr_pred_bboxes[no_hit_idx].cls

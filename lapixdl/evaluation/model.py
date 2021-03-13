@@ -525,7 +525,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         assert self.gt_count > 0, "The GT count must be greater than 0."
 
         sorted_predictions = sorted(
-            predictions, key=lambda p: p.score, reverse=True)
+            predictions, key=lambda p: float(p.score), reverse=True)
 
         curve: List[Tuple[float, float]] = []
         tp = 0

@@ -11,7 +11,7 @@ def test_evaluation_detection_iou_metric():
 
     gt_bbox = BBox(110, 110, 320, 280, 0)
 
-    pred_bbox = BBox(70, 50, 240, 220, 0)
+    pred_bbox = BBox(70, 50, 240, 220, 0, .5)
 
     metrics = evaluate_detection([[gt_bbox]], [[pred_bbox]], classes)
 
@@ -23,7 +23,7 @@ def test_evaluation_detection_iou_metric_w_more_classes():
 
     gt_bbox = BBox(110, 110, 320, 280, 0)
 
-    pred_bbox = BBox(70, 50, 240, 220, 0)
+    pred_bbox = BBox(70, 50, 240, 220, 0, .5)
 
     metrics = evaluate_detection([[gt_bbox]], [[pred_bbox]], classes)
 
