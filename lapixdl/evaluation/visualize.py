@@ -35,6 +35,8 @@ def show_classifications(
 
     rows = math.ceil(len(results) / cols)
     fig, axes = plt.subplots(rows, cols)
+    if rows == 1:
+        axes = [axes]
     fig.suptitle('Classifications')
 
     for i, result in enumerate(results):
@@ -54,6 +56,7 @@ def show_classifications(
         axe = axes[i // cols][i % cols]
         axe.axis('off')
 
+    fig.set_size_inches((20, 10), forward=True)
     plt.tight_layout(w_pad=.2, h_pad=1.5)
     plt.show()
     return fig, axes
@@ -80,6 +83,8 @@ def show_segmentations(
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
+    if rows == 1:
+        axes = [axes]
 
     fig.suptitle(' ', fontsize=40)  # To keep space for the legend
     lengend_handles = [mpatches.Patch(color=cmap_colors[i], label=code)
@@ -109,6 +114,7 @@ def show_segmentations(
             axe_pred.imshow(result.prediction, cmap=cmap, alpha=mask_alpha,
                             interpolation='none', vmin=0, vmax=len(cmap_colors) - 1)
 
+    fig.set_size_inches((20, 10), forward=True)
     plt.tight_layout(w_pad=.2, h_pad=3)
     plt.show()
 
@@ -135,6 +141,8 @@ def show_detections(results: List[Result[List[BBox]]],
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
+    if rows == 1:
+        axes = [axes]
 
     fig.suptitle(' ', fontsize=40)  # To keep space for the legend
     lengend_handles = [mpatches.Patch(color=cmap_colors[i], label=code)
@@ -164,6 +172,7 @@ def show_detections(results: List[Result[List[BBox]]],
             __draw_bboxes(axe_pred, result.prediction,
                           cmap_colors, class_names, show_bbox_label)
 
+    fig.set_size_inches((20, 10), forward=True)
     plt.tight_layout(w_pad=.2, h_pad=3)
     plt.show()
 
