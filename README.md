@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/306032350.svg)](https://zenodo.org/badge/latestdoi/306032350)
+
 # LAPiX DL - Utils for Computer Vision Deep Learning research
 
 This package contains utilitary functions to support train and evaluation of Deep Learning models applied to images.
