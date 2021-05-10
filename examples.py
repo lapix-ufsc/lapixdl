@@ -14,14 +14,14 @@ from lapixdl.evaluation.model import BBox, Classification, Result
 
 def main():
     # Model evaluation examples
-    #evaluate_segmentation_example()
-    #evaluate_detection_example()
-    #evaluate_classification_example()
+    evaluate_segmentation_example()
+    evaluate_detection_example()
+    evaluate_classification_example()
 
     # Results visualization examples
-    #show_classification_example()
+    show_classification_example()
     show_segmentation_example()
-    #show_detection_example()
+    show_detection_example()
 
 
 def evaluate_segmentation_example():

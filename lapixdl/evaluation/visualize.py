@@ -1,4 +1,4 @@
-from typing import Optional, Union, List, Tuple, TypeVar, Generic
+from typing import Union, List, Tuple
 import math
 
 import matplotlib.pyplot as plt
@@ -7,12 +7,13 @@ from matplotlib.axes import Axes
 from matplotlib import cm
 import matplotlib.patches as mpatches
 import seaborn as sn
-import numpy as np
 
 from .model import BBox, Mask, Classification, Result, Image
 
 correct_color = sn.color_palette("Paired")[3]
 incorrect_color = sn.color_palette("Paired")[5]
+
+ColorMap = Union[str, List[str]]
 
 
 def show_classifications(
@@ -65,21 +66,21 @@ def show_classifications(
 def show_segmentations(
         results: List[Result[Mask]],
         class_names: List[str],
-        cmap: Optional[str] = 'tab10',
+        cmap: ColorMap = 'tab10',
         mask_alpha: float = .3) -> Tuple[Figure, Axes]:
     """Shows segmentation results
 
     Args:
         results (List[Result[Mask]]): Segmentation results.
         class_names (List[str]): Class names.
-        cmap (Optional[str], optional): Matplotlib color map for the mask. Defaults to 'tab10'.
+        cmap (ColorMap, optional): Matplotlib color map for the mask or list of `class_index -> hex_color`. Defaults to 'tab10'.
         mask_alpha (float, optional): Alpha value for the mask colors. Defaults to .3.
 
     Returns:
         Tuple[Figure, Axes]: Figure and Axes of the ploted results.
     """
 
-    cmap_colors = cm.get_cmap(cmap).colors
+    cmap_colors = __get_colors(cmap)
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
@@ -123,21 +124,21 @@ def show_segmentations(
 
 def show_detections(results: List[Result[List[BBox]]],
                     class_names: List[str],
-                    cmap: Optional[str] = 'tab10',
+                    cmap: ColorMap = 'tab10',
                     show_bbox_label: bool = True) -> Tuple[Figure, Axes]:
     """Shows detection results.
 
     Args:
         results (List[Result[List[BBox]]]): Detection results.
         class_names (List[str]): Class names.
-        cmap (Optional[str], optional): Matplotlib color map for the bboxes. Defaults to 'tab10'.
+        cmap (ColorMap, optional): Matplotlib color map for the mask or list of `class_index -> hex_color`. Defaults to 'tab10'.
         show_bbox_label (bool, optional): Indicates if the class label should be shown for each bbox. Defaults to True.
 
     Returns:
         Tuple[Figure, Axes]: Figure and Axes of the ploted results.
     """
 
-    cmap_colors = cm.get_cmap(cmap).colors
+    cmap_colors = __get_colors(cmap)
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
@@ -179,7 +180,7 @@ def show_detections(results: List[Result[List[BBox]]],
     return fig, axes
 
 
-def __draw_bboxes(axe: plt.Axes, bboxes: List[BBox], cmap_colors: List, class_names: List[str], show_bbox_label: bool):
+def __draw_bboxes(axe: plt.Axes, bboxes: List[BBox], cmap_colors: List[str], class_names: List[str], show_bbox_label: bool):
     for bbox in bboxes:
         color = cmap_colors[bbox.cls]
         label = (f'{class_names[bbox.cls]}' if show_bbox_label else '') + \
@@ -198,3 +199,10 @@ def __draw_bboxes(axe: plt.Axes, bboxes: List[BBox], cmap_colors: List, class_na
                      fontsize=10,
                      ha='left', va='bottom',
                      bbox=dict(facecolor=color, edgecolor='none', pad=1.5))
+
+
+def __get_colors(cmap: ColorMap) -> List[str]:
+    if isinstance(cmap, str):
+        return cm.get_cmap(cmap).colors
+    else:
+        return cmap
