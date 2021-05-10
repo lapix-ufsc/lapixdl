@@ -82,6 +82,8 @@ def show_segmentations(
 
     cmap_colors = __get_colors(cmap)
 
+    assert len(cmap_colors) >= len(class_names), "The color map length must be greater or equal the length of the class names."
+
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
     if rows == 1:
@@ -139,6 +141,8 @@ def show_detections(results: List[Result[List[BBox]]],
     """
 
     cmap_colors = __get_colors(cmap)
+
+    assert len(cmap_colors) >= len(class_names), "The color map length must be greater or equal the length of the class names."
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)

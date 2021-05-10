@@ -86,11 +86,11 @@ def evaluate_detection_example():
     mask_shape = (480, 640)
 
     # Creating fake data
-    gt_bbox_1 = BBox(10, 10, 10, 10, 0)
-    pred_bbox_1 = BBox(10, 10, 10, 10, 0)
+    gt_bbox_1 = BBox(10, 10, 10, 10, 0, 1)
+    pred_bbox_1 = BBox(10, 10, 10, 10, 0, 1)
 
-    gt_bbox_2 = BBox(110, 110, 320, 280, 1)
-    pred_bbox_2 = BBox(70, 50, 240, 220, 1)
+    gt_bbox_2 = BBox(110, 110, 320, 280, 1, 1)
+    pred_bbox_2 = BBox(70, 50, 240, 220, 1, 1)
 
     # Creating data suplier iterator
     # It is not necessary here, but it's useful if you want to yield data
