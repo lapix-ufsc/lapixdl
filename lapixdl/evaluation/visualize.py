@@ -6,6 +6,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib import cm
 import matplotlib.patches as mpatches
+from matplotlib.colors import Colormap
 import seaborn as sn
 
 from .model import BBox, Mask, Classification, Result, Image
@@ -13,7 +14,7 @@ from .model import BBox, Mask, Classification, Result, Image
 correct_color = sn.color_palette("Paired")[3]
 incorrect_color = sn.color_palette("Paired")[5]
 
-ColorMap = Union[str, List[str]]
+ColorMap = Union[str, Colormap]
 
 
 def show_classifications(
@@ -80,9 +81,10 @@ def show_segmentations(
         Tuple[Figure, Axes]: Figure and Axes of the ploted results.
     """
 
-    cmap_colors = __get_colors(cmap)
+    cmap_colors = cm.get_cmap(cmap).colors
 
-    assert len(cmap_colors) >= len(class_names), "The color map length must be greater or equal the length of the class names."
+    assert len(cmap_colors) >= len(
+        class_names), "The color map length must be greater or equal the length of the class names."
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
@@ -140,9 +142,10 @@ def show_detections(results: List[Result[List[BBox]]],
         Tuple[Figure, Axes]: Figure and Axes of the ploted results.
     """
 
-    cmap_colors = __get_colors(cmap)
+    cmap_colors = cm.get_cmap(cmap).colors
 
-    assert len(cmap_colors) >= len(class_names), "The color map length must be greater or equal the length of the class names."
+    assert len(cmap_colors) >= len(
+        class_names), "The color map length must be greater or equal the length of the class names."
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
@@ -203,10 +206,3 @@ def __draw_bboxes(axe: plt.Axes, bboxes: List[BBox], cmap_colors: List[str], cla
                      fontsize=10,
                      ha='left', va='bottom',
                      bbox=dict(facecolor=color, edgecolor='none', pad=1.5))
-
-
-def __get_colors(cmap: ColorMap) -> List[str]:
-    if type(cmap) == str:
-        return cm.get_cmap(cmap).colors
-    else:
-        return List[str](cmap)

@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name='lapixdl',
     packages=find_packages(exclude=['tests']),
-    version='0.7.14',
+    version='0.7.15',
     description='Utils for Computer Vision Deep Learning research',
 
     long_description=long_description,
