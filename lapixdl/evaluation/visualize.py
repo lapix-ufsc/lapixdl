@@ -95,7 +95,7 @@ def show_segmentations(
     lengend_handles = [mpatches.Patch(color=cmap_colors[i], label=code)
                        for i, code in enumerate(class_names)]
     fig.legend(handles=lengend_handles, fontsize='small',
-               ncol=len(class_names), loc='upper center')
+               ncol=min(8, len(class_names)), loc='upper center')
 
     for i, result in enumerate(results):
         axe_img = axes[i][0]
@@ -156,7 +156,7 @@ def show_detections(results: List[Result[List[BBox]]],
     lengend_handles = [mpatches.Patch(color=cmap_colors[i], label=code)
                        for i, code in enumerate(class_names)]
     fig.legend(handles=lengend_handles, fontsize='small',
-               ncol=len(class_names), loc='upper center')
+               ncol=min(8, len(class_names)), loc='upper center')
 
     for i, result in enumerate(results):
         axe_img = axes[i][0]
