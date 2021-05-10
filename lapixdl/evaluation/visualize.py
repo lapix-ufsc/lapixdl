@@ -206,7 +206,7 @@ def __draw_bboxes(axe: plt.Axes, bboxes: List[BBox], cmap_colors: List[str], cla
 
 
 def __get_colors(cmap: ColorMap) -> List[str]:
-    if isinstance(cmap, str):
+    if type(cmap) == str:
         return cm.get_cmap(cmap).colors
     else:
-        return cmap
+        return List[str](cmap)
