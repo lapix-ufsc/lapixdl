@@ -6,6 +6,7 @@ Requires:
 """
 import cv2
 import numpy as np
+from matplotlib.colors import ListedColormap
 
 from lapixdl.evaluation.evaluate import evaluate_segmentation, evaluate_classification, evaluate_detection
 from lapixdl.evaluation.visualize import show_segmentations, show_classifications, show_detections
@@ -186,8 +187,11 @@ def show_segmentation_example():
     results = [
         Result(random_image(mask_shape[0], mask_shape[1]), mask_multi_GT)] + results
 
+    # Custom color map
+    cmap = ListedColormap(['#ff0000', '#00ff00', '#0000ff', '#ffffff'])
+
     # Shows results and returns its Figure and Axes
-    fig, axes = show_segmentations(results, classes)
+    fig, axes = show_segmentations(results, classes, cmap=cmap)
 
 
 def show_detection_example():
