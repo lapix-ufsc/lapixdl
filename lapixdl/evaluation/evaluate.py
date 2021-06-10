@@ -2,6 +2,7 @@ from typing import List, Iterable
 
 import numpy as np
 from tqdm import tqdm
+import warnings
 
 from .model import *
 
@@ -32,6 +33,10 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
     for (curr_gt_mask, curr_pred_mask) in tqdm(zip(gt_masks, pred_masks), unit=' masks'):
         flat_gt = __flat_mask(curr_gt_mask)
         flat_pred = __flat_mask(curr_pred_mask)
+        if len(flat_gt) != len(flat_pred):
+            warnings.warn(
+                f"The GT mask and Pred mask should have the same shape. GT length: {len(flat_gt)}. Pred length: {len(flat_pred)}.")
+
         for (curr_pred, curr_gt) in zip(flat_pred, flat_gt):
             confusion_matrix[curr_pred, curr_gt] += 1
 
