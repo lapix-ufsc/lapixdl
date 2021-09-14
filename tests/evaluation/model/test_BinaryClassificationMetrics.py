@@ -1,3 +1,4 @@
+import math
 from lapixdl.evaluation.model import BinaryClassificationMetrics
 
 
@@ -26,6 +27,13 @@ def test_recall():
 
     assert bin_class.recall == 0.25
 
+def test_recall_zero():
+    bin_class = BinaryClassificationMetrics(cls=['a', 'b'])
+    bin_class.TP = 0
+    bin_class.FN = 0
+
+    assert math.isnan(bin_class.recall)
+
 
 def test_fpr():
     bin_class = BinaryClassificationMetrics(cls=['a', 'b'])
@@ -41,6 +49,13 @@ def test_specificity():
 
     assert bin_class.specificity == 0.75
 
+def test_specificity_zero():
+    bin_class = BinaryClassificationMetrics(cls=['a', 'b'])
+    bin_class.TN = 0
+    bin_class.FP = 0
+
+    assert math.isnan(bin_class.specificity)
+
 
 def test_precision():
     bin_class = BinaryClassificationMetrics(cls=['a', 'b'])
@@ -49,6 +64,12 @@ def test_precision():
 
     assert bin_class.precision == 0.8
 
+def test_precision_zero():
+    bin_class = BinaryClassificationMetrics(cls=['a', 'b'])
+    bin_class.TP = 0
+    bin_class.FP = 0
+
+    assert bin_class.precision == 1
 
 def test_f_score():
     bin_class = BinaryClassificationMetrics(cls=['a', 'b'])
@@ -58,3 +79,12 @@ def test_f_score():
     bin_class.FP = 6
 
     assert bin_class.f_score == 0.5
+
+def test_f_score_zero():
+    bin_class = BinaryClassificationMetrics(cls=['a', 'b'])
+    bin_class.FN = 0
+    bin_class.TN = 0
+    bin_class.TP = 0
+    bin_class.FP = 0
+
+    assert bin_class.f_score == 1

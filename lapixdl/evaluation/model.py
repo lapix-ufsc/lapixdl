@@ -3,6 +3,7 @@ from typing import Optional, Union, List, Tuple, Generic, TypeVar
 from enum import Enum
 from dataclasses import dataclass
 from functools import reduce
+import math
 
 import numpy as np
 
@@ -15,6 +16,14 @@ Mask = List[List[int]]
 Image = Union[List[List[List[int]]], List[List[int]]]
 
 TResult = TypeVar('TResult')
+
+
+def recall_string(recall: float) -> str:
+    return 'No positive cases in GT' if math.isnan(recall) else str(recall)
+
+
+def specificity_string(specificity: float) -> str:
+    return 'No negative cases in GT' if math.isnan(specificity) else str(specificity)
 
 
 @dataclass
@@ -183,6 +192,8 @@ class BinaryClassificationMetrics:
     @property
     def recall(self) -> float:
         """float: Recall metric - TP / (TP + FN)."""
+        if self.TP == 0 and self.FN == 0:
+            return math.nan
         return self.TP/(self.TP + self.FN)
 
     @property
@@ -193,17 +204,25 @@ class BinaryClassificationMetrics:
     @property
     def specificity(self) -> float:
         """float: Specificity metric - TN / (FP + TN)."""
+        if self.FP == 0 and self.TN == 0:
+            return math.nan
         return self.TN/(self.FP + self.TN)
 
     @property
     def precision(self) -> float:
         """float: Precision metric - TP / (FP + TP)."""
+        if self.FP == 0 and self.FN == 0: # No GT instances
+            return 1
+
         return self.TP/(self.FP + self.TP)
 
     @property
     def f_score(self) -> float:
         """float: F-Score/Dice metric - 2*TP / (FP + FN + 2*TP)."""
-        return 2*self.TP/(self.FP + self.FN + 2*self.TP)
+        if self.TP == 0 and self.FP == 0 and self.FN == 0:  # No GT instances
+            return 1
+        else:
+            return 2*self.TP/(self.FP + self.FN + 2*self.TP)
 
     @property
     def confusion_matrix(self) -> List[List[int]]:
@@ -228,9 +247,9 @@ class BinaryClassificationMetrics:
             f'\tFN: {self.FN}\n'
             f'\tFPR: {self.false_positive_rate}\n'
             f'\tAccuracy: {self.accuracy}\n'
-            f'\tRecall: {self.recall}\n'
+            f'\tRecall: {recall_string(self.recall)}\n'
             f'\tPrecision: {self.precision}\n'
-            f'\tSpecificity: {self.specificity}\n'
+            f'\tSpecificity: {specificity_string(self.specificity)}\n'
             f'\tF-Score: {self.f_score}'
         )
 
@@ -287,17 +306,24 @@ class ClassificationMetrics:
     @property
     def avg_recall(self) -> float:
         """float: Macro average recall metric."""
-        return reduce(lambda acc, curr: curr.recall + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
+        by_class_w_recall = [
+            c for c in self.by_class_w_instances if not math.isnan(c.recall)]
+
+        if(len(by_class_w_recall) == 0):
+            return 1
+        return reduce(lambda acc, curr: curr.recall + acc, by_class_w_recall, .0) / len(by_class_w_recall)
 
     @property
     def avg_precision(self) -> float:
         """float: Macro average precision metric."""
-        return reduce(lambda acc, curr: curr.precision + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
+        return reduce(lambda acc, curr: (0 if math.isnan(curr.precision) else curr.precision) + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
 
     @property
     def avg_specificity(self) -> float:
         """float: Macro average specificity metric."""
-        return reduce(lambda acc, curr: curr.specificity + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
+        by_class_w_specificity = [
+            c for c in self.by_class_w_instances if not math.isnan(c.specificity)]
+        return reduce(lambda acc, curr: curr.specificity + acc, by_class_w_specificity, .0) / len(by_class_w_specificity)
 
     @property
     def avg_f_score(self) -> float:
@@ -391,9 +417,9 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
             f'\tFN: {self.FN}\n'
             f'\tIoU: {self.iou}\n'
             f'\tAccuracy: {self.accuracy}\n'
-            f'\tRecall: {self.recall}\n'
+            f'\tRecall: {recall_string(self.recall)}\n'
             f'\tPrecision: {self.precision}\n'
-            f'\tSpecificity: {self.specificity}\n'
+            f'\tSpecificity: {specificity_string(self.specificity)}\n'
             f'\tFPR: {self.false_positive_rate}\n'
             f'\tF-Score: {self.f_score}\n'
         )
@@ -577,7 +603,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
             f'\tTN: [NA]\n'
             f'\tIoU: {self.iou}\n'
             f'\tAccuracy: {self.accuracy}\n'
-            f'\tRecall: {self.recall}\n'
+            f'\tRecall: {recall_string(self.recall)}\n'
             f'\tPrecision: {self.precision}\n'
             f'\tF-Score: {self.f_score}\n'
             f'\tAverage Precision: {self.average_precision()}\n'
