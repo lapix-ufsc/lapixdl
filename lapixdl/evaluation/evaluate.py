@@ -1,8 +1,10 @@
-from typing import List, Iterable
+import warnings
+import itertools
 
 import numpy as np
+
+from typing import List, Iterable
 from tqdm import tqdm
-import warnings
 
 from .model import *
 
@@ -28,17 +30,25 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
         SegmentationMetrics: Pixel-based classification and segmentation metrics.
     """
 
-    confusion_matrix = np.zeros((len(classes), len(classes)), np.int)
+    qtd_classes = len(classes)
+    confusion_matrix = np.zeros((qtd_classes, qtd_classes), int)
+    dummy = confusion_matrix.copy()
+    r = range(qtd_classes)
 
     for (curr_gt_mask, curr_pred_mask) in tqdm(zip(gt_masks, pred_masks), unit=' masks'):
-        flat_gt = __flat_mask(curr_gt_mask)
-        flat_pred = __flat_mask(curr_pred_mask)
-        if len(flat_gt) != len(flat_pred):
-            warnings.warn(
-                f"The GT mask and Pred mask should have the same shape. GT length: {len(flat_gt)}. Pred length: {len(flat_pred)}.")
+        curr_gt_mask = np.array(curr_gt_mask)
+        curr_pred_mask = np.array(curr_pred_mask)
+        if curr_gt_mask.shape != curr_pred_mask.shape:
+            warnings.warn(f"The GT mask and Pred mask should have the same shape. GT shape: {curr_gt_mask.shape}.Pred shape: {curr_pred_mask.shape}.")
+        
+        confusion_matrix_tmp = dummy.copy()
+        for i, j in itertools.product(r, r):
+            confusion_matrix_tmp[j, i] = np.sum((curr_pred_mask==j)*(curr_gt_mask==i))
+        
+        # also can be, but shows be ~1% slow than the code above;
+        # confusion_matrix_tmp =  np.array([[np.sum((msk==i)*(pred == j)) for i in range(qtd_cats)] for j in range(qtd_cats)])
 
-        for (curr_pred, curr_gt) in zip(flat_pred, flat_gt):
-            confusion_matrix[curr_pred, curr_gt] += 1
+        confusion_matrix += confusion_matrix_tmp
 
     metrics = SegmentationMetrics(classes, confusion_matrix)
 
@@ -65,7 +75,7 @@ def evaluate_classification(gt_classifications: Iterable[Classification],
         ClassificationMetrics: Classification metrics.
     """
 
-    confusion_matrix = np.zeros((len(classes), len(classes)), np.int)
+    confusion_matrix = np.zeros((len(classes), len(classes)), int)
 
     for (curr_gt_classification, curr_pred_classification) in tqdm(zip(gt_classifications, pred_classifications), unit=' samples'):
         confusion_matrix[curr_pred_classification.cls,
@@ -103,7 +113,7 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
     classes_count = len(classes)
 
     cls_ious_sum = np.zeros(classes_count)
-    confusion_matrix = np.zeros((classes_count + 1, classes_count + 1), np.int)
+    confusion_matrix = np.zeros((classes_count + 1, classes_count + 1), int)
     undetected_idx = classes_count
     # Tracks detection scores to calculate the Precision x Recall curve and the Average Precision metric
     predictions_by_class: List[List[PredictionResult]] = [
@@ -257,7 +267,7 @@ def __calculate_binary_iou(gt_bboxes: List[BBox],
 
 
 def __draw_bboxes(mask_shape: Tuple[int, int], bboxes: List[BBox]) -> List[List[int]]:
-    mask = np.zeros(mask_shape, np.int)
+    mask = np.zeros(mask_shape, int)
 
     for bbox in bboxes:
         mask[
