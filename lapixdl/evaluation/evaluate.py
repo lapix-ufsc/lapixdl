@@ -191,7 +191,7 @@ def calculate_pairwise_bbox_ious(gt_bboxes: List[BBox],
         List[List[float]]: [gt x pred] matrix of pairwise IoUs of GT and predicted bboxes
     """
 
-    ious = np.zeros((len(gt_bboxes), len(pred_bboxes)), np.float)
+    ious = np.zeros((len(gt_bboxes), len(pred_bboxes)), float)
 
     for i, gt_bbox in enumerate(gt_bboxes):
         for j, pred_bbox in enumerate(pred_bboxes):
@@ -232,7 +232,7 @@ def calculate_iou_by_class(gt_bboxes: List[BBox],
         List[float]: IoUs of an image indexed by class
     """
 
-    ious = np.zeros(classes_count, np.float)
+    ious = np.zeros(classes_count, float)
 
     for i in range(classes_count):
         ious[i] = __calculate_binary_iou([gt_bbox for gt_bbox in gt_bboxes if gt_bbox.cls == i],
