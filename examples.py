@@ -2,9 +2,10 @@
 Module examples
 
 Requires:
-    opencv-python, numpy
+    numpy
 """
-import cv2
+from typing import Tuple
+
 import numpy as np
 from matplotlib.colors import ListedColormap
 
@@ -16,13 +17,13 @@ from lapixdl.evaluation.model import BBox, Classification, Result
 def main():
     # Model evaluation examples
     evaluate_segmentation_example()
-    evaluate_detection_example()
-    evaluate_classification_example()
+    # evaluate_detection_example()
+    # evaluate_classification_example()
 
     # Results visualization examples
-    show_classification_example()
-    show_segmentation_example()
-    show_detection_example()
+    # show_classification_example()
+    # show_segmentation_example()
+    # show_detection_example()
 
 
 def evaluate_segmentation_example():
@@ -35,29 +36,29 @@ def evaluate_segmentation_example():
     # Creating fake data
     # Creates a rectangle of 1s in a 0s array
     gt_bbox_1 = BBox(10, 10, 10, 10, 1)
-    mask_bin_GT_1 = cv2.rectangle(np.zeros(mask_shape, np.int),
-                                  gt_bbox_1.upper_left_point,
-                                  gt_bbox_1.bottom_right_point,
-                                  1, -1)
+    mask_bin_GT_1 = draw_rectangle(np.zeros(mask_shape, np.int),
+                                   gt_bbox_1.upper_left_point,
+                                   gt_bbox_1.bottom_right_point,
+                                   1)
 
     pred_bbox_1 = BBox(10, 10, 10, 10, 1)
-    mask_bin_pred_1 = cv2.rectangle(np.zeros(mask_shape, np.int),
-                                    pred_bbox_1.upper_left_point,
-                                    pred_bbox_1.bottom_right_point,
-                                    1, -1)
+    mask_bin_pred_1 = draw_rectangle(np.zeros(mask_shape, np.int),
+                                     pred_bbox_1.upper_left_point,
+                                     pred_bbox_1.bottom_right_point,
+                                     1)
 
     # Creates a rectangle of 2s in a 0s array
     gt_bbox_2 = BBox(110, 110, 320, 280, 2)
-    mask_bin_GT_2 = cv2.rectangle(np.zeros(mask_shape, np.int),
-                                  gt_bbox_2.upper_left_point,
-                                  gt_bbox_2.bottom_right_point,
-                                  2, -1)
+    mask_bin_GT_2 = draw_rectangle(np.zeros(mask_shape, np.int),
+                                   gt_bbox_2.upper_left_point,
+                                   gt_bbox_2.bottom_right_point,
+                                   2)
 
     pred_bbox_2 = BBox(70, 50, 240, 220, 2)
-    mask_bin_pred_2 = cv2.rectangle(np.zeros(mask_shape, np.int),
-                                    pred_bbox_2.upper_left_point,
-                                    pred_bbox_2.bottom_right_point,
-                                    2, -1)
+    mask_bin_pred_2 = draw_rectangle(np.zeros(mask_shape, np.int),
+                                     pred_bbox_2.upper_left_point,
+                                     pred_bbox_2.bottom_right_point,
+                                     2)
 
     # Merging masks
     mask_GT = np.maximum(mask_bin_GT_1, mask_bin_GT_2)
@@ -240,6 +241,12 @@ def draw_bboxes(mask_shape, bboxes):
         ] = 1
 
     return mask
+
+
+def draw_rectangle(img: np.ndarray, pt1: Tuple[int, int], pt2: Tuple[int, int], fill: int):
+    cp = img.copy()
+    cp[slice(pt1[0], pt2[0] + 1), slice(pt1[1], pt2[1] + 1)] = fill
+    return cp
 
 
 main()
