@@ -31,9 +31,9 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
     """
 
     classes_count = len(classes)
-    zeros_matrix = np.zeros((qtd_classes, qtd_classes), int)
+    zeros_matrix = np.zeros((classes_count, classes_count), int)
     confusion_matrix = zeros_matrix.copy()
-    classes_count_range = range(qtd_classes)
+    classes_count_range = range(classes_count)
 
     for (curr_gt_mask, curr_pred_mask) in tqdm(zip(gt_masks, pred_masks), unit=' masks'):
         curr_gt_mask = np.array(curr_gt_mask)
@@ -42,13 +42,13 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
             warnings.warn(f"The GT mask and Pred mask should have the same shape. GT shape: {curr_gt_mask.shape}.Pred shape: {curr_pred_mask.shape}.")
         
         curr_confusion_matrix = zeros_matrix.copy()
-        for i, j in itertools.product(r, r):
-            confusion_matrix_tmp[j, i] = np.sum((curr_pred_mask==j)*(curr_gt_mask==i))
+        for i, j in itertools.product(classes_count_range, classes_count_range):
+            curr_confusion_matrix[j, i] = np.sum((curr_pred_mask==j)*(curr_gt_mask==i))
         
         # ~1% slower alternative:
-        # confusion_matrix_tmp =  np.array([[np.sum((msk==i)*(pred == j)) for i in range(qtd_cats)] for j in range(qtd_cats)])
+        # curr_confusion_matrix =  np.array([[np.sum((msk==i)*(pred == j)) for i in range(classes_count)] for j in range(classes_count)])
 
-        confusion_matrix += confusion_matrix_tmp
+        confusion_matrix += curr_confusion_matrix
 
     metrics = SegmentationMetrics(classes, confusion_matrix)
 
