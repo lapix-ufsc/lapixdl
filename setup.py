@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name='lapixdl',
     packages=find_packages(exclude=['tests']),
-    version='0.7.17',
+    version='0.7.18',
     description='Utils for Computer Vision Deep Learning research',
 
     long_description=long_description,
@@ -18,7 +18,7 @@ setup(
 
     install_requires=['numpy', 'tqdm', 'seaborn', 'pandas', 'matplotlib'],
     setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'cv2'],
+    tests_require=['pytest'],
     test_suite='tests',
 
     classifiers=[
