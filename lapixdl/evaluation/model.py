@@ -414,7 +414,10 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
     @cached_property
     def iou(self) -> float:
         """float: IoU/Jaccard Index metric - TP / (FP + FN + TP)."""
-        return self.TP / (self.FP + self.FN + self.TP)
+        quotient = (self.FP + self.FN + self.TP)
+        if quotient == 0:
+            return math.nan
+        return self.TP / quotient
 
     def __str__(self):
         return (
