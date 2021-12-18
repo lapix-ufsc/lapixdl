@@ -261,6 +261,22 @@ class BinaryClassificationMetrics:
             f'\tF-Score: {self.f_score}'
         )
 
+    def to_dict(self):
+        if not self.has_instances:
+             return {}
+        else:
+            return {
+                'TP': self.TP,
+                'TN': self.TN,
+                'FP': self.FP,
+                'FN': self.FN,
+                'FPR': self.false_positive_rate,
+                'Accuracy': self.accuracy,
+                'Recall': recall_string(self.recall),
+                'Precision': self.precision,
+                'Specificity': specificity_string(self.specificity),
+                'F-Score': self.f_score,
+            }
 
 class ClassificationMetrics:
     """Multiclass classification metrics
@@ -387,6 +403,20 @@ class ClassificationMetrics:
         ) + '\n'.join([cls_metrics.__str__()
                        for cls_metrics in self.by_class])
 
+    def to_dict(self):
+        return {
+            'Sample Count': self.count,
+            'Accuracy': self.accuracy,
+            'Avg Recall': self.avg_recall,
+            'Avg Precision': self.avg_precision,
+            'Avg Specificity': self.avg_specificity,
+            'Avg FPR': self.avg_false_positive_rate,
+            'Avg F-Score': self.avg_f_score,
+            'By Class': {
+                cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in self.by_class
+            }
+        }
+
 
 class BinarySegmentationMetrics(BinaryClassificationMetrics):
     """Binary pixel-based classification metrics
@@ -434,6 +464,21 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
             f'\tFPR: {self.false_positive_rate}\n'
             f'\tF-Score: {self.f_score}\n'
         )
+    
+    def to_dict(self):
+        return {
+            'TP': self.TP,
+            'TN': self.TN,
+            'FP': self.FP,
+            'FN': self.FN,
+            'IoU': self.iou,
+            'Accuracy': self.accuracy,
+            'Recall': recall_string(self.recall),
+            'Precision': self.precision,
+            'Specificity': specificity_string(self.specificity),
+            'FPR': self.false_positive_rate,
+            'F-Score': self.f_score
+        }
 
 
 class SegmentationMetrics(ClassificationMetrics):
@@ -486,6 +531,22 @@ class SegmentationMetrics(ClassificationMetrics):
             f'By Class:\n\n'
         ) + '\n'.join(list([cls_metrics.__str__()
                             for cls_metrics in self.by_class]))
+    
+    def to_dict(self):
+        return {
+            'Pixel Count': self.count,
+            'Accuracy': self.accuracy,
+            'Avg Recall': self.avg_recall,
+            'Avg Precision': self.avg_precision,
+            'Avg Specificity': self.avg_specificity,
+            'Avg F-Score': self.avg_f_score,
+            'Avg FPR': self.avg_false_positive_rate,
+            'Avg IoU': self.avg_iou,
+            'Avg IoU w/o Background': self.avg_iou_no_bkg,
+            'By Class': {
+                cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in self.by_class
+            }
+        }
 
 
 class BinaryDetectionMetrics(BinaryClassificationMetrics):
@@ -620,6 +681,21 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
             f'\tAverage Precision: {self.average_precision()}\n'
             f'\t11-point Average Precision: {self.average_precision(11)}\n'
         )
+    
+    def to_dict(self):
+        return {
+            'TP': self.TP,
+            'FP': self.FP,
+            'FN': self.FN,
+            'TN': math.nan,
+            'IoU': self.iou,
+            'Accuracy': self.accuracy,
+            'Recall': recall_string(self.recall),
+            'Precision': self.precision,
+            'F-Score': self.f_score,
+            'Average Precision': self.average_precision(),
+            '11-point Average Precision': self.average_precision(11)
+        }
 
 
 class DetectionMetrics(ClassificationMetrics):
@@ -676,3 +752,16 @@ class DetectionMetrics(ClassificationMetrics):
             f'By Class:\n\n'
         ) + '\n'.join(list([cls_metrics.__str__()
                             for cls_metrics in self.by_class]))
+    
+    def to_dict(self):
+        return {
+            'Bboxes Count':self.count,
+            'Accuracy':self.accuracy,
+            'Avg Recall':self.avg_recall,
+            'Avg Precision':self.avg_precision,
+            'Avg F-Score':self.avg_f_score,
+            'Avg IoU':self.avg_iou,
+            'By Class': {
+                cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in self.by_class
+            }
+        }
