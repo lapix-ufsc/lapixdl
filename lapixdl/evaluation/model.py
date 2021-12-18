@@ -187,6 +187,8 @@ class BinaryClassificationMetrics:
     @property
     def accuracy(self) -> float:
         """int: Total count of classified instances."""
+        if self.count == 0:
+            return math.nan
         return (self.TP + self.TN)/self.count
 
     @property
@@ -199,6 +201,8 @@ class BinaryClassificationMetrics:
     @property
     def false_positive_rate(self) -> float:
         """float: False Positive Rate (FPR) metric - FP / (FP + TN)."""
+        if self.FP == 0 and self.TN == 0:
+            return math.nan
         return self.FP/(self.FP + self.TN)
 
     @property
@@ -206,6 +210,7 @@ class BinaryClassificationMetrics:
         """float: Specificity metric - TN / (FP + TN)."""
         if self.FP == 0 and self.TN == 0:
             return math.nan
+            
         return self.TN/(self.FP + self.TN)
 
     @property
@@ -213,16 +218,19 @@ class BinaryClassificationMetrics:
         """float: Precision metric - TP / (FP + TP)."""
         if self.FP == 0 and self.FN == 0: # No GT instances
             return 1
-
+        elif self.FP == 0 and self.TP == 0:
+            return math.nan
         return self.TP/(self.FP + self.TP)
 
     @property
     def f_score(self) -> float:
         """float: F-Score/Dice metric - 2*TP / (FP + FN + 2*TP)."""
+        quotient = (self.FP + self.FN + 2*self.TP)
         if self.TP == 0 and self.FP == 0 and self.FN == 0:  # No GT instances
             return 1
-        else:
-            return 2*self.TP/(self.FP + self.FN + 2*self.TP)
+        elif quotient == 0:
+            return math.nan
+        return 2*self.TP/quotient
 
     @property
     def confusion_matrix(self) -> List[List[int]]:
