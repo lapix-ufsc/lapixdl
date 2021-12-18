@@ -1,11 +1,15 @@
 from __future__ import annotations
-from typing import Optional, Union, List, Tuple, Generic, TypeVar
-from enum import Enum
-from dataclasses import dataclass
-from functools import cached_property, reduce
+
 import math
 
 import numpy as np
+from numpy.lib.function_base import average
+import pandas as pd
+
+from typing import Optional, Union, List, Tuple, Generic, TypeVar
+from enum import Enum
+from dataclasses import dataclass
+from functools import cached_property, lru_cache, reduce
 
 from . import plot
 
@@ -261,7 +265,7 @@ class BinaryClassificationMetrics:
             f'\tF-Score: {self.f_score}'
         )
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         if not self.has_instances:
              return {}
         else:
@@ -403,19 +407,30 @@ class ClassificationMetrics:
         ) + '\n'.join([cls_metrics.__str__()
                        for cls_metrics in self.by_class])
 
-    def to_dict(self):
+
+
+    def to_dict(self) -> dict:
         return {
             'Sample Count': self.count,
-            'Accuracy': self.accuracy,
-            'Avg Recall': self.avg_recall,
-            'Avg Precision': self.avg_precision,
-            'Avg Specificity': self.avg_specificity,
-            'Avg FPR': self.avg_false_positive_rate,
-            'Avg F-Score': self.avg_f_score,
-            'By Class': {
-                cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in self.by_class
-            }
+            'Average': {
+                'Accuracy': self.accuracy,
+                'Recall': self.avg_recall,
+                'Precision': self.avg_precision,
+                'Specificity': self.avg_specificity,
+                'FPR': self.avg_false_positive_rate,
+                'F-Score': self.avg_f_score
+            },
+            'By Class': dict_by_class(self.by_class)
         }
+    
+    def to_dataframe(self) -> pd.DataFrame:
+        as_dict = self.to_dict()
+        dict_to_df = {
+                        'Average': as_dict['Average'],
+                        **as_dict['By Class']
+                    }
+        return pd.DataFrame(dict_to_df)
+
 
 
 class BinarySegmentationMetrics(BinaryClassificationMetrics):
@@ -465,7 +480,7 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
             f'\tF-Score: {self.f_score}\n'
         )
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             'TP': self.TP,
             'TN': self.TN,
@@ -532,21 +547,29 @@ class SegmentationMetrics(ClassificationMetrics):
         ) + '\n'.join(list([cls_metrics.__str__()
                             for cls_metrics in self.by_class]))
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             'Pixel Count': self.count,
-            'Accuracy': self.accuracy,
-            'Avg Recall': self.avg_recall,
-            'Avg Precision': self.avg_precision,
-            'Avg Specificity': self.avg_specificity,
-            'Avg F-Score': self.avg_f_score,
-            'Avg FPR': self.avg_false_positive_rate,
-            'Avg IoU': self.avg_iou,
-            'Avg IoU w/o Background': self.avg_iou_no_bkg,
-            'By Class': {
-                cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in self.by_class
-            }
+            'Average': {
+                'Accuracy': self.accuracy,
+                'Recall': self.avg_recall,
+                'Precision': self.avg_precision,
+                'Specificity': self.avg_specificity,
+                'F-Score': self.avg_f_score,
+                'FPR': self.avg_false_positive_rate,
+                'IoU': self.avg_iou,
+                'IoU w/o Background': self.avg_iou_no_bkg
+                },
+            'By Class': dict_by_class(self.by_class)
         }
+    
+    def to_dataframe(self) -> pd.DataFrame:
+        as_dict = self.to_dict()
+        dict_to_df = {
+                        'Average': as_dict['Average'],
+                        **as_dict['By Class']
+                    }
+        return pd.DataFrame(dict_to_df)
 
 
 class BinaryDetectionMetrics(BinaryClassificationMetrics):
@@ -682,7 +705,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
             f'\t11-point Average Precision: {self.average_precision(11)}\n'
         )
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             'TP': self.TP,
             'FP': self.FP,
@@ -753,15 +776,28 @@ class DetectionMetrics(ClassificationMetrics):
         ) + '\n'.join(list([cls_metrics.__str__()
                             for cls_metrics in self.by_class]))
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             'Bboxes Count':self.count,
-            'Accuracy':self.accuracy,
-            'Avg Recall':self.avg_recall,
-            'Avg Precision':self.avg_precision,
-            'Avg F-Score':self.avg_f_score,
-            'Avg IoU':self.avg_iou,
-            'By Class': {
-                cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in self.by_class
-            }
+            'Average': {
+                'Accuracy':self.accuracy,
+                'Recall':self.avg_recall,
+                'Precision':self.avg_precision,
+                'F-Score':self.avg_f_score,
+                'IoU':self.avg_iou
+            },
+            'By Class': dict_by_class(self.by_class)
+        }
+    
+    def to_dataframe(self) -> pd.DataFrame:
+        as_dict = self.to_dict()
+        dict_to_df = {
+                        'Average': as_dict['Average'],
+                        **as_dict['By Class']
+                    }
+        return pd.DataFrame(dict_to_df)
+
+def dict_by_class(by_class) -> dict: 
+    return {
+            cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in by_class
         }
