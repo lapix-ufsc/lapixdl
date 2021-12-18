@@ -42,8 +42,8 @@ def __generate_coco_annotations(img_labels: List[dict], img_id: int, annotation_
 
 
 def __calculate_area(segmentation: List[float]) -> float:
-    x = segmentation[0:-1:2]
-    y = segmentation[1::2]
+    x = np.array(segmentation[0:-1:2], dtype=np.float32)
+    y = np.array(segmentation[1::2], dtype=np.float32)
     return 0.5*np.abs(np.dot(x, np.roll(y, 1))-np.dot(y, np.roll(x, 1))) #Shoelace
 
 
