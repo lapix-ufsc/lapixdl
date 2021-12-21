@@ -1,4 +1,5 @@
-[![DOI](https://zenodo.org/badge/306032350.svg)](https://zenodo.org/badge/latestdoi/306032350) [![CodeFactor](https://www.codefactor.io/repository/github/lapix-ufsc/lapixdl/badge)](https://www.codefactor.io/repository/github/lapix-ufsc/lapixdl) [![PyPI](https://img.shields.io/pypi/v/lapixdl?color=blue&label=pypi%20version)]
+[![DOI](https://zenodo.org/badge/306032350.svg)](https://zenodo.org/badge/latestdoi/306032350) [![CodeFactor](https://www.codefactor.io/repository/github/lapix-ufsc/lapixdl/badge)](https://www.codefactor.io/repository/github/lapix-ufsc/lapixdl) [![PyPI](https://img.shields.io/pypi/v/lapixdl?color=blue&label=pypi%20version)](https://pypi.org/project/lapixdl/)
+
 
 # LAPiX DL - Utils for Computer Vision Deep Learning research
 
