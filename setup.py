@@ -16,7 +16,7 @@ setup(
     author='LAPiX',
     license='MIT',
 
-    install_requires=['numpy', 'tqdm', 'seaborn', 'pandas', 'matplotlib'],
+    install_requires=['numpy', 'pandas', 'tqdm', 'seaborn', 'pandas', 'matplotlib'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     test_suite='tests',
