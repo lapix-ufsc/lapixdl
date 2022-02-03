@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 
 from typing import List, Iterable
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from .model import *
 
