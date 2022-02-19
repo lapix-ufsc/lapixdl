@@ -248,8 +248,8 @@ def __calculate_binary_iou(gt_bboxes: List[BBox],
 
     bboxes_btm_right_points = [bbox.bottom_right_point for bbox in gt_bboxes]\
         + [bbox.bottom_right_point for bbox in pred_bboxes]
-    max_x = max([point[0] for point in bboxes_btm_right_points])
-    max_y = max([point[1] for point in bboxes_btm_right_points])
+    max_x = max(point[0] for point in bboxes_btm_right_points)
+    max_y = max(point[1] for point in bboxes_btm_right_points)
 
     gt_mask = __draw_bboxes((int(max_x + 1), int(max_y + 1)), gt_bboxes)
     pred_mask = __draw_bboxes((int(max_x + 1), int(max_y + 1)), pred_bboxes)

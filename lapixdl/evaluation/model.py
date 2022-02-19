@@ -44,7 +44,7 @@ class Result(Generic[TResult]):
     """
     image: Image
     gt: TResult
-    prediction: Optional[TResult] = None
+    prediction: TResult | None = None
 
 
 class PredictionResultType(Enum):
@@ -77,20 +77,20 @@ class BBox:
     width: int
     height: int
     cls: int
-    score: Optional[float] = None
+    score: float | None = None
 
     @property
-    def upper_left_point(self) -> Tuple[int, int]:
+    def upper_left_point(self) -> tuple[int, int]:
         """Tuple[int, int]: (X,Y) of the upper left point of the Bounding Box."""
         return (self.upper_left_x, self.upper_left_y)
 
     @property
-    def bottom_right_point(self) -> Tuple[int, int]:
+    def bottom_right_point(self) -> tuple[int, int]:
         """Tuple[int, int]: (X,Y) of the bottom right point of the Bounding Box."""
         return (self.upper_left_x + self.width - 1, self.upper_left_y + self.height - 1)
 
     @property
-    def center_point(self) -> Tuple[int, int]:
+    def center_point(self) -> tuple[int, int]:
         """Tuple[int, int]: (X,Y) of the center point of the Bounding Box."""
         return ((self.upper_left_x + self.width - 1) // 2, (self.upper_left_y + self.height - 1) // 2)
 
@@ -133,7 +133,7 @@ class BBox:
 
         return w_intersect * h_intersect
 
-    def union_area_with(self: BBox, bbox: BBox, intersection_area: Optional[int] = None) -> int:
+    def union_area_with(self: BBox, bbox: BBox, intersection_area: int | None = None) -> int:
         """Calculates the union area with another bbox
 
         Args:
@@ -157,7 +157,7 @@ class Classification:
         score (Optional[float], optional): Prediction score. Defaults to None.
     """
     cls: int
-    score: Optional[float] = None
+    score: float | None = None
 
 
 @dataclass
@@ -237,7 +237,7 @@ class BinaryClassificationMetrics:
         return 2*self.TP/quotient
 
     @property
-    def confusion_matrix(self) -> List[List[int]]:
+    def confusion_matrix(self) -> list[list[int]]:
         """List[List[int]]: Confusion matrix of all the classes"""
         return [[self.TP, self.FP], [self.FN, self.TN]]
 
@@ -290,7 +290,7 @@ class ClassificationMetrics:
         confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
     """
 
-    def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = []):
+    def __init__(self, classes: list[str], confusion_matrix: list[list[int]] = []):
         """
         Args:
             classes (List[str]): Class names.
@@ -312,12 +312,12 @@ class ClassificationMetrics:
         self._count = self._confusion_matrix.sum()
 
     @property
-    def by_class(self) -> List[BinaryClassificationMetrics]:
+    def by_class(self) -> list[BinaryClassificationMetrics]:
         """List[BinaryClassificationMetrics]: Binary metrics calculated for each class index."""
         return self._by_class
 
     @property
-    def by_class_w_instances(self) -> List[BinaryClassificationMetrics]:
+    def by_class_w_instances(self) -> list[BinaryClassificationMetrics]:
         """List[BinaryClassificationMetrics]: Binary metrics calculated for each class index with instances."""
         return self._by_class_w_instances
 
@@ -364,7 +364,7 @@ class ClassificationMetrics:
         return reduce(lambda acc, curr: curr.false_positive_rate + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
 
     @property
-    def confusion_matrix(self) -> List[List[int]]:
+    def confusion_matrix(self) -> list[list[int]]:
         """List[List[int]]: Confusion matrix of all the classes"""
         return self._confusion_matrix
 
@@ -504,7 +504,7 @@ class SegmentationMetrics(ClassificationMetrics):
         confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
     """
 
-    def __init__(self, classes: List[str], confusion_matrix: List[List[int]] = []):
+    def __init__(self, classes: list[str], confusion_matrix: list[list[int]] = []):
         """
         Args:
             classes (List[str]): Class names. It is expected the first class to be the background class.
@@ -544,8 +544,8 @@ class SegmentationMetrics(ClassificationMetrics):
             f'\tAvg IoU: {self.avg_iou}\n'
             f'\tAvg IoU w/o Background: {self.avg_iou_no_bkg}\n'
             f'By Class:\n\n'
-        ) + '\n'.join(list([cls_metrics.__str__()
-                            for cls_metrics in self.by_class]))
+        ) + '\n'.join(list(cls_metrics.__str__()
+                            for cls_metrics in self.by_class))
 
     def to_dict(self) -> dict:
         return {
@@ -584,7 +584,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
 
     def __init__(self, classification_metrics: BinaryClassificationMetrics,
                  iou: float,
-                 predictions: List[PredictionResult]):
+                 predictions: list[PredictionResult]):
         super().__init__(
             cls=classification_metrics.cls,
             TP=classification_metrics.TP,
@@ -614,12 +614,12 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         return self._iou
 
     @property
-    def precision_recall_curve(self) -> List[Tuple[float, float]]:
+    def precision_recall_curve(self) -> list[tuple[float, float]]:
         """List[Tuple[float, float]]: Precision x Recall curve as a list of (Recall, Precision) tuples."""
         assert self.gt_count > 0, 'This class does not have instances.'
         return self._precision_recall_curve
 
-    def average_precision(self, interpolation_points: Optional[int] = None) -> float:
+    def average_precision(self, interpolation_points: int | None = None) -> float:
         """Calculates the Average Precision metric.
 
         Args:
@@ -642,13 +642,13 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         """
         return plot.precision_recall_curve([self._precision_recall_curve], [self.cls])
 
-    def __calculate_precision_recall_curve(self, predictions: List[PredictionResult]) -> List[Tuple[float, float]]:
+    def __calculate_precision_recall_curve(self, predictions: list[PredictionResult]) -> list[tuple[float, float]]:
         assert self.gt_count > 0, 'The GT count must be greater than 0.'
 
         sorted_predictions = sorted(
             predictions, key=lambda p: float(p.score), reverse=True)
 
-        curve: List[Tuple[float, float]] = []
+        curve: list[tuple[float, float]] = []
         tp = 0
         fp = 0
         gt_count = self.gt_count
@@ -732,10 +732,10 @@ class DetectionMetrics(ClassificationMetrics):
         The last column and line must correspond to the "undetected" class.
     """
 
-    def __init__(self, classes: List[str],
-                 confusion_matrix: List[List[int]],
-                 iou_by_class: List[float],
-                 predictions_by_class: List[List[PredictionResult]]):
+    def __init__(self, classes: list[str],
+                 confusion_matrix: list[list[int]],
+                 iou_by_class: list[float],
+                 predictions_by_class: list[list[PredictionResult]]):
         super().__init__(classes, confusion_matrix)
         by_class_wo_undetected = self.by_class[slice(0, -1)]
         self._by_class = [BinaryDetectionMetrics(by_class, iou, predictions)
@@ -751,7 +751,7 @@ class DetectionMetrics(ClassificationMetrics):
         """
         return reduce(lambda acc, curr: curr.iou + acc, self._by_class_w_instances, .0) / len(self._by_class_w_instances)
 
-    def mean_average_precision(self, interpolation_points: Optional[int] = None) -> float:
+    def mean_average_precision(self, interpolation_points: int | None = None) -> float:
         """Calculates the mean of Average Precision metrics of all classes.
 
         Args:
@@ -773,8 +773,8 @@ class DetectionMetrics(ClassificationMetrics):
             f'\tAvg F-Score: {self.avg_f_score}\n'
             f'\tAvg IoU: {self.avg_iou}\n'
             f'By Class:\n\n'
-        ) + '\n'.join(list([cls_metrics.__str__()
-                            for cls_metrics in self.by_class]))
+        ) + '\n'.join(list(cls_metrics.__str__()
+                            for cls_metrics in self.by_class))
 
     def to_dict(self) -> dict:
         return {
