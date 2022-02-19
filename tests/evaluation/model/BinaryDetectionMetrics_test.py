@@ -1,5 +1,4 @@
 from lapixdl.evaluation.model import BinaryDetectionMetrics, BinaryClassificationMetrics, PredictionResult, PredictionResultType
-import pytest
 
 # From https://github.com/rafaelpadilla/Object-Detection-Metrics
 predictions = [
@@ -91,6 +90,7 @@ def test_precision_recall_curve():
     ]
 
     assert rounded_pr_curve == expected_curve
+
 
 def test_average_precision():
     bin_class = BinaryClassificationMetrics(cls='a', FN=FN, TP=TP, FP=FP)
