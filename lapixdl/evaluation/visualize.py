@@ -26,10 +26,10 @@ ColorMap = Union[str, Colormap]
 
 
 def show_classifications(
-        results: List[Result[Classification]],
-        class_names: List[str],
+        results: list[Result[Classification]],
+        class_names: list[str],
         cols: int = 3,
-        diff_correct_incorect: bool = True) -> Tuple[Figure, Axes]:
+        diff_correct_incorect: bool = True) -> tuple[Figure, Axes]:
     """Shows multiple classification results.
 
     Args:
@@ -73,10 +73,10 @@ def show_classifications(
 
 
 def show_segmentations(
-        results: List[Result[Mask]],
-        class_names: List[str],
+        results: list[Result[Mask]],
+        class_names: list[str],
         cmap: ColorMap = 'tab10',
-        mask_alpha: float = .3) -> Tuple[Figure, Axes]:
+        mask_alpha: float = .3) -> tuple[Figure, Axes]:
     """Shows segmentation results
 
     Args:
@@ -134,10 +134,10 @@ def show_segmentations(
     return fig, axes
 
 
-def show_detections(results: List[Result[List[BBox]]],
-                    class_names: List[str],
+def show_detections(results: list[Result[list[BBox]]],
+                    class_names: list[str],
                     cmap: ColorMap = 'tab10',
-                    show_bbox_label: bool = True) -> Tuple[Figure, Axes]:
+                    show_bbox_label: bool = True) -> tuple[Figure, Axes]:
     """Shows detection results.
 
     Args:
@@ -195,7 +195,7 @@ def show_detections(results: List[Result[List[BBox]]],
     return fig, axes
 
 
-def __draw_bboxes(axe: plt.Axes, bboxes: List[BBox], cmap_colors: List[str], class_names: List[str], show_bbox_label: bool):
+def __draw_bboxes(axe: plt.Axes, bboxes: list[BBox], cmap_colors: list[str], class_names: list[str], show_bbox_label: bool):
     for bbox in bboxes:
         color = cmap_colors[bbox.cls]
         label = (f'{class_names[bbox.cls]}' if show_bbox_label else '') + \

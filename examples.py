@@ -251,7 +251,7 @@ def draw_bboxes(mask_shape, bboxes):
     return mask
 
 
-def draw_rectangle(img: np.ndarray, pt1: Tuple[int, int], pt2: Tuple[int, int], fill: int):
+def draw_rectangle(img: np.ndarray, pt1: tuple[int, int], pt2: tuple[int, int], fill: int):
     cp = img.copy()
     cp[slice(pt1[0], pt2[0] + 1), slice(pt1[1], pt2[1] + 1)] = fill
     return cp

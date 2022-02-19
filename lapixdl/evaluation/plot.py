@@ -12,7 +12,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 
-def confusion_matrix(confusion_matrix: List[List[int]], classes: List[str], title: Optional[str] = 'Confusion Matrix') -> Tuple[Figure, Axes]:
+def confusion_matrix(confusion_matrix: list[list[int]], classes: list[str], title: str | None = 'Confusion Matrix') -> tuple[Figure, Axes]:
     """Plots a confusion matrix
 
     Args:
@@ -41,9 +41,9 @@ def confusion_matrix(confusion_matrix: List[List[int]], classes: List[str], titl
     return fig, ax
 
 
-def precision_recall_curve(recalls_precisions_by_class: List[List[Tuple[float, float]]],
-                           classes: List[str],
-                           title: Optional[str] = 'Precision x Recall Curve') -> Tuple[Figure, Axes]:
+def precision_recall_curve(recalls_precisions_by_class: list[list[tuple[float, float]]],
+                           classes: list[str],
+                           title: str | None = 'Precision x Recall Curve') -> tuple[Figure, Axes]:
     """Plots a Precision x Recall curve.
 
     Args:

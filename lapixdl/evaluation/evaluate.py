@@ -13,7 +13,7 @@ from .model import *
 
 def evaluate_segmentation(gt_masks: Iterable[Mask],
                           pred_masks: Iterable[Mask],
-                          classes: List[str]) -> SegmentationMetrics:
+                          classes: list[str]) -> SegmentationMetrics:
     """Evaluates segmentation predictions
 
     The iterables should return one mask per iteration and the itens of
@@ -61,7 +61,7 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
 
 def evaluate_classification(gt_classifications: Iterable[Classification],
                             pred_classifications: Iterable[Classification],
-                            classes: List[str]) -> ClassificationMetrics:
+                            classes: list[str]) -> ClassificationMetrics:
     """Evaluates classification predictions
 
     The iterables should return one classification per iteration and
@@ -90,9 +90,9 @@ def evaluate_classification(gt_classifications: Iterable[Classification],
     return metrics
 
 
-def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
-                       pred_bboxes: Iterable[List[BBox]],
-                       classes: List[str],
+def evaluate_detection(gt_bboxes: Iterable[list[BBox]],
+                       pred_bboxes: Iterable[list[BBox]],
+                       classes: list[str],
                        iou_threshold: float = .5,
                        undetected_cls_name: str = '_undetected_') -> DetectionMetrics:
     """Evaluates detection predictions
@@ -118,7 +118,7 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
     confusion_matrix = np.zeros((classes_count + 1, classes_count + 1), int)
     undetected_idx = classes_count
     # Tracks detection scores to calculate the Precision x Recall curve and the Average Precision metric
-    predictions_by_class: List[List[PredictionResult]] = [
+    predictions_by_class: list[list[PredictionResult]] = [
         [] for i in range(len(classes))]
 
     # For each image GT and predicted bbox set
@@ -181,8 +181,8 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
     return metrics
 
 
-def calculate_pairwise_bbox_ious(gt_bboxes: List[BBox],
-                                 pred_bboxes: List[BBox]) -> List[List[float]]:
+def calculate_pairwise_bbox_ious(gt_bboxes: list[BBox],
+                                 pred_bboxes: list[BBox]) -> list[list[float]]:
     """Calculates the [gt x pred] matrix of pairwise IoUs of GT and predicted bboxes of an image.
 
     Args:
@@ -219,9 +219,9 @@ def calculate_bbox_iou(bbox_a: BBox, bbox_b: BBox) -> float:
     return float(intersect_area) / float(union_area)
 
 
-def calculate_iou_by_class(gt_bboxes: List[BBox],
-                           pred_bboxes: List[BBox],
-                           classes_count: int) -> List[float]:
+def calculate_iou_by_class(gt_bboxes: list[BBox],
+                           pred_bboxes: list[BBox],
+                           classes_count: int) -> list[float]:
     """Calculates the array of IoUs between GT and predicted bboxes of an image by class.
     This method considers bbox as segmentation masks to calculate the IoUs.
 
@@ -243,8 +243,8 @@ def calculate_iou_by_class(gt_bboxes: List[BBox],
     return ious
 
 
-def __calculate_binary_iou(gt_bboxes: List[BBox],
-                           pred_bboxes: List[BBox]) -> float:
+def __calculate_binary_iou(gt_bboxes: list[BBox],
+                           pred_bboxes: list[BBox]) -> float:
     if len(gt_bboxes) == 0 or len(pred_bboxes) == 0:
         return .0
 
@@ -268,7 +268,7 @@ def __calculate_binary_iou(gt_bboxes: List[BBox],
     return tp / (f + tp)
 
 
-def __draw_bboxes(mask_shape: Tuple[int, int], bboxes: List[BBox]) -> List[List[int]]:
+def __draw_bboxes(mask_shape: Tuple[int, int], bboxes: list[BBox]) -> list[list[int]]:
     mask = np.zeros(mask_shape, int)
 
     for bbox in bboxes:
@@ -280,5 +280,5 @@ def __draw_bboxes(mask_shape: Tuple[int, int], bboxes: List[BBox]) -> List[List[
     return mask
 
 
-def __flat_mask(mask: Mask) -> List[int]:
+def __flat_mask(mask: Mask) -> list[int]:
     return [item for sublist in mask for item in sublist]
