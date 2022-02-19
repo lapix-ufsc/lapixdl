@@ -1,5 +1,7 @@
-import pytest
+from __future__ import annotations
+
 import numpy as np
+import pytest
 
 from lapixdl.evaluation.evaluate import evaluate_segmentation
 from lapixdl.evaluation.model import BBox

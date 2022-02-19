@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from lapixdl.evaluation.evaluate import evaluate_classification
 from lapixdl.evaluation.model import Classification
 

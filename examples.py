@@ -4,14 +4,22 @@ Module examples
 Requires:
     numpy
 """
+from __future__ import annotations
+
 from typing import Tuple
 
 import numpy as np
 from matplotlib.colors import ListedColormap
 
-from lapixdl.evaluation.evaluate import evaluate_segmentation, evaluate_classification, evaluate_detection
-from lapixdl.evaluation.visualize import show_segmentations, show_classifications, show_detections
-from lapixdl.evaluation.model import BBox, Classification, Result
+from lapixdl.evaluation.evaluate import evaluate_classification
+from lapixdl.evaluation.evaluate import evaluate_detection
+from lapixdl.evaluation.evaluate import evaluate_segmentation
+from lapixdl.evaluation.model import BBox
+from lapixdl.evaluation.model import Classification
+from lapixdl.evaluation.model import Result
+from lapixdl.evaluation.visualize import show_classifications
+from lapixdl.evaluation.visualize import show_detections
+from lapixdl.evaluation.visualize import show_segmentations
 
 
 def main():

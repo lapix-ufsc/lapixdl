@@ -1,11 +1,15 @@
-from typing import List, Tuple, Optional
+from __future__ import annotations
 
+from typing import List
+from typing import Optional
+from typing import Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sn
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 
 def confusion_matrix(confusion_matrix: List[List[int]], classes: List[str], title: Optional[str] = 'Confusion Matrix') -> Tuple[Figure, Axes]:

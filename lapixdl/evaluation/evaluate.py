@@ -1,9 +1,11 @@
-import warnings
+from __future__ import annotations
+
 import itertools
+import warnings
+from typing import Iterable
+from typing import List
 
 import numpy as np
-
-from typing import List, Iterable
 from tqdm.auto import tqdm
 
 from .model import *

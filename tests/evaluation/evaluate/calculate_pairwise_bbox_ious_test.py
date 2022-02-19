@@ -1,5 +1,7 @@
-import pytest
+from __future__ import annotations
+
 import numpy as np
+import pytest
 
 from lapixdl.evaluation.evaluate import calculate_pairwise_bbox_ious
 from lapixdl.evaluation.model import BBox

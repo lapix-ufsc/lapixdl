@@ -1,5 +1,9 @@
-from lapixdl.convert.labelbox import labelbox_to_coco, __calculate_area
+from __future__ import annotations
+
 import json
+
+from lapixdl.convert.labelbox import __calculate_area
+from lapixdl.convert.labelbox import labelbox_to_coco
 
 def test_labelbox_to_coco():
     with open('./tests/convert/labelbox_test.json') as file:

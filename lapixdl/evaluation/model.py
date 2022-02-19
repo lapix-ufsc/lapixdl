@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
+from enum import Enum
+from functools import reduce
+from typing import Generic
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import TypeVar
+from typing import Union
 
 import numpy as np
-from numpy.lib.function_base import average
 import pandas as pd
-
-from typing import Optional, Union, List, Tuple, Generic, TypeVar
-from enum import Enum
-from dataclasses import dataclass
-from functools import reduce
+from numpy.lib.function_base import average
 
 from . import plot
 
@@ -193,21 +197,21 @@ class BinaryClassificationMetrics:
         """int: Total count of classified instances."""
         if self.count == 0:
             return math.nan
-        return (self.TP + self.TN)/self.count
+        return (self.TP + self.TN) / self.count
 
     @property
     def recall(self) -> float:
         """float: Recall metric - TP / (TP + FN)."""
         if self.TP == 0 and self.FN == 0:
             return math.nan
-        return self.TP/(self.TP + self.FN)
+        return self.TP / (self.TP + self.FN)
 
     @property
     def false_positive_rate(self) -> float:
         """float: False Positive Rate (FPR) metric - FP / (FP + TN)."""
         if self.FP == 0 and self.TN == 0:
             return math.nan
-        return self.FP/(self.FP + self.TN)
+        return self.FP / (self.FP + self.TN)
 
     @property
     def specificity(self) -> float:
@@ -215,26 +219,26 @@ class BinaryClassificationMetrics:
         if self.FP == 0 and self.TN == 0:
             return math.nan
 
-        return self.TN/(self.FP + self.TN)
+        return self.TN / (self.FP + self.TN)
 
     @property
     def precision(self) -> float:
         """float: Precision metric - TP / (FP + TP)."""
-        if self.FP == 0 and self.FN == 0: # No GT instances
+        if self.FP == 0 and self.FN == 0:  # No GT instances
             return 1
         elif self.FP == 0 and self.TP == 0:
             return math.nan
-        return self.TP/(self.FP + self.TP)
+        return self.TP / (self.FP + self.TP)
 
     @property
     def f_score(self) -> float:
         """float: F-Score/Dice metric - 2*TP / (FP + FN + 2*TP)."""
-        quotient = (self.FP + self.FN + 2*self.TP)
+        quotient = (self.FP + self.FN + 2 * self.TP)
         if self.TP == 0 and self.FP == 0 and self.FN == 0:  # No GT instances
             return 1
         elif quotient == 0:
             return math.nan
-        return 2*self.TP/quotient
+        return 2 * self.TP / quotient
 
     @property
     def confusion_matrix(self) -> list[list[int]]:
@@ -267,7 +271,7 @@ class BinaryClassificationMetrics:
 
     def to_dict(self) -> dict:
         if not self.has_instances:
-             return {}
+            return {}
         else:
             return {
                 'TP': self.TP,
@@ -281,6 +285,7 @@ class BinaryClassificationMetrics:
                 'Specificity': specificity_string(self.specificity),
                 'F-Score': self.f_score,
             }
+
 
 class ClassificationMetrics:
     """Multiclass classification metrics
@@ -407,8 +412,6 @@ class ClassificationMetrics:
         ) + '\n'.join([cls_metrics.__str__()
                        for cls_metrics in self.by_class])
 
-
-
     def to_dict(self) -> dict:
         return {
             'Sample Count': self.count,
@@ -426,11 +429,10 @@ class ClassificationMetrics:
     def to_dataframe(self) -> pd.DataFrame:
         as_dict = self.to_dict()
         dict_to_df = {
-                        'Average': as_dict['Average'],
-                        **as_dict['By Class']
-                    }
+            'Average': as_dict['Average'],
+            **as_dict['By Class']
+        }
         return pd.DataFrame(dict_to_df)
-
 
 
 class BinarySegmentationMetrics(BinaryClassificationMetrics):
@@ -545,7 +547,7 @@ class SegmentationMetrics(ClassificationMetrics):
             f'\tAvg IoU w/o Background: {self.avg_iou_no_bkg}\n'
             f'By Class:\n\n'
         ) + '\n'.join(list(cls_metrics.__str__()
-                            for cls_metrics in self.by_class))
+                           for cls_metrics in self.by_class))
 
     def to_dict(self) -> dict:
         return {
@@ -559,16 +561,16 @@ class SegmentationMetrics(ClassificationMetrics):
                 'FPR': self.avg_false_positive_rate,
                 'IoU': self.avg_iou,
                 'IoU w/o Background': self.avg_iou_no_bkg
-                },
+            },
             'By Class': dict_by_class(self.by_class)
         }
 
     def to_dataframe(self) -> pd.DataFrame:
         as_dict = self.to_dict()
         dict_to_df = {
-                        'Average': as_dict['Average'],
-                        **as_dict['By Class']
-                    }
+            'Average': as_dict['Average'],
+            **as_dict['By Class']
+        }
         return pd.DataFrame(dict_to_df)
 
 
@@ -653,8 +655,8 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         fp = 0
         gt_count = self.gt_count
 
-        def calc_precision(tp, fp): return tp/(tp + fp)
-        def calc_recall(tp): return tp/gt_count
+        def calc_precision(tp, fp): return tp / (tp + fp)
+        def calc_recall(tp): return tp / gt_count
 
         for prediction in sorted_predictions:
             if prediction.type == PredictionResultType.TP:
@@ -774,17 +776,17 @@ class DetectionMetrics(ClassificationMetrics):
             f'\tAvg IoU: {self.avg_iou}\n'
             f'By Class:\n\n'
         ) + '\n'.join(list(cls_metrics.__str__()
-                            for cls_metrics in self.by_class))
+                           for cls_metrics in self.by_class))
 
     def to_dict(self) -> dict:
         return {
-            'Bboxes Count':self.count,
+            'Bboxes Count': self.count,
             'Average': {
-                'Accuracy':self.accuracy,
-                'Recall':self.avg_recall,
-                'Precision':self.avg_precision,
-                'F-Score':self.avg_f_score,
-                'IoU':self.avg_iou
+                'Accuracy': self.accuracy,
+                'Recall': self.avg_recall,
+                'Precision': self.avg_precision,
+                'F-Score': self.avg_f_score,
+                'IoU': self.avg_iou
             },
             'By Class': dict_by_class(self.by_class)
         }
@@ -792,12 +794,13 @@ class DetectionMetrics(ClassificationMetrics):
     def to_dataframe(self) -> pd.DataFrame:
         as_dict = self.to_dict()
         dict_to_df = {
-                        'Average': as_dict['Average'],
-                        **as_dict['By Class']
-                    }
+            'Average': as_dict['Average'],
+            **as_dict['By Class']
+        }
         return pd.DataFrame(dict_to_df)
+
 
 def dict_by_class(by_class) -> dict:
     return {
-            cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in by_class
-        }
+        cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in by_class
+    }

@@ -1,15 +1,23 @@
-from typing import Union, List, Tuple
+from __future__ import annotations
+
 import math
+from typing import List
+from typing import Tuple
+from typing import Union
 
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from matplotlib.axes import Axes
-from matplotlib import cm
 import matplotlib.patches as mpatches
-from matplotlib.colors import Colormap
+import matplotlib.pyplot as plt
 import seaborn as sn
+from matplotlib import cm
+from matplotlib.axes import Axes
+from matplotlib.colors import Colormap
+from matplotlib.figure import Figure
 
-from .model import BBox, Mask, Classification, Result, Image
+from .model import BBox
+from .model import Classification
+from .model import Image
+from .model import Mask
+from .model import Result
 
 correct_color = sn.color_palette('Paired')[3]
 incorrect_color = sn.color_palette('Paired')[5]

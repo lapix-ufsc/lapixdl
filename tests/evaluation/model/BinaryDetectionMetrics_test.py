@@ -1,4 +1,9 @@
-from lapixdl.evaluation.model import BinaryDetectionMetrics, BinaryClassificationMetrics, PredictionResult, PredictionResultType
+from __future__ import annotations
+
+from lapixdl.evaluation.model import BinaryClassificationMetrics
+from lapixdl.evaluation.model import BinaryDetectionMetrics
+from lapixdl.evaluation.model import PredictionResult
+from lapixdl.evaluation.model import PredictionResultType
 
 # From https://github.com/rafaelpadilla/Object-Detection-Metrics
 predictions = [

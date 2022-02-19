@@ -1,6 +1,11 @@
-from typing import List, Optional, Tuple
-import numpy as np
+from __future__ import annotations
+
 import itertools
+from typing import List
+from typing import Optional
+from typing import Tuple
+
+import numpy as np
 
 
 def __bounding_rect_from_polygon(polygon: List[Tuple[int, int]]) -> List[int]:

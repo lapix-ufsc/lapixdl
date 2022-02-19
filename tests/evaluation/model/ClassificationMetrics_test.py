@@ -1,5 +1,8 @@
-from lapixdl.evaluation.model import ClassificationMetrics
+from __future__ import annotations
+
 import pytest
+
+from lapixdl.evaluation.model import ClassificationMetrics
 
 
 def test_constructor_invalid():
