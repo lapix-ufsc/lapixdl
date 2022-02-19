@@ -28,7 +28,7 @@ def show_classifications(
         results (List[Result[Classification]]): List of classification results.
         class_names (List[str]): Class names.
         cols (int, optional): Number of colunms to show. Defaults to 3.
-        diff_correct_incorect (bool, optional): Indicates if correct and incorrect 
+        diff_correct_incorect (bool, optional): Indicates if correct and incorrect
         results should be differentiated by color. Defaults to True.
 
     Returns:

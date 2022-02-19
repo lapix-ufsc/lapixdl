@@ -18,7 +18,7 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
     `gt_masks` and `pred_masks` with same index should correspond to the
     same sample.
 
-    Masks should be 2D arrays where each value corresponds to the class 
+    Masks should be 2D arrays where each value corresponds to the class
     index of the pixel the sample image.
 
     Args:
@@ -40,11 +40,11 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
         curr_pred_mask = np.array(curr_pred_mask)
         if curr_gt_mask.shape != curr_pred_mask.shape:
             warnings.warn(f"The GT mask and Pred mask should have the same shape. GT shape: {curr_gt_mask.shape}.Pred shape: {curr_pred_mask.shape}.")
-        
+
         curr_confusion_matrix = zeros_matrix.copy()
         for i, j in itertools.product(classes_count_range, classes_count_range):
             curr_confusion_matrix[j, i] = np.sum((curr_pred_mask==j)*(curr_gt_mask==i))
-        
+
         # ~1% slower alternative:
         # curr_confusion_matrix =  np.array([[np.sum((msk==i)*(pred == j)) for i in range(classes_count)] for j in range(classes_count)])
 
@@ -62,8 +62,8 @@ def evaluate_classification(gt_classifications: Iterable[Classification],
                             classes: List[str]) -> ClassificationMetrics:
     """Evaluates classification predictions
 
-    The iterables should return one classification per iteration and 
-    the itens of `gt_classifications` and `pred_classifications` with 
+    The iterables should return one classification per iteration and
+    the itens of `gt_classifications` and `pred_classifications` with
     same index should correspond to the same sample.
 
     Args:
@@ -95,8 +95,8 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
                        undetected_cls_name: str = "_undetected_") -> DetectionMetrics:
     """Evaluates detection predictions
 
-    The iterables should return the bboxes of one image per iteration 
-    and the itens of `gt_bboxes` and `pred_bboxes` with same index 
+    The iterables should return the bboxes of one image per iteration
+    and the itens of `gt_bboxes` and `pred_bboxes` with same index
     should correspond to the same image.
 
     Args:

@@ -78,7 +78,7 @@ class BBox:
     height: int
     cls: int
     score: Optional[float] = None
-    
+
     @property
     def upper_left_point(self) -> Tuple[int, int]:
         """Tuple[int, int]: (X,Y) of the upper left point of the Bounding Box."""
@@ -187,7 +187,7 @@ class BinaryClassificationMetrics:
     def count(self) -> int:
         """int: Total count of classified instances."""
         return self.TP + self.TN + self.FP + self.FN
-    
+
     @property
     def accuracy(self) -> float:
         """int: Total count of classified instances."""
@@ -208,13 +208,13 @@ class BinaryClassificationMetrics:
         if self.FP == 0 and self.TN == 0:
             return math.nan
         return self.FP/(self.FP + self.TN)
-    
+
     @property
     def specificity(self) -> float:
         """float: Specificity metric - TN / (FP + TN)."""
         if self.FP == 0 and self.TN == 0:
             return math.nan
-            
+
         return self.TN/(self.FP + self.TN)
 
     @property
@@ -345,14 +345,14 @@ class ClassificationMetrics:
     def avg_precision(self) -> float:
         """float: Macro average precision metric."""
         return reduce(lambda acc, curr: (0 if math.isnan(curr.precision) else curr.precision) + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
-    
+
     @property
     def avg_specificity(self) -> float:
         """float: Macro average specificity metric."""
         by_class_w_specificity = [
             c for c in self.by_class_w_instances if not math.isnan(c.specificity)]
         return reduce(lambda acc, curr: curr.specificity + acc, by_class_w_specificity, .0) / len(by_class_w_specificity)
-    
+
     @property
     def avg_f_score(self) -> float:
         """float: Macro average F-Score/Dice metric."""
@@ -422,7 +422,7 @@ class ClassificationMetrics:
             },
             'By Class': dict_by_class(self.by_class)
         }
-    
+
     def to_dataframe(self) -> pd.DataFrame:
         as_dict = self.to_dict()
         dict_to_df = {
@@ -446,7 +446,7 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
     def __init__(self, classification_metrics: BinaryClassificationMetrics):
         """
         Args:
-            classification_metrics (BinaryClassificationMetrics): Pixel-based binary classification metrics 
+            classification_metrics (BinaryClassificationMetrics): Pixel-based binary classification metrics
         """
         super().__init__(
             cls=classification_metrics.cls,
@@ -479,7 +479,7 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
             f'\tFPR: {self.false_positive_rate}\n'
             f'\tF-Score: {self.f_score}\n'
         )
-    
+
     def to_dict(self) -> dict:
         return {
             'TP': self.TP,
@@ -546,7 +546,7 @@ class SegmentationMetrics(ClassificationMetrics):
             f'By Class:\n\n'
         ) + '\n'.join(list([cls_metrics.__str__()
                             for cls_metrics in self.by_class]))
-    
+
     def to_dict(self) -> dict:
         return {
             'Pixel Count': self.count,
@@ -562,7 +562,7 @@ class SegmentationMetrics(ClassificationMetrics):
                 },
             'By Class': dict_by_class(self.by_class)
         }
-    
+
     def to_dataframe(self) -> pd.DataFrame:
         as_dict = self.to_dict()
         dict_to_df = {
@@ -594,12 +594,12 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         self._iou = iou
         self._precision_recall_curve = self.__calculate_precision_recall_curve(
             predictions) if self.gt_count > 0 else []
-    
+
     @property
     def gt_count(self) -> int:
         """int: Total count of GT bboxes."""
         return self.TP + self.FN
-    
+
     @property
     def predicted_count(self) -> int:
         """int: Total count of predicted bboxes."""
@@ -623,7 +623,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         """Calculates the Average Precision metric.
 
         Args:
-            interpolation_points (Optional[int], optional): Number of points to use for interpolation. 
+            interpolation_points (Optional[int], optional): Number of points to use for interpolation.
             Uses all points if None. Defaults to None.
 
         Returns:
@@ -704,7 +704,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
             f'\tAverage Precision: {self.average_precision()}\n'
             f'\t11-point Average Precision: {self.average_precision(11)}\n'
         )
-    
+
     def to_dict(self) -> dict:
         return {
             'TP': self.TP,
@@ -755,7 +755,7 @@ class DetectionMetrics(ClassificationMetrics):
         """Calculates the mean of Average Precision metrics of all classes.
 
         Args:
-            interpolation_points (Optional[int], optional): Number of points to use for interpolation. 
+            interpolation_points (Optional[int], optional): Number of points to use for interpolation.
             Uses all points if None. Defaults to None.
 
         Returns:
@@ -775,7 +775,7 @@ class DetectionMetrics(ClassificationMetrics):
             f'By Class:\n\n'
         ) + '\n'.join(list([cls_metrics.__str__()
                             for cls_metrics in self.by_class]))
-    
+
     def to_dict(self) -> dict:
         return {
             'Bboxes Count':self.count,
@@ -788,7 +788,7 @@ class DetectionMetrics(ClassificationMetrics):
             },
             'By Class': dict_by_class(self.by_class)
         }
-    
+
     def to_dataframe(self) -> pd.DataFrame:
         as_dict = self.to_dict()
         dict_to_df = {
@@ -797,7 +797,7 @@ class DetectionMetrics(ClassificationMetrics):
                     }
         return pd.DataFrame(dict_to_df)
 
-def dict_by_class(by_class) -> dict: 
+def dict_by_class(by_class) -> dict:
     return {
             cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in by_class
         }
