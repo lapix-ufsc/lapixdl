@@ -1,0 +1,5 @@
+covdefaults>=2.2
+coverage
+distlib
+pytest
+pytest-env
