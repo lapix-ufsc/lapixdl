@@ -616,7 +616,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
     @property
     def precision_recall_curve(self) -> List[Tuple[float, float]]:
         """List[Tuple[float, float]]: Precision x Recall curve as a list of (Recall, Precision) tuples."""
-        assert self.gt_count > 0, "This class does not have instances."
+        assert self.gt_count > 0, 'This class does not have instances.'
         return self._precision_recall_curve
 
     def average_precision(self, interpolation_points: Optional[int] = None) -> float:
@@ -643,7 +643,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         return plot.precision_recall_curve([self._precision_recall_curve], [self.cls])
 
     def __calculate_precision_recall_curve(self, predictions: List[PredictionResult]) -> List[Tuple[float, float]]:
-        assert self.gt_count > 0, "The GT count must be greater than 0."
+        assert self.gt_count > 0, 'The GT count must be greater than 0.'
 
         sorted_predictions = sorted(
             predictions, key=lambda p: float(p.score), reverse=True)

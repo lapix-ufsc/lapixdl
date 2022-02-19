@@ -11,8 +11,8 @@ import seaborn as sn
 
 from .model import BBox, Mask, Classification, Result, Image
 
-correct_color = sn.color_palette("Paired")[3]
-incorrect_color = sn.color_palette("Paired")[5]
+correct_color = sn.color_palette('Paired')[3]
+incorrect_color = sn.color_palette('Paired')[5]
 
 ColorMap = Union[str, Colormap]
 
@@ -84,7 +84,7 @@ def show_segmentations(
     cmap_colors = cm.get_cmap(cmap).colors
 
     assert len(cmap_colors) >= len(
-        class_names), "The color map length must be greater or equal the length of the class names."
+        class_names), 'The color map length must be greater or equal the length of the class names.'
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
@@ -145,7 +145,7 @@ def show_detections(results: List[Result[List[BBox]]],
     cmap_colors = cm.get_cmap(cmap).colors
 
     assert len(cmap_colors) >= len(
-        class_names), "The color map length must be greater or equal the length of the class names."
+        class_names), 'The color map length must be greater or equal the length of the class names.'
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)

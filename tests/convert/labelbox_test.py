@@ -14,8 +14,8 @@ def test_labelbox_to_coco():
 
 def test_labelbox_to_coco_w_filter():
     imgs_to_include = [
-        "2019_07_10__16_23__0048_b0s0c0x135537-1600y50862-1200m6486.png",
-        "2019_07_10__16_23__0048_b0s0c0x123913-1600y119932-1200m15182.png"
+        '2019_07_10__16_23__0048_b0s0c0x135537-1600y50862-1200m6486.png',
+        '2019_07_10__16_23__0048_b0s0c0x123913-1600y119932-1200m15182.png'
     ]
 
     with open('./tests/convert/labelbox_test.json') as file:

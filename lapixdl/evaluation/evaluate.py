@@ -39,7 +39,7 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
         curr_gt_mask = np.array(curr_gt_mask)
         curr_pred_mask = np.array(curr_pred_mask)
         if curr_gt_mask.shape != curr_pred_mask.shape:
-            warnings.warn(f"The GT mask and Pred mask should have the same shape. GT shape: {curr_gt_mask.shape}.Pred shape: {curr_pred_mask.shape}.")
+            warnings.warn(f'The GT mask and Pred mask should have the same shape. GT shape: {curr_gt_mask.shape}.Pred shape: {curr_pred_mask.shape}.')
 
         curr_confusion_matrix = zeros_matrix.copy()
         for i, j in itertools.product(classes_count_range, classes_count_range):
@@ -92,7 +92,7 @@ def evaluate_detection(gt_bboxes: Iterable[List[BBox]],
                        pred_bboxes: Iterable[List[BBox]],
                        classes: List[str],
                        iou_threshold: float = .5,
-                       undetected_cls_name: str = "_undetected_") -> DetectionMetrics:
+                       undetected_cls_name: str = '_undetected_') -> DetectionMetrics:
     """Evaluates detection predictions
 
     The iterables should return the bboxes of one image per iteration

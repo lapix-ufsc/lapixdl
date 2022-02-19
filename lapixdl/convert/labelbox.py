@@ -68,26 +68,26 @@ def __generate_coco_file(lblbox_annotations: dict, img_names_to_include: Optiona
         annotations += new_annotations
 
         images.append({
-            "file_name": img_filename,
-            "height": 1200,
-            "width": 1600,
-            "id": image_id
+            'file_name': img_filename,
+            'height': 1200,
+            'width': 1600,
+            'id': image_id
         })
 
         image_id += 1
         annotation_id += len(new_annotations)
 
     categories = [{
-        "supercategory": "none",
-        "name": cls,
-        "id": i
+        'supercategory': 'none',
+        'name': cls,
+        'id': i
     } for i, cls in enumerate(classes)]
 
     final_json = {
-        "type": "instances",
-        "images": images,
-        "categories": categories,
-        "annotations": annotations
+        'type': 'instances',
+        'images': images,
+        'categories': categories,
+        'annotations': annotations
     }
 
     return final_json
