@@ -15,3 +15,8 @@ repos:
     -   id: trailing-whitespace
     -   id: double-quote-string-fixer
     -   id: requirements-txt-fixer
+-   repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v1.6.0
+    hooks:
+    -   id: autopep8
+        args: [--max-line-length=128, --diff]
