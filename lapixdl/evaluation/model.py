@@ -6,14 +6,11 @@ from enum import Enum
 from functools import reduce
 from typing import Generic
 from typing import List
-from typing import Optional
-from typing import Tuple
 from typing import TypeVar
 from typing import Union
 
 import numpy as np
 import pandas as pd
-from numpy.lib.function_base import average
 
 from . import plot
 
@@ -349,7 +346,9 @@ class ClassificationMetrics:
     @property
     def avg_precision(self) -> float:
         """float: Macro average precision metric."""
-        return reduce(lambda acc, curr: (0 if math.isnan(curr.precision) else curr.precision) + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
+        return reduce(lambda acc, curr: (0 if math.isnan(curr.precision)
+                                         else curr.precision) + acc,
+                      self.by_class_w_instances, .0) / len(self.by_class_w_instances)
 
     @property
     def avg_specificity(self) -> float:
@@ -366,7 +365,8 @@ class ClassificationMetrics:
     @property
     def avg_false_positive_rate(self) -> float:
         """float: Macro average False Positive Rate metric."""
-        return reduce(lambda acc, curr: curr.false_positive_rate + acc, self.by_class_w_instances, .0) / len(self.by_class_w_instances)
+        return reduce(lambda acc, curr: curr.false_positive_rate + acc,
+                      self.by_class_w_instances, .0) / len(self.by_class_w_instances)
 
     @property
     def confusion_matrix(self) -> list[list[int]]:
@@ -377,7 +377,8 @@ class ClassificationMetrics:
         """Plots de confusion matrix
 
         Return:
-            Tuple[Figure, Axes]: Figure and Axes of the ploted confusion matrix
+            Tuple[Figure, Axes]: Figure and Axes of the plotted confusion
+            matrix
         """
         return plot.confusion_matrix(self._confusion_matrix, self._classes)
 
@@ -531,7 +532,8 @@ class SegmentationMetrics(ClassificationMetrics):
     @property
     def avg_iou_no_bkg(self) -> float:
         """float: Macro average IoU/Jaccard Index metric without `background` class (index 0)."""
-        return reduce(lambda acc, curr: curr.iou + acc, self._by_class_w_instances[1:], .0) / (len(self._by_class_w_instances) - 1)
+        return reduce(lambda acc, curr: curr.iou + acc,
+                      self._by_class_w_instances[1:], .0) / (len(self._by_class_w_instances) - 1)
 
     def __str__(self):
         return (
@@ -631,7 +633,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         Returns:
             float: Average Precision metric.
         """
-        if not interpolation_points is None:
+        if interpolation_points is not None:
             return self._interpolated_average_precision(interpolation_points)
         else:
             return self._average_precision()
@@ -763,7 +765,9 @@ class DetectionMetrics(ClassificationMetrics):
         Returns:
             float: Mean Average Precision metric.
         """
-        return reduce(lambda acc, curr: curr.average_precision(interpolation_points) + acc, self._by_class_w_instances, .0) / len(self._by_class_w_instances)
+        return reduce(lambda acc,
+                      curr: curr.average_precision(interpolation_points) + acc, self._by_class_w_instances,
+                      .0) / len(self._by_class_w_instances)
 
     def __str__(self):
         return (

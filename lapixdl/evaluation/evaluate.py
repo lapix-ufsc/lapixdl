@@ -3,12 +3,18 @@ from __future__ import annotations
 import itertools
 import warnings
 from typing import Iterable
-from typing import List
 
 import numpy as np
 from tqdm.auto import tqdm
 
-from .model import *
+from .model import BBox
+from .model import Classification
+from .model import ClassificationMetrics
+from .model import DetectionMetrics
+from .model import Mask
+from .model import PredictionResult
+from .model import PredictionResultType
+from .model import SegmentationMetrics
 
 
 def evaluate_segmentation(gt_masks: Iterable[Mask],
@@ -41,14 +47,12 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
         curr_gt_mask = np.array(curr_gt_mask)
         curr_pred_mask = np.array(curr_pred_mask)
         if curr_gt_mask.shape != curr_pred_mask.shape:
-            warnings.warn(f'The GT mask and Pred mask should have the same shape. GT shape: {curr_gt_mask.shape}.Pred shape: {curr_pred_mask.shape}.')
+            warnings.warn(f'The GT mask and Pred mask should have the same shape. GT shape: {curr_gt_mask.shape}.'
+                          f'Pred shape: {curr_pred_mask.shape}.')
 
         curr_confusion_matrix = zeros_matrix.copy()
         for i, j in itertools.product(classes_count_range, classes_count_range):
-            curr_confusion_matrix[j, i] = np.sum((curr_pred_mask==j)*(curr_gt_mask==i))
-
-        # ~1% slower alternative:
-        # curr_confusion_matrix =  np.array([[np.sum((msk==i)*(pred == j)) for i in range(classes_count)] for j in range(classes_count)])
+            curr_confusion_matrix[j, i] = np.sum((curr_pred_mask == j) * (curr_gt_mask == i))
 
         confusion_matrix += curr_confusion_matrix
 
@@ -79,7 +83,9 @@ def evaluate_classification(gt_classifications: Iterable[Classification],
 
     confusion_matrix = np.zeros((len(classes), len(classes)), int)
 
-    for (curr_gt_classification, curr_pred_classification) in tqdm(zip(gt_classifications, pred_classifications), unit=' samples'):
+    for (curr_gt_classification, curr_pred_classification) in tqdm(zip(gt_classifications,
+                                                                       pred_classifications),
+                                                                   unit=' samples'):
         confusion_matrix[curr_pred_classification.cls,
                          curr_gt_classification.cls] += 1
 
@@ -268,7 +274,7 @@ def __calculate_binary_iou(gt_bboxes: list[BBox],
     return tp / (f + tp)
 
 
-def __draw_bboxes(mask_shape: Tuple[int, int], bboxes: list[BBox]) -> list[list[int]]:
+def __draw_bboxes(mask_shape: tuple[int, int], bboxes: list[BBox]) -> list[list[int]]:
     mask = np.zeros(mask_shape, int)
 
     for bbox in bboxes:

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import math
-from typing import List
-from typing import Tuple
 from typing import Union
 
 import matplotlib.patches as mpatches
@@ -15,7 +13,6 @@ from matplotlib.figure import Figure
 
 from .model import BBox
 from .model import Classification
-from .model import Image
 from .model import Mask
 from .model import Result
 
@@ -51,9 +48,10 @@ def show_classifications(
 
     for i, result in enumerate(results):
         axe = axes[i // cols][i % cols]
+        pred_s = (f'\nPred: {class_names[result.prediction.cls]} ({result.prediction.score})' if result.prediction is not None
+                  else '')
         axe.set_title(
-            f'GT: {class_names[result.gt.cls]}' +
-            (f'\nPred: {class_names[result.prediction.cls]} ({result.prediction.score})' if not result.prediction is None else ''),
+            f'GT: {class_names[result.gt.cls]}' + pred_s,
             fontsize='small',
             color='#333' if result.prediction is None or not diff_correct_incorect
             else (correct_color if result.prediction.cls ==
@@ -121,7 +119,7 @@ def show_segmentations(
                       interpolation='none', vmin=0, vmax=len(cmap_colors) - 1)
 
         axe_pred.axis('off')
-        if not result.prediction is None:
+        if result.prediction is not None:
             axe_pred.set_title('Prediction', fontsize='small')
             axe_pred.imshow(result.image)
             axe_pred.imshow(result.prediction, cmap=cmap, alpha=mask_alpha,
@@ -182,7 +180,7 @@ def show_detections(results: list[Result[list[BBox]]],
                       class_names, show_bbox_label)
 
         axe_pred.axis('off')
-        if not result.prediction is None:
+        if result.prediction is not None:
             axe_pred.set_title('Prediction', fontsize='small')
             axe_pred.imshow(result.image)
             __draw_bboxes(axe_pred, result.prediction,

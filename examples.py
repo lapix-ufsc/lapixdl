@@ -6,8 +6,6 @@ Requires:
 """
 from __future__ import annotations
 
-from typing import Tuple
-
 import numpy as np
 from matplotlib.colors import ListedColormap
 
@@ -93,7 +91,7 @@ def evaluate_detection_example():
     classes = ['kite', 'person']
 
     # Image shape
-    mask_shape = (480, 640)
+    # mask_shape = (480, 640)
 
     # Creating fake data
     gt_bbox_1 = BBox(10, 10, 10, 10, 0, 1)
@@ -112,7 +110,7 @@ def evaluate_detection_example():
     metrics = evaluate_detection(it_gt_masks, it_pred_masks, classes)
 
     # Shows confusion matrix and returns its Figure and Axes
-    fig, axes = metrics.show_confusion_matrix()
+    # fig, axes = metrics.show_confusion_matrix()
 
     # Shows confusion matrix for class `a`
     metrics.by_class[0].show_confusion_matrix()

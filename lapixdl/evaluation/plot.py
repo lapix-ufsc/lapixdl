@@ -1,27 +1,26 @@
 from __future__ import annotations
 
-from typing import List
-from typing import Optional
-from typing import Tuple
-
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import seaborn as sn
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 
-def confusion_matrix(confusion_matrix: list[list[int]], classes: list[str], title: str | None = 'Confusion Matrix') -> tuple[Figure, Axes]:
+def confusion_matrix(confusion_matrix: list[list[int]],
+                     classes: list[str],
+                     title: str | None = 'Confusion Matrix') -> tuple[Figure, Axes]:
     """Plots a confusion matrix
 
     Args:
         confusion_matrix (List[List[int]]): Confusion matrix.
         classes (List[str]): Class names.
-        title (Optional[str], optional): Chart title. Defaults to "Confusion Matrix".
+        title (Optional[str], optional): Chart title. Defaults to
+        "Confusion Matrix".
 
     Return:
-        Tuple[Figure, Axes]: Figure and Axes of the ploted confusion matrix.
+        Tuple[Figure, Axes]: Figure and Axes of the plotted confusion
+        matrix.
     """
 
     df_cm = pd.DataFrame(confusion_matrix, classes, classes)
