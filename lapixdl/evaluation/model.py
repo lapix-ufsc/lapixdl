@@ -635,8 +635,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         """
         if interpolation_points is not None:
             return self._interpolated_average_precision(interpolation_points)
-        else:
-            return self._average_precision()
+        return self._average_precision()
 
     def show_precision_recall_curve(self):
         """Plots de Precision x Recall curve.
