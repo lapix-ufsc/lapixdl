@@ -1,34 +1,39 @@
-from typing import Union, List, Tuple
+from __future__ import annotations
+
 import math
+from typing import Union
 
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from matplotlib.axes import Axes
-from matplotlib import cm
 import matplotlib.patches as mpatches
-from matplotlib.colors import Colormap
+import matplotlib.pyplot as plt
 import seaborn as sn
+from matplotlib import cm
+from matplotlib.axes import Axes
+from matplotlib.colors import Colormap
+from matplotlib.figure import Figure
 
-from .model import BBox, Mask, Classification, Result, Image
+from .model import BBox
+from .model import Classification
+from .model import Mask
+from .model import Result
 
-correct_color = sn.color_palette("Paired")[3]
-incorrect_color = sn.color_palette("Paired")[5]
+correct_color = sn.color_palette('Paired')[3]
+incorrect_color = sn.color_palette('Paired')[5]
 
 ColorMap = Union[str, Colormap]
 
 
 def show_classifications(
-        results: List[Result[Classification]],
-        class_names: List[str],
+        results: list[Result[Classification]],
+        class_names: list[str],
         cols: int = 3,
-        diff_correct_incorect: bool = True) -> Tuple[Figure, Axes]:
+        diff_correct_incorect: bool = True) -> tuple[Figure, Axes]:
     """Shows multiple classification results.
 
     Args:
         results (List[Result[Classification]]): List of classification results.
         class_names (List[str]): Class names.
         cols (int, optional): Number of colunms to show. Defaults to 3.
-        diff_correct_incorect (bool, optional): Indicates if correct and incorrect 
+        diff_correct_incorect (bool, optional): Indicates if correct and incorrect
         results should be differentiated by color. Defaults to True.
 
     Returns:
@@ -43,9 +48,10 @@ def show_classifications(
 
     for i, result in enumerate(results):
         axe = axes[i // cols][i % cols]
+        pred_s = (f'\nPred: {class_names[result.prediction.cls]} ({result.prediction.score})' if result.prediction is not None
+                  else '')
         axe.set_title(
-            f'GT: {class_names[result.gt.cls]}' +
-            (f'\nPred: {class_names[result.prediction.cls]} ({result.prediction.score})' if not result.prediction is None else ''),
+            f'GT: {class_names[result.gt.cls]}' + pred_s,
             fontsize='small',
             color='#333' if result.prediction is None or not diff_correct_incorect
             else (correct_color if result.prediction.cls ==
@@ -65,10 +71,10 @@ def show_classifications(
 
 
 def show_segmentations(
-        results: List[Result[Mask]],
-        class_names: List[str],
+        results: list[Result[Mask]],
+        class_names: list[str],
         cmap: ColorMap = 'tab10',
-        mask_alpha: float = .3) -> Tuple[Figure, Axes]:
+        mask_alpha: float = .3) -> tuple[Figure, Axes]:
     """Shows segmentation results
 
     Args:
@@ -84,7 +90,7 @@ def show_segmentations(
     cmap_colors = cm.get_cmap(cmap).colors
 
     assert len(cmap_colors) >= len(
-        class_names), "The color map length must be greater or equal the length of the class names."
+        class_names), 'The color map length must be greater or equal the length of the class names.'
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
@@ -113,7 +119,7 @@ def show_segmentations(
                       interpolation='none', vmin=0, vmax=len(cmap_colors) - 1)
 
         axe_pred.axis('off')
-        if not result.prediction is None:
+        if result.prediction is not None:
             axe_pred.set_title('Prediction', fontsize='small')
             axe_pred.imshow(result.image)
             axe_pred.imshow(result.prediction, cmap=cmap, alpha=mask_alpha,
@@ -126,10 +132,10 @@ def show_segmentations(
     return fig, axes
 
 
-def show_detections(results: List[Result[List[BBox]]],
-                    class_names: List[str],
+def show_detections(results: list[Result[list[BBox]]],
+                    class_names: list[str],
                     cmap: ColorMap = 'tab10',
-                    show_bbox_label: bool = True) -> Tuple[Figure, Axes]:
+                    show_bbox_label: bool = True) -> tuple[Figure, Axes]:
     """Shows detection results.
 
     Args:
@@ -145,7 +151,7 @@ def show_detections(results: List[Result[List[BBox]]],
     cmap_colors = cm.get_cmap(cmap).colors
 
     assert len(cmap_colors) >= len(
-        class_names), "The color map length must be greater or equal the length of the class names."
+        class_names), 'The color map length must be greater or equal the length of the class names.'
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
@@ -174,7 +180,7 @@ def show_detections(results: List[Result[List[BBox]]],
                       class_names, show_bbox_label)
 
         axe_pred.axis('off')
-        if not result.prediction is None:
+        if result.prediction is not None:
             axe_pred.set_title('Prediction', fontsize='small')
             axe_pred.imshow(result.image)
             __draw_bboxes(axe_pred, result.prediction,
@@ -187,7 +193,7 @@ def show_detections(results: List[Result[List[BBox]]],
     return fig, axes
 
 
-def __draw_bboxes(axe: plt.Axes, bboxes: List[BBox], cmap_colors: List[str], class_names: List[str], show_bbox_label: bool):
+def __draw_bboxes(axe: plt.Axes, bboxes: list[BBox], cmap_colors: list[str], class_names: list[str], show_bbox_label: bool):
     for bbox in bboxes:
         color = cmap_colors[bbox.cls]
         label = (f'{class_names[bbox.cls]}' if show_bbox_label else '') + \

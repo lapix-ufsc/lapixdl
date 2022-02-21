@@ -4,14 +4,20 @@ Module examples
 Requires:
     numpy
 """
-from typing import Tuple
+from __future__ import annotations
 
 import numpy as np
 from matplotlib.colors import ListedColormap
 
-from lapixdl.evaluation.evaluate import evaluate_segmentation, evaluate_classification, evaluate_detection
-from lapixdl.evaluation.visualize import show_segmentations, show_classifications, show_detections
-from lapixdl.evaluation.model import BBox, Classification, Result
+from lapixdl.evaluation.evaluate import evaluate_classification
+from lapixdl.evaluation.evaluate import evaluate_detection
+from lapixdl.evaluation.evaluate import evaluate_segmentation
+from lapixdl.evaluation.model import BBox
+from lapixdl.evaluation.model import Classification
+from lapixdl.evaluation.model import Result
+from lapixdl.evaluation.visualize import show_classifications
+from lapixdl.evaluation.visualize import show_detections
+from lapixdl.evaluation.visualize import show_segmentations
 
 
 def main():
@@ -85,7 +91,7 @@ def evaluate_detection_example():
     classes = ['kite', 'person']
 
     # Image shape
-    mask_shape = (480, 640)
+    # mask_shape = (480, 640)
 
     # Creating fake data
     gt_bbox_1 = BBox(10, 10, 10, 10, 0, 1)
@@ -104,7 +110,7 @@ def evaluate_detection_example():
     metrics = evaluate_detection(it_gt_masks, it_pred_masks, classes)
 
     # Shows confusion matrix and returns its Figure and Axes
-    fig, axes = metrics.show_confusion_matrix()
+    # fig, axes = metrics.show_confusion_matrix()
 
     # Shows confusion matrix for class `a`
     metrics.by_class[0].show_confusion_matrix()
@@ -243,7 +249,7 @@ def draw_bboxes(mask_shape, bboxes):
     return mask
 
 
-def draw_rectangle(img: np.ndarray, pt1: Tuple[int, int], pt2: Tuple[int, int], fill: int):
+def draw_rectangle(img: np.ndarray, pt1: tuple[int, int], pt2: tuple[int, int], fill: int):
     cp = img.copy()
     cp[slice(pt1[0], pt2[0] + 1), slice(pt1[1], pt2[1] + 1)] = fill
     return cp

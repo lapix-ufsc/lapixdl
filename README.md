@@ -29,14 +29,14 @@ from lapixdl.evaluation.evaluate import evaluate_segmentation
 
 classes = ['background', 'object']
 
-# Iterator for GT masks 
+# Iterator for GT masks
 # `dl` is a PyTorch DataLoader
 def gt_mask_iterator_from_dl(dl):
   for imgs, masks in iter(dl):
     for mask in masks:
       yield mask
 
-# Iterator for prediction masks 
+# Iterator for prediction masks
 # `predict` a function that, given an image, predicts the mask.
 def pred_mask_iterator_from_dl(dl, predict):
   for imgs, masks in iter(dl):

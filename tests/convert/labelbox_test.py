@@ -1,5 +1,10 @@
-from lapixdl.convert.labelbox import labelbox_to_coco, __calculate_area
+from __future__ import annotations
+
 import json
+
+from lapixdl.convert.labelbox import __calculate_area
+from lapixdl.convert.labelbox import labelbox_to_coco
+
 
 def test_labelbox_to_coco():
     with open('./tests/convert/labelbox_test.json') as file:
@@ -12,10 +17,11 @@ def test_labelbox_to_coco():
 
     assert conversion == coco_expect
 
+
 def test_labelbox_to_coco_w_filter():
     imgs_to_include = [
-        "2019_07_10__16_23__0048_b0s0c0x135537-1600y50862-1200m6486.png",
-        "2019_07_10__16_23__0048_b0s0c0x123913-1600y119932-1200m15182.png"
+        '2019_07_10__16_23__0048_b0s0c0x135537-1600y50862-1200m6486.png',
+        '2019_07_10__16_23__0048_b0s0c0x123913-1600y119932-1200m15182.png'
     ]
 
     with open('./tests/convert/labelbox_test.json') as file:
@@ -28,8 +34,9 @@ def test_labelbox_to_coco_w_filter():
 
     assert conversion == coco_expect
 
+
 def test_calculate_area():
-    segmentation = [0,0, 0,2, 2,2, 2,0]
+    segmentation = [0, 0, 0, 2, 2, 2, 2, 0]
     area = __calculate_area(segmentation)
 
     assert area == 4
