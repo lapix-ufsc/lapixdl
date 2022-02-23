@@ -93,7 +93,7 @@ class BBox:
     @property
     def center_point(self) -> tuple[int, int]:
         """Tuple[int, int]: (X,Y) of the center point of the Bounding Box."""
-        return ((self.upper_left_x + self.width - 1) // 2, (self.upper_left_y + self.height - 1) // 2)
+        return (self.upper_left_x + ((self.width - 1) // 2), self.upper_left_y + ((self.height - 1) // 2))
 
     @property
     def area(self) -> int:
