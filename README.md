@@ -52,7 +52,7 @@ eval = evaluate_segmentation(gt_masks, pred_masks, classes)
 # Shows confusion matrix and returns its Figure and Axes
 fig, axes = eval.show_confusion_matrix()
 ```
-#### Example of how to log the results of lapixdl evaluations for Wandb
+#### Example of how to log the results of LAPiX DL evaluations in the Weights & Biases platform
 About [Weights & Biases](https://docs.wandb.ai/).
 
 ```python
