@@ -58,8 +58,6 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
 
     metrics = SegmentationMetrics(classes, confusion_matrix)
 
-    print(metrics.to_dataframe())
-
     return metrics
 
 
@@ -90,8 +88,6 @@ def evaluate_classification(gt_classifications: Iterable[Classification],
                          curr_gt_classification.cls] += 1
 
     metrics = ClassificationMetrics(classes, confusion_matrix)
-
-    print(metrics.to_dataframe())
 
     return metrics
 
@@ -181,8 +177,6 @@ def evaluate_detection(gt_bboxes: Iterable[list[BBox]],
         confusion_matrix,
         cls_ious_sum / tot_images,
         predictions_by_class)
-
-    print(metrics.to_dataframe())
 
     return metrics
 
