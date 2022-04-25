@@ -52,6 +52,28 @@ eval = evaluate_segmentation(gt_masks, pred_masks, classes)
 # Shows confusion matrix and returns its Figure and Axes
 fig, axes = eval.show_confusion_matrix()
 ```
+#### Example of how to log the results of lapixdl evaluations for Wandb
+About [Weights & Biases](https://docs.wandb.ai/).
+
+```python
+from lapixdl.evaluation.evaluate import evaluate_segmentation
+import wandb
+
+# init wandb ...
+...
+
+eval_test = evaluate_segmentation(gt_masks, pred_masks, categories)
+
+...
+
+# If you want to log everything
+wandb.log({'test_evaluation':  eval_test.to_dict()['By Class']})
+
+# If you want to choose specific categories to log
+selected_cats = ['A', 'B', 'C']
+metrics_by_cat = {k: v for k, v in eval_test.to_dict()['By Class'].items() if k in selected_cats}
+wandb.log({'test_evaluation': metrics_by_cat})
+```
 
 ### For Results Visualization
 
