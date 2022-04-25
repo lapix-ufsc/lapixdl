@@ -12,7 +12,7 @@ Three computer vision approaches are covered: Segmentation, Detection and Classi
 ### For Model Evaluation
 
 This module exports the following functions for model evaluation:
-```
+```python
 from lapixdl.evaluation.evaluate import evaluate_segmentation
 from lapixdl.evaluation.evaluate import evaluate_detection
 from lapixdl.evaluation.evaluate import evaluate_classification
@@ -24,7 +24,7 @@ These iterators must be sorted equaly, assuring that the ground truth and the pr
 
 #### Example of segmentation model evaluation using **PyTorch**:
 
-```
+```python
 from lapixdl.evaluation.evaluate import evaluate_segmentation
 
 classes = ['background', 'object']
@@ -78,7 +78,7 @@ wandb.log({'test_evaluation': metrics_by_cat})
 ### For Results Visualization
 
 This module exports the following functions for results visualization:
-```
+```python
 from lapixdl.evaluation.visualize import show_segmentations
 from lapixdl.evaluation.visualize import show_classifications
 from lapixdl.evaluation.visualize import show_detections
@@ -89,13 +89,13 @@ The available color maps are the [ones from matplotlib](https://matplotlib.org/3
 ### For Data Conversion
 
 This module exports the following functions for data conversion:
-```
+```python
 from lapixdl.convert.labelbox import labelbox_to_coco
 ```
 
 #### Example of conversion from **Labelbox** to **COCO** labels format:
 
-```
+```python
 import json
 from lapixdl.convert.labelbox import labelbox_to_coco
 
