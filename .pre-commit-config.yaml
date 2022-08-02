@@ -16,7 +16,7 @@ repos:
     -   id: double-quote-string-fixer
     -   id: requirements-txt-fixer
 -   repo: https://github.com/pycqa/flake8
-    rev: 4.0.1
+    rev: 5.0.2
     hooks:
     -   id: flake8
         exclude: ^data/
@@ -28,7 +28,7 @@ repos:
     -   id: autopep8
         args: [--max-line-length=128, --diff]
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v2.37.2
+    rev: v2.37.3
     hooks:
     -   id: pyupgrade
         args: [--py37-plus]
@@ -39,7 +39,7 @@ repos:
         args: [--py37-plus, --add-import, 'from __future__ import annotations']
         exclude: ^data/
 -   repo: https://github.com/asottile/setup-cfg-fmt
-    rev: v1.20.2
+    rev: v2.0.0
     hooks:
     -   id: setup-cfg-fmt
         args: [--min-py3-version, '3.7']

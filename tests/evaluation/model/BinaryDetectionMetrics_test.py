@@ -33,10 +33,8 @@ predictions = [
     PredictionResult(.95, PredictionResultType.FP)
 ]
 
-TP = len([prediction for prediction in predictions if prediction.type ==
-          PredictionResultType.TP])
-FP = len([prediction for prediction in predictions if prediction.type ==
-          PredictionResultType.FP])
+TP = len([prediction for prediction in predictions if prediction.type == PredictionResultType.TP])
+FP = len([prediction for prediction in predictions if prediction.type == PredictionResultType.FP])
 FN = 15 - TP
 
 

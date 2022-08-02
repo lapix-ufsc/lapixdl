@@ -125,8 +125,8 @@ class BBox:
             min(btm_rgt_x_a, btm_rgt_x_b), min(btm_rgt_y_a, btm_rgt_y_b))
 
         # Calculates the height and width of the intersection box
-        (w_intersect, h_intersect) = (btm_rgt_x_intersect -
-                                      upr_lft_x_intersect + 1, btm_rgt_y_intersect - upr_lft_y_intersect + 1)
+        (w_intersect, h_intersect) = (btm_rgt_x_intersect - upr_lft_x_intersect + 1,
+                                      btm_rgt_y_intersect - upr_lft_y_intersect + 1)
 
         # If H or W <= 0, there is no intersection
         if (w_intersect <= 0) or (h_intersect <= 0):
@@ -339,7 +339,7 @@ class ClassificationMetrics:
         by_class_w_recall = [
             c for c in self.by_class_w_instances if not math.isnan(c.recall)]
 
-        if(len(by_class_w_recall) == 0):
+        if (len(by_class_w_recall) == 0):
             return 1
         return reduce(lambda acc, curr: curr.recall + acc, by_class_w_recall, .0) / len(by_class_w_recall)
 
@@ -353,8 +353,8 @@ class ClassificationMetrics:
     @property
     def avg_specificity(self) -> float:
         """float: Macro average specificity metric."""
-        by_class_w_specificity = [
-            c for c in self.by_class_w_instances if not math.isnan(c.specificity)]
+        by_class_w_specificity = [c for c in self.by_class_w_instances
+                                  if not math.isnan(c.specificity)]
         return reduce(lambda acc, curr: curr.specificity + acc, by_class_w_specificity, .0) / len(by_class_w_specificity)
 
     @property
@@ -656,8 +656,11 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
         fp = 0
         gt_count = self.gt_count
 
-        def calc_precision(tp, fp): return tp / (tp + fp)
-        def calc_recall(tp): return tp / gt_count
+        def calc_precision(tp, fp):
+            return tp / (tp + fp)
+
+        def calc_recall(tp):
+            return tp / gt_count
 
         for prediction in sorted_predictions:
             if prediction.type == PredictionResultType.TP:

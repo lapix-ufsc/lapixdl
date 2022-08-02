@@ -54,8 +54,7 @@ def show_classifications(
             f'GT: {class_names[result.gt.cls]}' + pred_s,
             fontsize='small',
             color='#333' if result.prediction is None or not diff_correct_incorect
-            else (correct_color if result.prediction.cls ==
-                  result.gt.cls else incorrect_color)
+            else (correct_color if result.prediction.cls == result.gt.cls else incorrect_color)
         )
         axe.axis('off')
         axe.imshow(result.image)
