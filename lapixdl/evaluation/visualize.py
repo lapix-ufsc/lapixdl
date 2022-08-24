@@ -11,10 +11,10 @@ from matplotlib.axes import Axes
 from matplotlib.colors import Colormap
 from matplotlib.figure import Figure
 
-from .model import BBox
 from .model import Classification
 from .model import Mask
 from .model import Result
+from lapixdl.formats.annotation import BBox
 
 correct_color = sn.color_palette('Paired')[3]
 incorrect_color = sn.color_palette('Paired')[5]

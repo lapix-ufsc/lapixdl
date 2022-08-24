@@ -7,7 +7,6 @@ from typing import Iterable
 import numpy as np
 from tqdm.auto import tqdm
 
-from .model import BBox
 from .model import Classification
 from .model import ClassificationMetrics
 from .model import DetectionMetrics
@@ -15,6 +14,7 @@ from .model import Mask
 from .model import PredictionResult
 from .model import PredictionResultType
 from .model import SegmentationMetrics
+from lapixdl.formats.annotation import BBox
 
 
 def evaluate_segmentation(gt_masks: Iterable[Mask],

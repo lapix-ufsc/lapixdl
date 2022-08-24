@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from lapixdl.evaluation.evaluate import evaluate_detection
-from lapixdl.evaluation.model import BBox
+from lapixdl.formats.annotation import BBox
 
 
 def test_evaluation_detection_iou_metric():

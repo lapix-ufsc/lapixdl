@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from lapixdl.evaluation.evaluate import evaluate_segmentation
-from lapixdl.evaluation.model import BBox
+from lapixdl.formats.annotation import BBox
 from testing import utils
 
 
