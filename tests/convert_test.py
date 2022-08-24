@@ -1,6 +1,8 @@
+from __future__ import annotations
+
+from lapixdl.convert import create_COCO_OD
 from lapixdl.convert import from_labelbox
 from lapixdl.convert import to_OD_COCO_annotations
-from lapixdl.convert import create_COCO_OD
 from lapixdl.formats import labelbox
 from lapixdl.formats import lapix
 from lapixdl.formats.lapix import Lapix

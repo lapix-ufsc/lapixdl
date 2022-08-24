@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from typing import Any
 
-import shapely.wkt
 import pandas as pd
+import shapely.wkt
+
 from lapixdl.base import FileTypeError
 
 

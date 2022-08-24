@@ -1,19 +1,18 @@
 from __future__ import annotations
-from datetime import datetime
+
 import multiprocessing
+from datetime import datetime
 from itertools import chain
-from shapely.geometry import MultiPolygon
-import pandas as pd
-
-from lapixdl.formats.lapix import Lapix
-from lapixdl.base import basename
-
 from typing import Any
 
 import numpy as np
-
+import pandas as pd
+from shapely.geometry import MultiPolygon
 from shapely.geometry import Point
 from shapely.geometry import Polygon
+
+from lapixdl.base import basename
+from lapixdl.formats.lapix import Lapix
 
 
 # -----------------------------------------------------------------------

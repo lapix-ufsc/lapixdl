@@ -1,14 +1,13 @@
 from __future__ import annotations
-from shapely.geometry import Point
-from shapely.geometry import MultiPolygon
-
-from lapixdl.formats.annotation import BBox
-from lapixdl.formats.annotation import Annotation
-from lapixdl.formats.annotation import bounds_to_BBox
 
 import pytest
-
+from shapely.geometry import MultiPolygon
+from shapely.geometry import Point
 from shapely.geometry import Polygon
+
+from lapixdl.formats.annotation import Annotation
+from lapixdl.formats.annotation import BBox
+from lapixdl.formats.annotation import bounds_to_BBox
 
 
 def test_bbox():

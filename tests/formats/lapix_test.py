@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import pytest
-from lapixdl.formats import lapix
+
 from lapixdl.base import FileTypeError
+from lapixdl.formats import lapix
 
 
 def test_lapix_load(lapix_filename):

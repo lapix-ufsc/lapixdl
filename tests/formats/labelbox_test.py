@@ -1,7 +1,9 @@
-import pytest
-from lapixdl.formats import labelbox
+from __future__ import annotations
 
 import pandas as pd
+import pytest
+
+from lapixdl.formats import labelbox
 
 
 def test_load(labelbox_filename, labelbox_raw):
