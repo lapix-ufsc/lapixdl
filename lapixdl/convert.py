@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import multiprocessing
-from datetime import datetime
 from itertools import chain
 from typing import Any
 
@@ -208,14 +207,14 @@ def to_OD_COCO_annotations(
     print(f'Number of processes: {processes}, annotations per process: {len(ann_ids_splitted[0])}')
 
     workers = multiprocessing.Pool(processes=processes)
-    processes = []
+    procs = []
     for ann_ids in ann_ids_splitted:
         df_to_process = lapix_df.loc[lapix_df.index.isin(ann_ids), :]
         p = workers.apply_async(__to_OD_COCO_annotations, (df_to_process, decimals))
-        processes.append(p)
+        procs.append(p)
 
     annotations_coco = []
-    for p in processes:
+    for p in procs:
         annotations_coco.extend(p.get())
 
     return annotations_coco
@@ -246,8 +245,7 @@ def create_COCO_OD(
         'categories': categories_coco,
         'images': images_coco,
         'annotations': annotations_coco,
+        'info': info_coco if isinstance(info_coco, dict) else {}
     }
-    if info_coco is not None:
-        coco_od['info'] = info_coco
 
     return coco_od
