@@ -11,7 +11,7 @@ from shapely.geometry import Point
 from shapely.geometry import Polygon
 
 from lapixdl.base import basename
-from lapixdl.formats.lapix import Lapix
+from lapixdl.formats.lapix import LapixDataFrame
 
 
 # -----------------------------------------------------------------------
@@ -88,10 +88,10 @@ def __lbox_cast_geometries(labelbox_df: pd.DataFrame) -> pd.DataFrame:
     return df_out
 
 
-def from_labelbox(
+def labelbox_to_lapix(
     labelbox_df: pd.DataFrame,
     schematic_to_id: dict[str, int]
-) -> Lapix:
+) -> LapixDataFrame:
     '''Transform the raw dataframe from LabelBox data to Lapix dataframe'''
 
     df_out = labelbox_df.copy()
@@ -127,7 +127,7 @@ def from_labelbox(
 
     df_out = df_out.drop(['ID', 'objects', 'Reviews'], axis=1)
 
-    lapix_df = Lapix(df_out)
+    lapix_df = LapixDataFrame(df_out)
 
     return lapix_df
 
@@ -166,8 +166,8 @@ def pol_to_coco_segment(
         raise TypeError(f'Geometry shape is not a polygon or MultiPolygon. This is a {geo.geom_type}.')
 
 
-def __to_OD_COCO_annotations(
-    lapix_df: Lapix,
+def __lapix_to_od_coco_annotations(
+    lapix_df: LapixDataFrame,
     decimals: int = 2,
 ) -> list[dict[str, Any]]:
     cols = lapix_df.columns
@@ -188,8 +188,8 @@ def __to_OD_COCO_annotations(
     ).to_numpy().tolist()
 
 
-def to_OD_COCO_annotations(
-    lapix_df: Lapix,
+def lapix_to_od_coco_annotations(
+    lapix_df: LapixDataFrame,
     decimals: int = 2,
     processes: int = 1
 ) -> list[dict[str, Any]]:
@@ -210,7 +210,7 @@ def to_OD_COCO_annotations(
     procs = []
     for ann_ids in ann_ids_splitted:
         df_to_process = lapix_df.loc[lapix_df.index.isin(ann_ids), :]
-        p = workers.apply_async(__to_OD_COCO_annotations, (df_to_process, decimals))
+        p = workers.apply_async(__lapix_to_od_coco_annotations, (df_to_process, decimals))
         procs.append(p)
 
     annotations_coco = []
@@ -220,8 +220,8 @@ def to_OD_COCO_annotations(
     return annotations_coco
 
 
-def create_COCO_OD(
-    lapix_df: Lapix,
+def create_coco_od(
+    lapix_df: LapixDataFrame,
     categories_coco: list[dict[str, str]],
     decimals: int = 2,
     processes: int = 1,
@@ -239,7 +239,7 @@ def create_COCO_OD(
         } for _, row in lapix_df_clean.iterrows()
     ]
 
-    annotations_coco = to_OD_COCO_annotations(lapix_df, decimals, processes)
+    annotations_coco = lapix_to_od_coco_annotations(lapix_df, decimals, processes)
 
     coco_od = {
         'categories': categories_coco,

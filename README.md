@@ -87,7 +87,12 @@ from lapixdl.evaluation.visualize import show_detections
 The available color maps are the [ones from matplotlib](https://matplotlib.org/3.1.1/gallery/color/colormap_reference.html).
 
 ### For Data Conversion
-This module exports the functions for data conversio.
+This module exports the functions for data conversion.
+```python
+from lapixdl.convert import labelbox_to_lapix
+from lapixdl.convert import lapix_to_od_coco_annotations
+from lapixdl.convert import create_coco_od
+```
 
 #### Example of conversion from **Labelbox** to **COCO** labels format:
 
@@ -95,8 +100,8 @@ This module exports the functions for data conversio.
 import json
 
 from lapixdl.formats import labelbox
-from lapixdl.convert import create_COCO_OD
-from lapixdl.convert import from_labelbox
+from lapixdl.convert import create_coco_od
+from lapixdl.convert import labelbox_to_lapix
 
 # load the labelbox raw file
 labelbox_df = labelbox.load('labelbox_export_file.json')
@@ -105,7 +110,7 @@ labelbox_df = labelbox.load('labelbox_export_file.json')
 map_categories = {
   '<schematic id from labelbox>': 1 # category id
 }
-lapix_df = from_labelbox(labelbox_df, map_categories)
+lapix_df = labelbox_to_lapix(labelbox_df, map_categories)
 
 # convert it into the desired format (COCO object detection) (just the labels)
 # from lapixdl.convert import to_OD_COCO

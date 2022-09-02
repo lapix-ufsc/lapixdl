@@ -8,25 +8,25 @@ import shapely.wkt
 from lapixdl.base import FileTypeError
 
 
-class Lapix(pd.DataFrame):
+class LapixDataFrame(pd.DataFrame):
     _metadata = ['geometry', 'category']
 
     @property
     def _constructor(self):
-        return Lapix
+        return LapixDataFrame
 
 
 def load(
     filename: str,
     **kwargs: Any
-) -> Lapix:
+) -> LapixDataFrame:
 
     if not filename.endswith(('.parquet.gzip', '.parquet')):
         raise FileTypeError('The file is not a parquet file.')
 
     df = pd.read_parquet(filename, **kwargs)
 
-    lapix_df = Lapix(df)
+    lapix_df = LapixDataFrame(df)
 
     if 'geometry' in df.columns:
         # buffer(0) applied to fix invalid geomtries. From shapely issue #278
@@ -36,7 +36,7 @@ def load(
 
 
 def save(
-        lapix_df: Lapix,
+        lapix_df: LapixDataFrame,
         filename: str,
         compression: str = 'gzip',
         **kwargs: Any

@@ -1,29 +1,29 @@
 from __future__ import annotations
 
-from lapixdl.convert import create_COCO_OD
-from lapixdl.convert import from_labelbox
-from lapixdl.convert import to_OD_COCO_annotations
+from lapixdl.convert import create_coco_od
+from lapixdl.convert import labelbox_to_lapix
+from lapixdl.convert import lapix_to_od_coco_annotations
 from lapixdl.formats import labelbox
 from lapixdl.formats import lapix
-from lapixdl.formats.lapix import Lapix
+from lapixdl.formats.lapix import LapixDataFrame
 
 
-def test_from_labelbox(labelbox_filename):
+def test_labelbox_to_lapix(labelbox_filename):
     labelbox_df = labelbox.load(labelbox_filename)
 
     categories_map = {
         '<Unique ID for category square>': 1
     }
-    lapix_df = from_labelbox(labelbox_df, categories_map)
+    lapix_df = labelbox_to_lapix(labelbox_df, categories_map)
 
     assert lapix_df.shape == (1, 3)
-    assert type(lapix_df) is Lapix
+    assert type(lapix_df) is LapixDataFrame
 
 
-def test_to_OD_COCO_annotations(lapix_filename):
+def test_lapix_to_od_coco_annotations(lapix_filename):
     lapix_df = lapix.load(lapix_filename)
 
-    annotations_coco = to_OD_COCO_annotations(lapix_df)
+    annotations_coco = lapix_to_od_coco_annotations(lapix_df)
 
     assert len(annotations_coco) == 2
 
@@ -35,7 +35,7 @@ def test_to_OD_COCO_annotations(lapix_filename):
     assert all(k in coco_od_labels for k in annotations_coco[0].keys())
 
 
-def test_create_COCO_OD(lapix_filename):
+def test_create_coco_od(lapix_filename):
     lapix_df = lapix.load(lapix_filename)
 
     categories_coco = [{
@@ -44,10 +44,10 @@ def test_create_COCO_OD(lapix_filename):
         'id': 1
     }]
 
-    coco_od = create_COCO_OD(lapix_df, categories_coco)
+    coco_od = create_coco_od(lapix_df, categories_coco)
 
     coco_od_labels = ['categories', 'images', 'annotations']
-    assert all(k in coco_od_labels for k in coco_od.keys())
+    assert all(k in coco_od.keys() for k in coco_od_labels)
 
     info_coco = {
         'year': '2022',
@@ -58,6 +58,6 @@ def test_create_COCO_OD(lapix_filename):
         'date_created': '2022-01-01',
     }
 
-    coco_od = create_COCO_OD(lapix_df, categories_coco, info_coco=info_coco)
+    coco_od = create_coco_od(lapix_df, categories_coco, info_coco=info_coco)
 
     assert coco_od['info'] == info_coco

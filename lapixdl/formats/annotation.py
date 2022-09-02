@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from copy import copy
 from dataclasses import dataclass
 
-from shapely.geometry import MultiPolygon
 from shapely.geometry import Polygon
 
 
@@ -149,49 +147,6 @@ class BBox:
 
     def to_polygon(self) -> Polygon:
         return Polygon(self.coords)
-
-
-@dataclass
-class Annotation:
-    geometry: Polygon | MultiPolygon
-    category_id: int
-    iscrowd: int = 0
-
-    @property
-    def bbox(self) -> BBox:
-        return bounds_to_BBox(self.geometry.bounds, self.category_id)
-
-    @property
-    def _geo_type(self) -> str:
-        return self.geometry.geom_type
-
-    @property
-    def coco_bbox(self) -> list[float | int]:
-        bbox = self.bbox
-        return [bbox.upper_left_x, bbox.upper_left_y, bbox.width, bbox.height]
-
-    def __iter__(self) -> Annotation:
-        self._idx = 0
-
-        if self._geo_type == 'MultiPolygon':
-            self._geometries = list(self.geometry.geoms)
-        elif self._geo_type == 'Polygon':
-            self._geometries = [self.geometry]
-        else:
-            raise TypeError(f'Unexpected geometry type (`{self._geo_type}`) - expected `MultiPolygon` or `Polygon`')
-
-        return self
-
-    def __next__(self) -> Polygon:
-        if self._idx < len(self._geometries):
-            out = self._geometries[self._idx]
-            self._idx += 1
-            return out
-        else:
-            raise StopIteration
-
-    def copy(self) -> Annotation:
-        return copy(self)
 
 
 def bounds_to_BBox(bounds: tuple[float], category_id: int) -> BBox:
