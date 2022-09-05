@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from lapixdl.convert import create_coco_od
+import pytest
+
+from lapixdl.convert import labelbox_to_coco
 from lapixdl.convert import labelbox_to_lapix
 from lapixdl.convert import lapix_to_od_coco_annotations
 from lapixdl.formats import labelbox
@@ -8,13 +10,10 @@ from lapixdl.formats import lapix
 from lapixdl.formats.lapix import LapixDataFrame
 
 
-def test_labelbox_to_lapix(labelbox_filename):
+def test_labelbox_to_lapix(labelbox_filename, labelbox_map_categories):
     labelbox_df = labelbox.load(labelbox_filename)
 
-    categories_map = {
-        '<Unique ID for category square>': 1
-    }
-    lapix_df = labelbox_to_lapix(labelbox_df, categories_map)
+    lapix_df = labelbox_to_lapix(labelbox_df, labelbox_map_categories)
 
     assert lapix_df.shape == (1, 3)
     assert type(lapix_df) is LapixDataFrame
@@ -35,8 +34,7 @@ def test_lapix_to_od_coco_annotations(lapix_filename):
     assert all(k in coco_od_labels for k in annotations_coco[0].keys())
 
 
-def test_create_coco_od(lapix_filename):
-    lapix_df = lapix.load(lapix_filename)
+def test_labelbox_to_coco(labelbox_filename, labelbox_map_categories):
 
     categories_coco = [{
         'supercategory': None,
@@ -44,7 +42,12 @@ def test_create_coco_od(lapix_filename):
         'id': 1
     }]
 
-    coco_od = create_coco_od(lapix_df, categories_coco)
+    coco_od = labelbox_to_coco(
+        labelbox_filename,
+        labelbox_map_categories,
+        categories_coco,
+        image_shape=(1000, 1000)
+    )
 
     coco_od_labels = ['categories', 'images', 'annotations']
     assert all(k in coco_od.keys() for k in coco_od_labels)
@@ -58,6 +61,22 @@ def test_create_coco_od(lapix_filename):
         'date_created': '2022-01-01',
     }
 
-    coco_od = create_coco_od(lapix_df, categories_coco, info_coco=info_coco)
+    coco_od = labelbox_to_coco(
+        labelbox_filename,
+        labelbox_map_categories,
+        categories_coco,
+        info_coco=info_coco,
+        image_shape=(1000, 1000)
+    )
 
     assert coco_od['info'] == info_coco
+
+
+def test_labelbox_to_coco_wrong_target(labelbox_filename, labelbox_map_categories):
+    with pytest.raises(NotImplementedError):
+        labelbox_to_coco(labelbox_filename, labelbox_map_categories, [], target='Wrong target', image_shape=(1000, 1000))
+
+
+def test_labelbox_to_coco_wrong_image_shape(labelbox_filename, labelbox_map_categories):
+    with pytest.raises(NotImplementedError):
+        labelbox_to_coco(labelbox_filename, labelbox_map_categories, [], target='Wrong target', image_shape=None)

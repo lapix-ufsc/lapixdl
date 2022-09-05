@@ -61,3 +61,16 @@ def save(
     df_out = lapix_df.copy()
     df_out['geometry'] = df_out['geometry'].apply(lambda x: x.wkt)
     df_out.to_parquet(filename, compression=compression, **kwargs)
+
+
+def generate_ids(
+    column: pd.Series,
+) -> pd.Series:
+    column = column.astype('category')
+    return column.cat.codes + 1
+
+
+def geometries_area(
+    lapix_df: LapixDataFrame,
+) -> pd.Series:
+    return pd.Series(lapix_df['geometry'].apply(lambda x: x.area))

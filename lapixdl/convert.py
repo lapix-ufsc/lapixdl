@@ -256,7 +256,7 @@ def lapix_to_od_coco_annotations(
     return annotations_coco
 
 
-def create_coco_od(
+def __generate_coco_od_file(
     lapix_df: LapixDataFrame,
     categories_coco: list[dict[str, str]],
     decimals: int = 2,
@@ -298,3 +298,73 @@ def create_coco_od(
     }
 
     return coco_od
+
+
+# -----------------------------------------------------------------------
+# Functions to convert from x to y directly (ex: labelbox to coco)
+def labelbox_to_coco(
+    labelbox_filename: str,
+    schematic_to_id: dict[str, int],
+    categories_coco: list[dict[str, str]],
+    *,
+    target: str = 'OD',
+    decimals: int = 2,
+    processes: int = 1,
+    info_coco: dict[str, Any] | None = None,
+    image_shape: tuple[int, int] | None = None
+) -> dict[str, Any]:
+    """Generate dictionary into COCO format from labelbox
+
+    Args:
+        labelbox_filename (str): The full filename for the labelbox
+    JSON file
+        schematic_to_id (dict[str, int]): A map dictionary between
+    schematic id at labelbox and the matching category
+        categories_coco (list[dict[str, str]]): A list with dicts within
+    the categories into coco format.
+        target (str): The desired target format of the COCO file, this
+    can be (`OD` or `OBJECT DETECTION`)
+        decimals (int): The quantity of decimals desired on the coco
+    annotations
+        processes (int): The number of processes to be triggered to
+    perform the conversion
+        info_coco (dict[str, Any] | None ): The data to be the `info`
+    field of the COCO data.
+        image_shape (tuple[int, int] | None): If a tuple will set this
+    shape (height, width) for all images, if None, will try open and
+    load the shape of each image.
+
+    Return:
+        dict[str, Any]: A dictionary with the data into the COCO target
+    format
+    """
+    from lapixdl.formats import labelbox
+    from lapixdl.formats import lapix
+
+    labelbox_df = labelbox.load(labelbox_filename)
+
+    lapix_df = labelbox_to_lapix(labelbox_df, schematic_to_id)
+
+    lapix_df['image_id'] = lapix.generate_ids(lapix_df['image_name'])
+    lapix_df['area'] = lapix.geometries_area(lapix_df)
+    lapix_df['iscrowd'] = 0  # TODO: Auto check this?
+
+    if isinstance(image_shape, tuple):
+        height, width = image_shape[:2]
+        lapix_df['image_height'] = height
+        lapix_df['image_width'] = width
+    else:
+        raise NotImplementedError
+
+    if target.upper() in {'OD', 'OBJECT DETECTION'}:
+        coco_dict = __generate_coco_od_file(
+            lapix_df,
+            categories_coco,
+            decimals,
+            processes,
+            info_coco
+        )
+    else:
+        raise NotImplementedError
+
+    return coco_dict

@@ -32,7 +32,7 @@ def labelbox_raw(polygon_example):
             'Label': {
                 'objects': [{
                     'featureId': '<ID for this annotation - 26>',
-                    'schemaId': '<Unique ID for category square>',
+                    'schemaId': 'Unique_schematicID_for_category_square',
                     'color': '#1CE6FF',
                     'title': 'square',
                     'value': 'square',
@@ -52,6 +52,13 @@ def labelbox_filename(labelbox_raw, tmpdir):
         json.dump(labelbox_raw, outfile)
 
     return filename
+
+
+@pytest.fixture
+def labelbox_map_categories():
+    return {
+        'Unique_schematicID_for_category_square': 1
+    }
 
 
 @pytest.fixture

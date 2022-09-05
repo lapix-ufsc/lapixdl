@@ -90,8 +90,7 @@ The available color maps are the [ones from matplotlib](https://matplotlib.org/3
 This module exports the functions for data conversion.
 ```python
 from lapixdl.convert import labelbox_to_lapix
-from lapixdl.convert import lapix_to_od_coco_annotations
-from lapixdl.convert import create_coco_od
+from lapixdl.convert import labelbox_to_coco
 ```
 
 #### Example of conversion from **Labelbox** to **COCO** labels format:
@@ -99,30 +98,28 @@ from lapixdl.convert import create_coco_od
 ```python
 import json
 
-from lapixdl.formats import labelbox
-from lapixdl.convert import create_coco_od
-from lapixdl.convert import labelbox_to_lapix
-
-# load the labelbox raw file
-labelbox_df = labelbox.load('labelbox_export_file.json')
+from lapixdl.formats import labelbox_to_coco
 
 # convert it to a intermediary format
 map_categories = {
   '<schematic id from labelbox>': 1 # category id
 }
-lapix_df = labelbox_to_lapix(labelbox_df, map_categories)
 
-# convert it into the desired format (COCO object detection) (just the labels)
-# from lapixdl.convert import to_OD_COCO
-# coco_dict = to_OD_COCO(lapix_df)
-
-# convert it and create the full COCO OD file
+# convert it
 categories_coco = [{
   'supercategory': None,
   'name': 'example_category',
   'id': 1
 }]
-coco_dict = create_COCO_OD(lapix_df, categories_coco)
+
+# create the full COCO OD file
+coco_dict = labelbox_to_coco(
+  'labelbox_export_file.json',
+  map_categories,
+  categories_coco,
+  target = 'object detection',
+  image_shape = (1200, 1600)
+)
 
 # Saves converted json
 with open('./coco.json', 'w') as out_file:
