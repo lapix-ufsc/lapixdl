@@ -87,10 +87,12 @@ class BBox:
 
     @property
     def slice_x(self) -> slice:
+        """slice: A slice between upper_left_x and upper_right_x"""
         return slice(self.upper_left_x, self.upper_right_point[0])
 
     @property
     def slice_y(self) -> slice:
+        """slice: A slice between upper_left_y and bottom_left_y"""
         return slice(self.upper_left_y, self.bottom_left_point[1])
 
     def intersection_area_with(self: BBox, bbox: BBox) -> int:
@@ -146,10 +148,21 @@ class BBox:
         return self.area + bbox.area - (intersection_area or self.intersection_area_with(bbox))
 
     def to_polygon(self) -> Polygon:
+        """Polygon: A shapely polygon from the coordinates of the bbox"""
         return Polygon(self.coords)
 
 
 def bounds_to_BBox(bounds: tuple[float], category_id: int) -> BBox:
+    """Generate a BBox from a tuple of bounds
+
+    Args:
+        bounds (tuple[float]): A tuple of floats in the following order
+    (min_x, min_y, max_x, max_y)
+        category_id: A category id fot the BBox
+
+    Returns:
+        BBox: An BBox based on the bounds
+    """
     b = tuple(int(i) for i in bounds)
     min_x, min_y, max_x, max_y = b
     return BBox(upper_left_x=min_x,

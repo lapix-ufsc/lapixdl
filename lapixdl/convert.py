@@ -17,6 +17,9 @@ from lapixdl.formats.lapix import LapixDataFrame
 # -----------------------------------------------------------------------
 # Functions to work with data from LabelBox (lbox)
 def lbox_geo_to_shapely(object: dict[str, Any]) -> Polygon | Point | np.nan:
+    """Convert the labelbox geometries into shapely geometries
+    (For polygons or Points)
+    """
     keys = object.keys()
 
     if 'polygon' in keys:
@@ -31,6 +34,7 @@ def lbox_geo_to_shapely(object: dict[str, Any]) -> Polygon | Point | np.nan:
 
 
 def __lbox_has_review(reviews: list[dict[str, Any]]) -> bool:
+    """Verify if the labelbox review field has at least one review"""
     for x in reviews:
         if x['score'] == 1:
             return True
@@ -39,6 +43,8 @@ def __lbox_has_review(reviews: list[dict[str, Any]]) -> bool:
 
 
 def __lbox_drop_duplicate_labels(labelbox_df: pd.DataFrame) -> pd.DataFrame:
+    """Remove duplicated annotations from labelbox dataframe"""
+
     duplicated_idx = labelbox_df['image_name'].duplicated(keep=False)
     df_duplicated = labelbox_df.loc[duplicated_idx, :].copy()
 
@@ -67,6 +73,7 @@ def __lbox_drop_duplicate_labels(labelbox_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def __lbox_explode_images_annotations(labelbox_df: pd.DataFrame) -> pd.DataFrame:
+    """Explode image annotations of the Labelbox dataframe"""
     labelbox_df['objects'] = labelbox_df.apply(lambda row: row['Label']['objects'], axis=1)
     labelbox_df = labelbox_df.explode('objects')
     labelbox_df = labelbox_df.reset_index()
@@ -76,6 +83,7 @@ def __lbox_explode_images_annotations(labelbox_df: pd.DataFrame) -> pd.DataFrame
 
 
 def __lbox_cast_geometries(labelbox_df: pd.DataFrame) -> pd.DataFrame:
+    """Cast the labelbox geometries into shapely geometries"""
     labelbox_df['geometry'] = labelbox_df['objects'].apply(lambda obj: lbox_geo_to_shapely(obj))
     df_out = labelbox_df.dropna(axis=0, subset=['geometry'])
 
@@ -138,6 +146,16 @@ def bounds_to_coco_bb(
     bounds: tuple[float],
     decimals: int = 2,
 ) -> list[float]:
+    """Generate a bbox in coco format from a tuple of bounds
+
+    Args:
+        bounds (tuple[float]): A tuple of floats in the following order
+    (min_x, min_y, max_x, max_y)
+        decimals: The quantity of decimals to round the data
+
+    Returns:
+        list[float]: An bbox into coco format based on the bounds
+    """
     # bounds is in  (minx, miny, maxx, maxy)
     # bb  of coco is in [min(x), min(y), max(x)-min(x), max(y)-min(y)]
     b = tuple(np.round(x, decimals) for x in bounds)
@@ -149,6 +167,7 @@ def pol_to_coco_segment(
     geo: Polygon | MultiPolygon,
     decimals: int = 2,
 ) -> list[list[float]]:
+    """Generate a coco segment from shapely polygon"""
     # polygon of shapely is a class
     # polygon or segmentation at coco is a list of [[x0, y0, x1, y1 ...]]
 
@@ -170,6 +189,8 @@ def __lapix_to_od_coco_annotations(
     lapix_df: LapixDataFrame,
     decimals: int = 2,
 ) -> list[dict[str, Any]]:
+    """Convert lapix dataframe annotations into object detection
+    annotations in a single process"""
     cols = lapix_df.columns
     if not all(c in cols for c in ['area', 'image_id', 'iscrowd']):
         raise KeyError('The dataframe need to have the columns `area`, `image_id`, `iscrowd`!')
@@ -193,10 +214,25 @@ def lapix_to_od_coco_annotations(
     decimals: int = 2,
     processes: int = 1
 ) -> list[dict[str, Any]]:
+    """Convert lapix dataframe annotations into object detection
+    annotations in a multiprocesses
+
+    Args:
+        lapix_df (LapixDataFrame): The data into Lapix format, need to
+    have the columns: `area`, `image_id`, `iscrowd` and `geometry`
+        decimals (int): The quantity of decimals desired on the coco
+    annotations
+        processes (int): The number of processes to be triggered to
+    perform the conversion
+
+    Results:
+        list[dict[str, Any]]: A list with the annotations in the coco
+    for object detection format.
+    """
 
     cols = lapix_df.columns
-    if not all(c in cols for c in ['area', 'image_id', 'iscrowd']):
-        raise KeyError('The dataframe need to have the columns `area`, `image_id`, `iscrowd`!')
+    if not all(c in cols for c in {'area', 'image_id', 'iscrowd', 'geometry'}):
+        raise KeyError('The dataframe need to have the columns `area`, `image_id`, `iscrowd` and `geometry`!')
 
     # To ensure that will have sequential index
     lapix_df.reset_index(drop=True, inplace=True)
@@ -227,7 +263,20 @@ def create_coco_od(
     processes: int = 1,
     info_coco: dict[str, Any] | None = None
 ) -> dict[str, Any]:
+    """Create the object detection COCO data
 
+    Args:
+        lapix_df (LapixDataFrame): The data into Lapix format, need to
+    have the columns: `area`, `image_id`, `iscrowd` and `geometry`.
+        categories_coco (list[dict[str, str]]): A list with dicts within
+    the categories into coco format.
+        decimals (int): The quantity of decimals desired on the coco
+    annotations
+        processes (int): The number of processes to be triggered to
+    perform the conversion
+        info_coco (dict[str, Any] | None ): The data to be the `info`
+    field of the COCO data.
+    """
     lapix_df_clean = lapix_df.drop_duplicates('image_name')
 
     images_coco = [
