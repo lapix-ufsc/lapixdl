@@ -100,19 +100,19 @@ import json
 
 from lapixdl.formats import labelbox_to_coco
 
-# convert it to a intermediary format
+# A map categories between labelbox schematic id and category ID
 map_categories = {
   '<schematic id from labelbox>': 1 # category id
 }
 
-# convert it
+# The categories section in the COCO format
 categories_coco = [{
   'supercategory': None,
   'name': 'example_category',
   'id': 1
 }]
 
-# create the full COCO OD file
+# Convert it and create the COCO OD data
 coco_dict = labelbox_to_coco(
   'labelbox_export_file.json',
   map_categories,
