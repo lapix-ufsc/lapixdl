@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from lapixdl.evaluation.evaluate import calculate_pairwise_bbox_ious
-from lapixdl.evaluation.model import BBox
+from lapixdl.formats.annotation import BBox
 
 
 def test_calculate_pairwise_bbox_ious():

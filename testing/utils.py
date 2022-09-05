@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from lapixdl.evaluation.model import BBox
+from lapixdl.formats.annotation import BBox
 
 
 def bin_mask_from_bb(mask_shape: tuple[int, int], bbox: BBox):

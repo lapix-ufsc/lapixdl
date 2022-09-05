@@ -12,12 +12,12 @@ from matplotlib.colors import ListedColormap
 from lapixdl.evaluation.evaluate import evaluate_classification
 from lapixdl.evaluation.evaluate import evaluate_detection
 from lapixdl.evaluation.evaluate import evaluate_segmentation
-from lapixdl.evaluation.model import BBox
 from lapixdl.evaluation.model import Classification
 from lapixdl.evaluation.model import Result
 from lapixdl.evaluation.visualize import show_classifications
 from lapixdl.evaluation.visualize import show_detections
 from lapixdl.evaluation.visualize import show_segmentations
+from lapixdl.formats.annotation import BBox
 
 
 def main():
