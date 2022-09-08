@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import pytest
+from shapely.geometry import MultiPolygon
+from shapely.geometry import Point
 from shapely.geometry import Polygon
 
+from lapixdl.formats.annotation import Annotation
 from lapixdl.formats.annotation import BBox
 from lapixdl.formats.annotation import bounds_to_BBox
 
@@ -54,3 +58,51 @@ def test_bounds_to_BBox(polygon_example):
     assert bbox.width == 15
     assert bbox.height == 28
     assert bbox.cls == 0
+
+
+def test_annotation_bbox(polygon_example):
+    ann = Annotation(polygon_example, 0)
+
+    assert ann.bbox.upper_left_x == 0
+    assert ann.bbox.upper_left_y == 0
+    assert ann.bbox.width == 15
+    assert ann.bbox.height == 28
+    assert ann.bbox.cls == 0
+
+
+def test_annotation_geo_type(polygon_example):
+    ann = Annotation(polygon_example, 1)
+    geo_type = ann._geo_type
+
+    assert geo_type == 'Polygon'
+
+
+def test_annotation_coco_bbox(polygon_example):
+    ann = Annotation(polygon_example, 1)
+    min_x, min_y, max_x, max_y = polygon_example.bounds
+    assert ann.coco_bbox == [min_x, min_y, int(max_x) - int(min_x), int(max_y) - int(min_y)]
+
+
+def test_annotation_iter(polygon_example):
+    ann = Annotation(polygon_example, 1)
+
+    assert len([geo for geo in ann]) == 1
+
+    mult_p = MultiPolygon([polygon_example, polygon_example])
+    ann = Annotation(mult_p, 1)
+
+    assert len([geo for geo in ann]) == 2
+
+
+def test_annotation_iter_wrong_geo():
+    with pytest.raises(TypeError):
+        iter(Annotation(Point(0, 0), 3))
+
+
+def test_annotation_copy(polygon_example):
+    ann = Annotation(polygon_example, 1)
+    ann2 = ann.copy()
+
+    assert ann == ann2
+    ann2.geometry = ann2.geometry.buffer(10)
+    assert not ann.geometry.equals(ann2.geometry)
