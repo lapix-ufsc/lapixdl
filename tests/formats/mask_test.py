@@ -5,9 +5,9 @@ import os
 import numpy as np
 import pytest
 from PIL import Image
-from testing.utils import mask_categorical
 
 from lapixdl.formats.mask import Mask
+from testing.utils import mask_categorical
 
 
 @pytest.fixture
