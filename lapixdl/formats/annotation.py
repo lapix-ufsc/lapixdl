@@ -197,7 +197,7 @@ class Annotation:
         return copy(self)
 
 
-def bounds_to_BBox(bounds: tuple[float], category_id: int) -> BBox:
+def bounds_to_bbox(bounds: tuple[float], category_id: int) -> BBox:
     """Generate a BBox from a tuple of bounds
 
     Args:
