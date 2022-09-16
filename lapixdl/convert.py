@@ -403,13 +403,11 @@ def save_lapixdf_as_masks(
     '''Saves masks as files based on the annotations from a Lapix DataFrame
 
     Args:
-        lapix_df (LapixDataFrame): The data into Lapix format, need to
-    have the columns: `image_id` and `geometry`
-        output_directory (str): The directory desired to save the images
-        mask_extension (str): The masks extensions, by default is PNG,
-    this will also define the image type.
-        processes (int): The number of processes to be triggered to
-    perform the conversion
+        lapix_df (LapixDataFrame): The data in the Lapix format. Needs to
+    have the following columns: `image_id` and `geometry`.
+        output_directory (str): The directory where the images should be saved.
+        mask_extension (str): The image file extension/type. Defaults to '.png'.
+        processes (int): The number of processes to be used to perform the conversion.
 
     '''
     img_ids = lapix_df['image_id'].unique()
