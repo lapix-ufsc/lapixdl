@@ -394,7 +394,7 @@ def __lapix_to_masks(
         mask.save(out_path)
 
 
-def lapix_to_masks(
+def save_lapixdf_as_masks(
     lapix_df: LapixDataFrame,
     output_directory: str,
     mask_extension: str = '.png',
