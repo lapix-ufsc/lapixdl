@@ -169,7 +169,7 @@ class Annotation:
         return self.geometry.geom_type
 
     @property
-    def coco_bbox(self) -> list[float | int]:
+    def xywh_bbox(self) -> list[float | int]:
         bbox = self.bbox
         return [bbox.upper_left_x, bbox.upper_left_y, bbox.width, bbox.height]
 
