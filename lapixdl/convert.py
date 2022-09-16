@@ -413,7 +413,7 @@ def save_lapixdf_as_masks(
     img_ids = lapix_df['image_id'].unique()
 
     if len(img_ids) == 0:
-        print('Do not have annotations to generate the masks!', file=sys.stderr)
+        print('There is no annotation to save as mask.', file=sys.stderr)
         return
 
     images_ids_splitted = np.array_split(img_ids, processes)
