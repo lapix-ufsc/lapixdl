@@ -362,8 +362,7 @@ def annotations_to_mask(
     width: int = 1600,
     height: int = 1200,
 ) -> Mask:
-    """Mask: Generate a Mask with in the shape (height, width) with the
-    annotations"""
+    """Creates a Mask with the specified shape based on the annotations"""
     shape = (height, width)
 
     annotations_sorted = sort_annotations_to_draw(annotations)
