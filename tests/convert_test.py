@@ -14,8 +14,8 @@ from lapixdl.convert import draw_annotation
 from lapixdl.convert import labelbox_to_coco
 from lapixdl.convert import labelbox_to_lapix
 from lapixdl.convert import lapix_to_annotations
-from lapixdl.convert import lapix_to_masks
 from lapixdl.convert import lapix_to_od_coco_annotations
+from lapixdl.convert import save_lapixdf_as_masks
 from lapixdl.convert import sort_annotations_to_draw
 from lapixdl.formats import labelbox
 from lapixdl.formats import lapix
@@ -109,15 +109,15 @@ def test_lapix_to_masks_single_process(lapix_raw, tmpdir):
     assert len(tmpdir.listdir()) == 2
 
 
-def test_lapix_to_masks(lapix_raw, tmpdir):
-    lapix_to_masks(lapix_raw, str(tmpdir), '.png', 2)
+def test_save_lapixdf_as_masks(lapix_raw, tmpdir):
+    save_lapixdf_as_masks(lapix_raw, str(tmpdir), '.png', 2)
     assert len(tmpdir.listdir()) == 2
 
 
-def test_lapix_to_masks_without_images(capsys):
-    lapix_to_masks(pd.DataFrame(columns=['image_id', 'image_name']), '')
+def test_save_lapixdf_as_masks_without_images(capsys):
+    save_lapixdf_as_masks(pd.DataFrame(columns=['image_id', 'image_name']), '')
     _, err = capsys.readouterr()
-    assert 'Do not have annotations to generate the masks!\n' == err
+    assert 'There is no annotation to save as mask.\n' == err
 
 
 def test_labelbox_to_coco_od(labelbox_filename, labelbox_map_categories):

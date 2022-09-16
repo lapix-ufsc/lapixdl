@@ -162,7 +162,7 @@ class Annotation:
 
     @property
     def bbox(self) -> BBox:
-        return bounds_to_BBox(self.geometry.bounds, self.category_id)
+        return bounds_to_bbox(self.geometry.bounds, self.category_id)
 
     @property
     def _geo_type(self) -> str:

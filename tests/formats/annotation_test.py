@@ -7,7 +7,7 @@ from shapely.geometry import Polygon
 
 from lapixdl.formats.annotation import Annotation
 from lapixdl.formats.annotation import BBox
-from lapixdl.formats.annotation import bounds_to_BBox
+from lapixdl.formats.annotation import bounds_to_bbox
 
 
 def test_bbox():
@@ -51,8 +51,8 @@ def test_bbox_to_polygon():
     assert out.equals_exact(Polygon(coords), 0)
 
 
-def test_bounds_to_BBox(polygon_example):
-    bbox = bounds_to_BBox(polygon_example.bounds, 0)
+def test_bounds_to_bbox(polygon_example):
+    bbox = bounds_to_bbox(polygon_example.bounds, 0)
     assert bbox.upper_left_x == 0
     assert bbox.upper_left_y == 0
     assert bbox.width == 15
@@ -77,10 +77,10 @@ def test_annotation_geo_type(polygon_example):
     assert geo_type == 'Polygon'
 
 
-def test_annotation_coco_bbox(polygon_example):
+def test_annotation_xywh_bbox(polygon_example):
     ann = Annotation(polygon_example, 1)
     min_x, min_y, max_x, max_y = polygon_example.bounds
-    assert ann.coco_bbox == [min_x, min_y, int(max_x) - int(min_x), int(max_y) - int(min_y)]
+    assert ann.xywh_bbox == [min_x, min_y, int(max_x) - int(min_x), int(max_y) - int(min_y)]
 
 
 def test_annotation_iter(polygon_example):
