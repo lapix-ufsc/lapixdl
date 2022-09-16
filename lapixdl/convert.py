@@ -418,8 +418,8 @@ def save_lapixdf_as_masks(
 
     images_ids_splitted = np.array_split(img_ids, processes)
     print(
-        f'Start to generate a total of {len(img_ids)} semantic segmentation masks based on the annotations using '
-        f'{processes} processes with {len(images_ids_splitted[0])} masks with annotations per process...',
+        f'Starting to save {len(img_ids)} semantic segmentation masks using '
+        f'{processes} processes with {len(images_ids_splitted[0])} masks per process...',
     )
 
     workers = multiprocessing.Pool(processes=processes)
