@@ -361,11 +361,12 @@ def annotations_to_mask(
     annotations: list[Annotation],
     width: int = 1600,
     height: int = 1200,
+    draw_order: tuple[int, ...] | None = None,
 ) -> Mask:
     """Creates a Mask with the specified shape based on the annotations"""
     shape = (height, width)
 
-    annotations_sorted = sort_annotations_to_draw(annotations)
+    annotations_sorted = sort_annotations_to_draw(annotations, draw_order)
 
     out = Image.fromarray(np.zeros(shape, dtype=np.uint8))
     for ann in annotations_sorted:
@@ -377,7 +378,8 @@ def annotations_to_mask(
 def __lapix_to_masks(
     lapix_df: LapixDataFrame,
     output_directory: str,
-    mask_extension: str = '.png'
+    mask_extension: str = '.png',
+    draw_order: tuple[int, ...] | None = None,
 ) -> None:
     df_groupped = lapix_df.groupby('image_id')
 
@@ -387,7 +389,7 @@ def __lapix_to_masks(
         w = df_by_img['image_width'].unique()[0]
         h = df_by_img['image_height'].unique()[0]
 
-        mask = annotations_to_mask(annotations, int(w), int(h))
+        mask = annotations_to_mask(annotations, int(w), int(h), draw_order)
 
         img_name = basename(df_by_img.iloc[0]['image_name']) + mask_extension
         out_path = os.path.join(output_directory, img_name)
@@ -398,6 +400,7 @@ def save_lapixdf_as_masks(
     lapix_df: LapixDataFrame,
     output_directory: str,
     mask_extension: str = '.png',
+    draw_order: tuple[int, ...] | None = None,
     processes: int = 1
 ) -> None:
     '''Saves masks as files based on the annotations from a Lapix DataFrame
@@ -405,9 +408,15 @@ def save_lapixdf_as_masks(
     Args:
         lapix_df (LapixDataFrame): The data in the Lapix format. Needs to
     have the following columns: `image_id` and `geometry`.
-        output_directory (str): The directory where the images should be saved.
-        mask_extension (str): The image file extension/type. Defaults to '.png'.
-        processes (int): The number of processes to be used to perform the conversion.
+        output_directory (str): The directory where the images should be
+    saved.
+        mask_extension (str): The image file extension/type. Defaults to
+    '.png'.
+        draw_order (tuple[int, ...] | None): If draw_order is None sorts
+    in ascending order based on the category value. Otherwise this will
+    draw the masks based on the tuple sequence.
+        processes (int): The number of processes to be used to perform
+    the conversion.
 
     '''
     img_ids = lapix_df['image_id'].unique()
@@ -427,7 +436,7 @@ def save_lapixdf_as_masks(
 
     for images_ids in images_ids_splitted:
         df_to_process = lapix_df.loc[lapix_df['image_id'].isin(images_ids), :]
-        p = workers.apply_async(__lapix_to_masks, (df_to_process, output_directory, mask_extension))
+        p = workers.apply_async(__lapix_to_masks, (df_to_process, output_directory, mask_extension, draw_order))
         procs.append(p)
 
     workers.close()

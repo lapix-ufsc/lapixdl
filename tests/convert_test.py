@@ -110,7 +110,7 @@ def test_lapix_to_masks_single_process(lapix_raw, tmpdir):
 
 
 def test_save_lapixdf_as_masks(lapix_raw, tmpdir):
-    save_lapixdf_as_masks(lapix_raw, str(tmpdir), '.png', 2)
+    save_lapixdf_as_masks(lapix_raw, str(tmpdir), '.png', processes=2)
     assert len(tmpdir.listdir()) == 2
 
 
