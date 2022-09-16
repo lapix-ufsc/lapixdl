@@ -400,7 +400,7 @@ def save_lapixdf_as_masks(
     mask_extension: str = '.png',
     processes: int = 1
 ) -> None:
-    '''Generate masks files based on the annotations from Lapix DataFrame
+    '''Saves masks as files based on the annotations from a Lapix DataFrame
 
     Args:
         lapix_df (LapixDataFrame): The data into Lapix format, need to
