@@ -336,7 +336,7 @@ def sort_annotations_to_draw(
     if draw_order is None:
         draw_order = tuple(np.unique(list(items)))
     elif not isinstance(draw_order, tuple):
-        raise ValueError('Unexpected value for `draw_order`. Need to be a tuple of int, or None.')
+        raise ValueError('Unexpected value for `draw_order`. The value needs to be a tuple of int or None.')
 
     out = [ann for cat in draw_order for ann in items[cat]]
 
