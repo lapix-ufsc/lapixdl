@@ -326,8 +326,8 @@ def sort_annotations_to_draw(
     annotations: list[Annotation],
     draw_order: tuple[int, ...] | None = None
 ) -> list[Annotation]:
-    '''Will sort the annotations based on the draw_order, if draw_order
-    is None will sort in ascending order based in category value'''
+    '''Sorts the annotations based on the draw_order. If draw_order
+    is None sorts in ascending order based on the category value'''
     items = defaultdict(list)
 
     for ann in annotations:
