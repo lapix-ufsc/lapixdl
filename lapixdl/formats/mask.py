@@ -16,7 +16,7 @@ class Mask:
         self.categorical: np.ndarray = np.array(self.categorical, dtype=np.uint8)
 
         if not len(self.categorical.shape) == 2:
-            raise ValueError('Unexpected shape, categorical mask need to be a matrix (2D array)!')
+            raise ValueError('Unexpected shape. The categorical mask needs to be a 2D array.')
 
     @property
     def height(self) -> int:
