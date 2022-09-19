@@ -6,6 +6,7 @@ import sys
 from collections import defaultdict
 from itertools import chain
 from typing import Any
+from typing import Iterator
 
 import numpy as np
 import pandas as pd
@@ -320,6 +321,24 @@ def lapix_to_annotations(lapix_df: LapixDataFrame) -> list[Annotation]:
     ]
 
 
+def lapix_to_masks(
+    lapix_df: LapixDataFrame,
+    draw_order: tuple[int, ...] | None = None,
+) -> Iterator[tuple[str, Mask]]:
+    df_groupped = lapix_df.groupby('image_id')
+    for _, df_by_img in df_groupped:
+        annotations = lapix_to_annotations(df_by_img)
+
+        w = df_by_img['image_width'].unique()[0]
+        h = df_by_img['image_height'].unique()[0]
+        image_name = basename(df_by_img.iloc[0]['image_name'])
+
+        yield (
+            image_name,
+            annotations_to_mask(annotations, int(w), int(h), draw_order)
+        )
+
+
 # -----------------------------------------------------------------------
 # Functions to generate masks
 def sort_annotations_to_draw(
@@ -375,24 +394,18 @@ def annotations_to_mask(
     return Mask(np.array(out))
 
 
-def __lapix_to_masks(
+def __save_masks_as_files(
     lapix_df: LapixDataFrame,
     output_directory: str,
     mask_extension: str = '.png',
     draw_order: tuple[int, ...] | None = None,
 ) -> None:
-    df_groupped = lapix_df.groupby('image_id')
 
-    for _, df_by_img in df_groupped:
-        annotations = lapix_to_annotations(df_by_img)
-
-        w = df_by_img['image_width'].unique()[0]
-        h = df_by_img['image_height'].unique()[0]
-
-        mask = annotations_to_mask(annotations, int(w), int(h), draw_order)
-
-        img_name = basename(df_by_img.iloc[0]['image_name']) + mask_extension
-        out_path = os.path.join(output_directory, img_name)
+    for image_name, mask in lapix_to_masks(lapix_df, draw_order):
+        out_path = os.path.join(
+            output_directory,
+            image_name + mask_extension
+        )
         mask.save(out_path)
 
 
@@ -436,7 +449,7 @@ def save_lapixdf_as_masks(
 
     for images_ids in images_ids_splitted:
         df_to_process = lapix_df.loc[lapix_df['image_id'].isin(images_ids), :]
-        p = workers.apply_async(__lapix_to_masks, (df_to_process, output_directory, mask_extension, draw_order))
+        p = workers.apply_async(__save_masks_as_files, (df_to_process, output_directory, mask_extension, draw_order))
         procs.append(p)
 
     workers.close()

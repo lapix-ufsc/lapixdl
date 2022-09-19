@@ -8,7 +8,7 @@ import pytest
 from PIL import Image
 from shapely.geometry import Polygon
 
-from lapixdl.convert import __lapix_to_masks
+from lapixdl.convert import __save_masks_as_files
 from lapixdl.convert import annotations_to_mask
 from lapixdl.convert import draw_annotation
 from lapixdl.convert import labelbox_to_coco
@@ -105,7 +105,7 @@ def test_annotations_to_mask():
 
 
 def test_lapix_to_masks_single_process(lapix_raw, tmpdir):
-    __lapix_to_masks(lapix_raw, str(tmpdir))
+    __save_masks_as_files(lapix_raw, str(tmpdir))
     assert len(tmpdir.listdir()) == 2
 
 
