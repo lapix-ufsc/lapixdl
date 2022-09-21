@@ -19,3 +19,14 @@ def draw_rectangle(img: np.ndarray, pt1: tuple[int, int], pt2: tuple[int, int], 
     cp = img.copy()
     cp[slice(pt1[0], pt2[0] + 1), slice(pt1[1], pt2[1] + 1)] = fill
     return cp
+
+
+def mask_categorical(shape: tuple[int, int]) -> np.ndarray:
+    h = int(shape[0])
+    w = int(shape[1])
+    out = np.zeros(shape, dtype=np.uint8)
+    out[:h // 2, :w // 2] = 1
+    out[:h // 2, w // 2:] = 2
+    out[h // 2:, :w // 2] = 3
+    out[h // 2:, w // 2:] = 4
+    return np.array(out, dtype=np.uint8)

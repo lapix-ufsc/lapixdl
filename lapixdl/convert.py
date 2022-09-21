@@ -1,17 +1,25 @@
 from __future__ import annotations
 
 import multiprocessing
+import os
+import sys
+from collections import defaultdict
 from itertools import chain
 from typing import Any
+from typing import Iterator
 
 import numpy as np
 import pandas as pd
+from PIL import Image
+from PIL import ImageDraw
 from shapely.geometry import MultiPolygon
 from shapely.geometry import Point
 from shapely.geometry import Polygon
 
 from lapixdl.base import basename
+from lapixdl.formats.annotation import Annotation
 from lapixdl.formats.lapix import LapixDataFrame
+from lapixdl.formats.mask import Mask
 
 
 # -----------------------------------------------------------------------
@@ -298,6 +306,154 @@ def __generate_coco_od_file(
     }
 
     return coco_od
+
+
+# -----------------------------------------------------------------------
+# Functions to work with lapix DataFrame
+def lapix_to_annotations(lapix_df: LapixDataFrame) -> list[Annotation]:
+    return [
+        Annotation(
+            row['geometry'],
+            row['category_id'],
+            row['iscrowd'] if 'iscrowd' in row else 0
+        )
+        for _, row in lapix_df.iterrows()
+    ]
+
+
+def lapix_to_masks(
+    lapix_df: LapixDataFrame,
+    draw_order: tuple[int, ...] | None = None,
+) -> Iterator[tuple[str, Mask]]:
+    df_groupped = lapix_df.groupby('image_id')
+    for _, df_by_img in df_groupped:
+        annotations = lapix_to_annotations(df_by_img)
+
+        w = df_by_img['image_width'].unique()[0]
+        h = df_by_img['image_height'].unique()[0]
+        image_name = basename(df_by_img.iloc[0]['image_name'])
+
+        yield (
+            image_name,
+            annotations_to_mask(annotations, int(w), int(h), draw_order)
+        )
+
+
+# -----------------------------------------------------------------------
+# Functions to generate masks
+def sort_annotations_to_draw(
+    annotations: list[Annotation],
+    draw_order: tuple[int, ...] | None = None
+) -> list[Annotation]:
+    '''Sorts the annotations based on the draw_order. If draw_order
+    is None sorts in ascending order based on the category value'''
+    items = defaultdict(list)
+
+    for ann in annotations:
+        items[ann.category_id].append(ann)
+
+    if draw_order is None:
+        draw_order = tuple(np.unique(list(items)))
+    elif not isinstance(draw_order, tuple):
+        raise ValueError('Unexpected value for `draw_order`. The value needs to be a tuple of int or None.')
+
+    out = [ann for cat in draw_order for ann in items[cat]]
+
+    return out
+
+
+def draw_annotation(
+    target: Image.Image,
+    annotation: Annotation,
+    value: int | tuple[int, int, int],
+) -> Image.Image:
+    '''Image: Draw an Annotation into the target (an Image)'''
+    for geo in annotation:
+        pol_x, pol_y = geo.exterior.coords.xy
+        coords = list(zip(pol_x, pol_y))
+        ImageDraw.Draw(target).polygon(coords, fill=value)
+
+    return target
+
+
+def annotations_to_mask(
+    annotations: list[Annotation],
+    width: int = 1600,
+    height: int = 1200,
+    draw_order: tuple[int, ...] | None = None,
+) -> Mask:
+    """Creates a Mask with the specified shape based on the annotations"""
+    shape = (height, width)
+
+    annotations_sorted = sort_annotations_to_draw(annotations, draw_order)
+
+    out = Image.fromarray(np.zeros(shape, dtype=np.uint8))
+    for ann in annotations_sorted:
+        out = draw_annotation(out, ann, ann.category_id)
+
+    return Mask(np.array(out))
+
+
+def __save_masks_as_files(
+    lapix_df: LapixDataFrame,
+    output_directory: str,
+    mask_extension: str = '.png',
+    draw_order: tuple[int, ...] | None = None,
+) -> None:
+
+    for image_name, mask in lapix_to_masks(lapix_df, draw_order):
+        out_path = os.path.join(
+            output_directory,
+            image_name + mask_extension
+        )
+        mask.save(out_path)
+
+
+def save_lapixdf_as_masks(
+    lapix_df: LapixDataFrame,
+    output_directory: str,
+    mask_extension: str = '.png',
+    draw_order: tuple[int, ...] | None = None,
+    processes: int = 1
+) -> None:
+    '''Saves masks as files based on the annotations from a Lapix DataFrame
+
+    Args:
+        lapix_df (LapixDataFrame): The data in the Lapix format. Needs to
+    have the following columns: `image_id` and `geometry`.
+        output_directory (str): The directory where the images should be
+    saved.
+        mask_extension (str): The image file extension/type. Defaults to
+    '.png'.
+        draw_order (tuple[int, ...] | None): If draw_order is None sorts
+    in ascending order based on the category value. Otherwise this will
+    draw the masks based on the tuple sequence.
+        processes (int): The number of processes to be used to perform
+    the conversion.
+
+    '''
+    img_ids = lapix_df['image_id'].unique()
+
+    if len(img_ids) == 0:
+        print('There is no annotation to save as mask.', file=sys.stderr)
+        return
+
+    images_ids_splitted = np.array_split(img_ids, processes)
+    print(
+        f'Starting to save {len(img_ids)} semantic segmentation masks using '
+        f'{processes} processes with {len(images_ids_splitted[0])} masks per process...',
+    )
+
+    workers = multiprocessing.Pool(processes=processes)
+    procs = []
+
+    for images_ids in images_ids_splitted:
+        df_to_process = lapix_df.loc[lapix_df['image_id'].isin(images_ids), :]
+        p = workers.apply_async(__save_masks_as_files, (df_to_process, output_directory, mask_extension, draw_order))
+        procs.append(p)
+
+    workers.close()
+    workers.join()
 
 
 # -----------------------------------------------------------------------
