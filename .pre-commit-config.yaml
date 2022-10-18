@@ -33,13 +33,13 @@ repos:
     -   id: pyupgrade
         args: [--py37-plus]
 -   repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.8.4
+    rev: v3.8.5
     hooks:
     -   id: reorder-python-imports
         args: [--py37-plus, --add-import, 'from __future__ import annotations']
         exclude: ^data/
 -   repo: https://github.com/asottile/setup-cfg-fmt
-    rev: v2.0.0
+    rev: v2.1.0
     hooks:
     -   id: setup-cfg-fmt
         args: [--min-py3-version, '3.7']
