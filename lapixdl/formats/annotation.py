@@ -26,6 +26,16 @@ class BBox:
     cls: int
     score: float | None = None
 
+    def __post_init__(self):
+        if self.upper_left_x < 0 or self.upper_left_y < 0:
+            raise ValueError(f'The upper left (x, y) should be positive values. Got ({self.upper_left_x}, {self.upper_left_y})')
+
+        if self.width <= 0:
+            raise ValueError(f'The width should be bigger than zero. Got {self.width}')
+
+        if self.height <= 0:
+            raise ValueError(f'The height should be bigger than zero. Got {self.height}')
+
     @property
     def upper_left_point(self) -> tuple[int, int]:
         """Tuple[int, int]: (X,Y) of the upper left point of the Bounding Box."""

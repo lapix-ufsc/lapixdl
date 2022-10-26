@@ -28,6 +28,20 @@ def test_bbox():
     assert bbox.slice_y == slice(0, 14)
 
 
+def test_invalid_bbox():
+    with pytest.raises(ValueError):
+        BBox(0, -1, 1, 1, 0)
+
+    with pytest.raises(ValueError):
+        BBox(-1, 0, 1, 1, 0)
+
+    with pytest.raises(ValueError):
+        BBox(0, 0, 0, 1, 0)
+
+    with pytest.raises(ValueError):
+        BBox(0, 0, 1, 0, 0)
+
+
 def test_bbox_intersection_and_union_area_with():
     bbox_A = BBox(0, 0, 10, 15, 0)
     bbox_B = BBox(5, 5, 20, 25, 0)
