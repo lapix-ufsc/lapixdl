@@ -52,7 +52,10 @@ eval = evaluate_segmentation(gt_masks, pred_masks, classes)
 # Shows confusion matrix and returns its Figure and Axes
 fig, axes = eval.show_confusion_matrix()
 ```
-#### Example of how to log the results of LAPiX DL evaluations in the Weights & Biases platform
+
+#### Examples with third libraries
+
+##### How to log the results of LAPiX DL evaluations in the Weights & Biases platform
 About [Weights & Biases](https://docs.wandb.ai/).
 
 ```python
@@ -73,6 +76,35 @@ wandb.log({'test_evaluation':  eval_test.to_dict()['By Class']})
 selected_cats = ['A', 'B', 'C']
 metrics_by_cat = {k: v for k, v in eval_test.to_dict()['By Class'].items() if k in selected_cats}
 wandb.log({'test_evaluation': metrics_by_cat})
+```
+
+##### Computing using GPU with `torchmetrics`
+About [torchmetrics](https://torchmetrics.readthedocs.io/en/stable/).
+
+The lapixdl package calculates the confusion matrix first (on the CPU), which
+this will be slower than calculating using `torchmetrics` which uses `pytorch`
+**tensors**. So a trick here, to not calculate each metric separately in
+`torchmetrics`, is to calculate a **confusion matrix** using `torchmetrics`
+and then calculate all the metrics at once using `lapixdl`.
+
+A simple example for a Segmentation case:
+
+```python
+import torchmetrics
+from lapixdl.evaluation.model import SegmentationMetrics
+
+classes = ['background', 'object']
+
+confMat = torchmetrics.ConfusionMatrix(
+    reduce="macro", mdmc_reduce="global", num_classes=len(classes)
+)
+
+confusion_matrix = confMat(pred, target)
+confusion_matrix = confusion_matrix.numpy()
+
+metrics = SegmentationMetrics(
+    classes=classes, confusion_matrix=confusion_matrix
+)
 ```
 
 ### For Results Visualization
