@@ -4,16 +4,17 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 from PIL import Image
 
 
 @dataclass
 class Mask:
     # FIXME: typing also can be a list[list[int]]
-    categorical: np.ndarray
+    categorical: npt.NDArray[np.uint8]
 
     def __post_init__(self) -> None:
-        self.categorical: np.ndarray = np.array(self.categorical, dtype=np.uint8)
+        self.categorical = np.array(self.categorical, dtype=np.uint8)
 
         if not len(self.categorical.shape) == 2:
             raise ValueError('Unexpected shape. The categorical mask needs to be a 2D array.')
