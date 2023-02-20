@@ -4,12 +4,14 @@ import math
 from dataclasses import dataclass
 from enum import Enum
 from functools import reduce
+from typing import Any
 from typing import Generic
 from typing import List
 from typing import TypeVar
 from typing import Union
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
 from . import plot
@@ -178,7 +180,7 @@ class BinaryClassificationMetrics:
             f'\tF-Score: {self.f_score}'
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         if not self.has_instances:
             return {}
         else:
@@ -204,7 +206,7 @@ class ClassificationMetrics:
         confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
     """
 
-    def __init__(self, classes: list[str], confusion_matrix: list[list[int]] = []):
+    def __init__(self, classes: list[str], confusion_matrix: list[list[int]] | npt.NDArray[np.uint] = []):
         """
         Args:
             classes (List[str]): Class names.
@@ -213,14 +215,13 @@ class ClassificationMetrics:
         Raises:
             AssertException: If the confusion matrix is not a square matrix of order `len(classes)`
         """
-        self._confusion_matrix = np.array(confusion_matrix)
+        self._confusion_matrix = np.asarray(confusion_matrix, dtype=np.uint)
 
         assert self._confusion_matrix.shape == (
             len(classes), len(
                 classes,
             ),
         ), 'The confusion matrix must be a square matrix of order len(classes)'
-
         self._classes = classes
 
         self._by_class = self.__get_by_class_metrics()
@@ -296,7 +297,7 @@ class ClassificationMetrics:
         ) / len(self.by_class_w_instances)
 
     @property
-    def confusion_matrix(self) -> list[list[int]]:
+    def confusion_matrix(self) -> npt.NDArray[np.uint]:
         """List[List[int]]: Confusion matrix of all the classes"""
         return self._confusion_matrix
 
@@ -307,7 +308,7 @@ class ClassificationMetrics:
             Tuple[Figure, Axes]: Figure and Axes of the plotted confusion
             matrix
         """
-        return plot.confusion_matrix(self._confusion_matrix, self._classes)
+        return plot.confusion_matrix(self._confusion_matrix.tolist(), self._classes)
 
     def __get_by_class_metrics(self):
         by_class = []
@@ -344,7 +345,7 @@ class ClassificationMetrics:
             for cls_metrics in self.by_class
         ])
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             'Sample Count': self.count,
             'Average': {
@@ -414,7 +415,7 @@ class BinarySegmentationMetrics(BinaryClassificationMetrics):
             f'\tF-Score: {self.f_score}\n'
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             'TP': self.TP,
             'TN': self.TN,
@@ -438,7 +439,7 @@ class SegmentationMetrics(ClassificationMetrics):
         confusion_matrix (List[List[int]]): Confusion matrix of all the classes.
     """
 
-    def __init__(self, classes: list[str], confusion_matrix: list[list[int]] = []):
+    def __init__(self, classes: list[str], confusion_matrix: list[list[int]] | npt.NDArray[np.uint] = []):
         """
         Args:
             classes (List[str]): Class names. It is expected the first class to be the background class.
@@ -489,7 +490,7 @@ class SegmentationMetrics(ClassificationMetrics):
             ),
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             'Pixel Count': self.count,
             'Average': {
@@ -525,7 +526,8 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
     """
 
     def __init__(
-        self, classification_metrics: BinaryClassificationMetrics,
+        self,
+        classification_metrics: BinaryClassificationMetrics,
         iou: float,
         predictions: list[PredictionResult],
     ):
@@ -656,7 +658,7 @@ class BinaryDetectionMetrics(BinaryClassificationMetrics):
             f'\t11-point Average Precision: {self.average_precision(11)}\n'
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             'TP': self.TP,
             'FP': self.FP,
@@ -684,8 +686,9 @@ class DetectionMetrics(ClassificationMetrics):
     """
 
     def __init__(
-        self, classes: list[str],
-        confusion_matrix: list[list[int]],
+        self,
+        classes: list[str],
+        confusion_matrix: list[list[int]] | npt.NDArray[np.uint],
         iou_by_class: list[float],
         predictions_by_class: list[list[PredictionResult]],
     ):
@@ -740,7 +743,7 @@ class DetectionMetrics(ClassificationMetrics):
             ),
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             'Bboxes Count': self.count,
             'Average': {
@@ -762,7 +765,7 @@ class DetectionMetrics(ClassificationMetrics):
         return pd.DataFrame(dict_to_df)
 
 
-def dict_by_class(by_class) -> dict:
+def dict_by_class(by_class) -> dict[str, Any]:
     return {
         cls_metrics.cls: cls_metrics.to_dict() for cls_metrics in by_class
     }

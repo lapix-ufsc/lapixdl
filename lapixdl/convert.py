@@ -24,7 +24,7 @@ from lapixdl.formats.mask import Mask
 
 # -----------------------------------------------------------------------
 # Functions to work with data from LabelBox (lbox)
-def lbox_geo_to_shapely(object: dict[str, Any]) -> Polygon | Point | np.nan:
+def lbox_geo_to_shapely(object: dict[str, Any]) -> Polygon | Point | float:
     """Convert the labelbox geometries into shapely geometries
     (For polygons or Points)
     """

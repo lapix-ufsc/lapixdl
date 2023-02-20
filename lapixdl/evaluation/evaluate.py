@@ -5,6 +5,7 @@ import warnings
 from typing import Iterable
 
 import numpy as np
+import numpy.typing as npt
 from tqdm.auto import tqdm
 
 from .model import Classification
@@ -41,7 +42,7 @@ def evaluate_segmentation(
     """
 
     classes_count = len(classes)
-    zeros_matrix = np.zeros((classes_count, classes_count), int)
+    zeros_matrix = np.zeros((classes_count, classes_count), dtype=np.uint)
     confusion_matrix = zeros_matrix.copy()
     classes_count_range = range(classes_count)
 
@@ -60,9 +61,7 @@ def evaluate_segmentation(
 
         confusion_matrix += curr_confusion_matrix
 
-    metrics = SegmentationMetrics(classes, confusion_matrix)
-
-    return metrics
+    return SegmentationMetrics(classes, confusion_matrix)
 
 
 def evaluate_classification(
@@ -131,7 +130,7 @@ def evaluate_detection(
     classes_count = len(classes)
 
     cls_ious_sum = np.zeros(classes_count)
-    confusion_matrix = np.zeros((classes_count + 1, classes_count + 1), int)
+    confusion_matrix = np.zeros((classes_count + 1, classes_count + 1), dtype=np.uint)
     undetected_idx = classes_count
     # Tracks detection scores to calculate the Precision x Recall curve and the Average Precision metric
     predictions_by_class: list[list[PredictionResult]] = [
@@ -174,7 +173,7 @@ def evaluate_detection(
             if max_iou < iou_threshold:  # FN - GT bbox not detected
                 confusion_matrix[undetected_idx, gt_cls_idx] += 1
             else:  # TP - GT bbox detected
-                no_hit_idxs.remove(max_iou_idx)  # Remove from FPs
+                no_hit_idxs.remove(int(max_iou_idx))  # Remove from FPs
 
                 pred_cls_idx = curr_pred_bboxes[max_iou_idx].cls
                 confusion_matrix[pred_cls_idx, gt_cls_idx] += 1
@@ -194,7 +193,7 @@ def evaluate_detection(
     metrics = DetectionMetrics(
         classes + [undetected_cls_name],
         confusion_matrix,
-        cls_ious_sum / tot_images,
+        (cls_ious_sum / tot_images).tolist(),
         predictions_by_class,
     )
 
@@ -204,7 +203,7 @@ def evaluate_detection(
 def calculate_pairwise_bbox_ious(
     gt_bboxes: list[BBox],
     pred_bboxes: list[BBox],
-) -> list[list[float]]:
+) -> list[list[float]] | npt.NDArray[np.float32]:
     """Calculates the [gt x pred] matrix of pairwise IoUs of GT and predicted bboxes of an image.
 
     Args:
@@ -215,7 +214,7 @@ def calculate_pairwise_bbox_ious(
         List[List[float]]: [gt x pred] matrix of pairwise IoUs of GT and predicted bboxes
     """
 
-    ious = np.zeros((len(gt_bboxes), len(pred_bboxes)), float)
+    ious = np.zeros((len(gt_bboxes), len(pred_bboxes)), dtype=float)
 
     for i, gt_bbox in enumerate(gt_bboxes):
         for j, pred_bbox in enumerate(pred_bboxes):
@@ -245,7 +244,7 @@ def calculate_iou_by_class(
     gt_bboxes: list[BBox],
     pred_bboxes: list[BBox],
     classes_count: int,
-) -> list[float]:
+) -> list[float] | npt.NDArray[np.float32]:
     """Calculates the array of IoUs between GT and predicted bboxes of an image by class.
     This method considers bbox as segmentation masks to calculate the IoUs.
 
@@ -258,7 +257,7 @@ def calculate_iou_by_class(
         List[float]: IoUs of an image indexed by class
     """
 
-    ious = np.zeros(classes_count, float)
+    ious = np.zeros(classes_count, dtype=float)
 
     for i in range(classes_count):
         ious[i] = __calculate_binary_iou(
@@ -296,8 +295,8 @@ def __calculate_binary_iou(
     return tp / (f + tp)
 
 
-def __draw_bboxes(mask_shape: tuple[int, int], bboxes: list[BBox]) -> list[list[int]]:
-    mask = np.zeros(mask_shape, int)
+def __draw_bboxes(mask_shape: tuple[int, int], bboxes: list[BBox]) -> list[list[int]] | npt.NDArray[np.uint]:
+    mask = np.zeros(mask_shape, dtype=np.uint)
 
     for bbox in bboxes:
         mask[
@@ -308,5 +307,5 @@ def __draw_bboxes(mask_shape: tuple[int, int], bboxes: list[BBox]) -> list[list[
     return mask
 
 
-def __flat_mask(mask: Mask) -> list[int]:
+def __flat_mask(mask: Mask | npt.NDArray[np.uint]) -> list[int]:
     return [item for sublist in mask for item in sublist]
