@@ -28,7 +28,7 @@ def load(
 
 
 def validate(
-    raw: list[dict[str, Any]]
+    raw: list[dict[str, Any]],
 ) -> bool:
     """Validate if the content of labelbox file is valid
 

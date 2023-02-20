@@ -10,7 +10,7 @@ class FileTypeError(RuntimeError):
 
 def basename(
     filename: str,
-    with_extension: bool = False
+    with_extension: bool = False,
 ) -> str:
     """Gets the basename from a full filename
 

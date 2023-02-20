@@ -41,7 +41,7 @@ class BBox:
         """Tuple[int, int]: (X,Y) of the upper left point of the Bounding Box."""
         return (
             self.upper_left_x,
-            self.upper_left_y
+            self.upper_left_y,
         )
 
     @property
@@ -49,7 +49,7 @@ class BBox:
         """Tuple[int, int]: (X,Y) of the upper right point of the Bounding Box."""
         return (
             self.upper_left_x + self.width - 1,
-            self.upper_left_y
+            self.upper_left_y,
         )
 
     @property
@@ -57,7 +57,7 @@ class BBox:
         """Tuple[int, int]: (X,Y) of the bottom right point of the Bounding Box."""
         return (
             self.upper_left_x + self.width - 1,
-            self.upper_left_y + self.height - 1
+            self.upper_left_y + self.height - 1,
         )
 
     @property
@@ -65,7 +65,7 @@ class BBox:
         """Tuple[int, int]: (X,Y) of the bottom left point of the Bounding Box."""
         return (
             self.upper_left_x,
-            self.upper_left_y + self.height - 1
+            self.upper_left_y + self.height - 1,
         )
 
     @property
@@ -73,7 +73,7 @@ class BBox:
         """Tuple[int, int]: (X,Y) of the center point of the Bounding Box."""
         return (
             self.upper_left_x + ((self.width - 1) // 2),
-            self.upper_left_y + ((self.height - 1) // 2)
+            self.upper_left_y + ((self.height - 1) // 2),
         )
 
     @property
@@ -127,13 +127,17 @@ class BBox:
 
         # Calculates the intersection box upper left and bottom right coordinates
         (upr_lft_x_intersect, upr_lft_y_intersect) = (
-            max(upr_lft_x_a, upr_lft_x_b), max(upr_lft_y_a, upr_lft_y_b))
+            max(upr_lft_x_a, upr_lft_x_b), max(upr_lft_y_a, upr_lft_y_b),
+        )
         (btm_rgt_x_intersect, btm_rgt_y_intersect) = (
-            min(btm_rgt_x_a, btm_rgt_x_b), min(btm_rgt_y_a, btm_rgt_y_b))
+            min(btm_rgt_x_a, btm_rgt_x_b), min(btm_rgt_y_a, btm_rgt_y_b),
+        )
 
         # Calculates the height and width of the intersection box
-        (w_intersect, h_intersect) = (btm_rgt_x_intersect - upr_lft_x_intersect + 1,
-                                      btm_rgt_y_intersect - upr_lft_y_intersect + 1)
+        (w_intersect, h_intersect) = (
+            btm_rgt_x_intersect - upr_lft_x_intersect + 1,
+            btm_rgt_y_intersect - upr_lft_y_intersect + 1,
+        )
 
         # If H or W <= 0, there is no intersection
         if (w_intersect <= 0) or (h_intersect <= 0):
@@ -144,7 +148,7 @@ class BBox:
     def union_area_with(
             self: BBox,
             bbox: BBox,
-            intersection_area: int | None = None
+            intersection_area: int | None = None,
     ) -> int:
         """Calculates the union area with another bbox
 
@@ -220,8 +224,10 @@ def bounds_to_bbox(bounds: tuple[float], category_id: int) -> BBox:
     """
     b = tuple(int(i) for i in bounds)
     min_x, min_y, max_x, max_y = b
-    return BBox(upper_left_x=min_x,
-                upper_left_y=min_y,
-                width=max_x - min_x,
-                height=max_y - min_y,
-                cls=category_id)
+    return BBox(
+        upper_left_x=min_x,
+        upper_left_y=min_y,
+        width=max_x - min_x,
+        height=max_y - min_y,
+        cls=category_id,
+    )

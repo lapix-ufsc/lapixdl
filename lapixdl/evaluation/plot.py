@@ -7,9 +7,11 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 
-def confusion_matrix(confusion_matrix: list[list[int]],
-                     classes: list[str],
-                     title: str | None = 'Confusion Matrix') -> tuple[Figure, Axes]:
+def confusion_matrix(
+    confusion_matrix: list[list[int]],
+    classes: list[str],
+    title: str | None = 'Confusion Matrix',
+) -> tuple[Figure, Axes]:
     """Plots a confusion matrix
 
     Args:
@@ -28,10 +30,12 @@ def confusion_matrix(confusion_matrix: list[list[int]],
     fig, ax = plt.subplots()
     fig.suptitle(title)
 
-    ax = sn.heatmap(df_cm,
-                    annot=True,
-                    ax=ax,
-                    cmap='YlGnBu')
+    ax = sn.heatmap(
+        df_cm,
+        annot=True,
+        ax=ax,
+        cmap='YlGnBu',
+    )
 
     ax.set_xlabel('Actual')
     ax.set_ylabel('Predicted')
@@ -40,9 +44,11 @@ def confusion_matrix(confusion_matrix: list[list[int]],
     return fig, ax
 
 
-def precision_recall_curve(recalls_precisions_by_class: list[list[tuple[float, float]]],
-                           classes: list[str],
-                           title: str | None = 'Precision x Recall Curve') -> tuple[Figure, Axes]:
+def precision_recall_curve(
+    recalls_precisions_by_class: list[list[tuple[float, float]]],
+    classes: list[str],
+    title: str | None = 'Precision x Recall Curve',
+) -> tuple[Figure, Axes]:
     """Plots a Precision x Recall curve.
 
     Args:
@@ -58,18 +64,21 @@ def precision_recall_curve(recalls_precisions_by_class: list[list[tuple[float, f
     for i, recalls_precisions_cls in enumerate(recalls_precisions_by_class):
         for recall_precision in recalls_precisions_cls:
             table.append(
-                (classes[i], recall_precision[0], recall_precision[1]))
+                (classes[i], recall_precision[0], recall_precision[1]),
+            )
 
     df = pd.DataFrame(table, columns=['class', 'recall', 'precision'])
 
     fig, ax = plt.subplots()
     fig.suptitle(title)
 
-    ax = sn.lineplot(data=df,
-                     y='precision',
-                     x='recall',
-                     hue='class',
-                     ax=ax)
+    ax = sn.lineplot(
+        data=df,
+        y='precision',
+        x='recall',
+        hue='class',
+        ax=ax,
+    )
 
     ax.set_xlabel('Recall')
     ax.set_ylabel('Precision')

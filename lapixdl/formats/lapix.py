@@ -19,7 +19,7 @@ class LapixDataFrame(pd.DataFrame):
 
 def load(
     filename: str,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> LapixDataFrame:
     """Loads the lapix parquet file into a Lapix dataframe
 
@@ -47,7 +47,7 @@ def save(
         lapix_df: LapixDataFrame,
         filename: str,
         compression: str = 'gzip',
-        **kwargs: Any
+        **kwargs: Any,
 ) -> None:
     """Save a Lapix DataFrame into a parquet file
 

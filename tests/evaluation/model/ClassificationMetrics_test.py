@@ -15,12 +15,14 @@ def test_constructor_valid():
 
 
 def test_count():
-    metrics = ClassificationMetrics(['a', 'b', 'c'],
-                                    [
-        [4, 6, 3],
-        [1, 2, 0],
-        [1, 2, 6]
-    ])
+    metrics = ClassificationMetrics(
+        ['a', 'b', 'c'],
+        [
+            [4, 6, 3],
+            [1, 2, 0],
+            [1, 2, 6],
+        ],
+    )
 
     assert metrics.count == 25
 
@@ -34,12 +36,14 @@ def test_count():
 
 
 def test_accuracy():
-    metrics = ClassificationMetrics(['a', 'b', 'c'],
-                                    [
-        [4, 6, 3],
-        [1, 2, 0],
-        [1, 2, 6]
-    ])
+    metrics = ClassificationMetrics(
+        ['a', 'b', 'c'],
+        [
+            [4, 6, 3],
+            [1, 2, 0],
+            [1, 2, 6],
+        ],
+    )
 
     assert round(metrics.accuracy, 3) == .480
 
@@ -53,12 +57,14 @@ def test_accuracy():
 
 
 def test_recall():
-    metrics = ClassificationMetrics(['a', 'b', 'c'],
-                                    [
-        [4, 6, 3],
-        [1, 2, 0],
-        [1, 2, 6]
-    ])
+    metrics = ClassificationMetrics(
+        ['a', 'b', 'c'],
+        [
+            [4, 6, 3],
+            [1, 2, 0],
+            [1, 2, 6],
+        ],
+    )
 
     assert round(metrics.avg_recall, 3) == .511
 
@@ -72,12 +78,14 @@ def test_recall():
 
 
 def test_specificity():
-    metrics = ClassificationMetrics(['a', 'b', 'c'],
-                                    [
-        [4, 6, 3],
-        [1, 2, 0],
-        [1, 2, 6]
-    ])
+    metrics = ClassificationMetrics(
+        ['a', 'b', 'c'],
+        [
+            [4, 6, 3],
+            [1, 2, 0],
+            [1, 2, 6],
+        ],
+    )
 
     assert round(metrics.avg_specificity, 3) == .757
 
@@ -91,12 +99,14 @@ def test_specificity():
 
 
 def test_precision():
-    metrics = ClassificationMetrics(['a', 'b', 'c'],
-                                    [
-        [4, 6, 3],
-        [1, 2, 0],
-        [1, 2, 6]
-    ])
+    metrics = ClassificationMetrics(
+        ['a', 'b', 'c'],
+        [
+            [4, 6, 3],
+            [1, 2, 0],
+            [1, 2, 6],
+        ],
+    )
 
     assert round(metrics.avg_precision, 3) == .547
 
@@ -110,12 +120,14 @@ def test_precision():
 
 
 def test_f_score():
-    metrics = ClassificationMetrics(['a', 'b', 'c'],
-                                    [
-        [4, 6, 3],
-        [1, 2, 0],
-        [1, 2, 6]
-    ])
+    metrics = ClassificationMetrics(
+        ['a', 'b', 'c'],
+        [
+            [4, 6, 3],
+            [1, 2, 0],
+            [1, 2, 6],
+        ],
+    )
 
     assert round(metrics.avg_f_score, 3) == .465
 

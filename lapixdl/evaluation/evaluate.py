@@ -17,9 +17,11 @@ from .model import SegmentationMetrics
 from lapixdl.formats.annotation import BBox
 
 
-def evaluate_segmentation(gt_masks: Iterable[Mask],
-                          pred_masks: Iterable[Mask],
-                          classes: list[str]) -> SegmentationMetrics:
+def evaluate_segmentation(
+    gt_masks: Iterable[Mask],
+    pred_masks: Iterable[Mask],
+    classes: list[str],
+) -> SegmentationMetrics:
     """Evaluates segmentation predictions
 
     The iterables should return one mask per iteration and the itens of
@@ -47,8 +49,10 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
         curr_gt_mask = np.array(curr_gt_mask)
         curr_pred_mask = np.array(curr_pred_mask)
         if curr_gt_mask.shape != curr_pred_mask.shape:
-            warnings.warn(f'The GT mask and Pred mask should have the same shape. GT shape: {curr_gt_mask.shape}.'
-                          f'Pred shape: {curr_pred_mask.shape}.')
+            warnings.warn(
+                f'The GT mask and Pred mask should have the same shape. GT shape: {curr_gt_mask.shape}.'
+                f'Pred shape: {curr_pred_mask.shape}.',
+            )
 
         curr_confusion_matrix = zeros_matrix.copy()
         for i, j in itertools.product(classes_count_range, classes_count_range):
@@ -61,9 +65,11 @@ def evaluate_segmentation(gt_masks: Iterable[Mask],
     return metrics
 
 
-def evaluate_classification(gt_classifications: Iterable[Classification],
-                            pred_classifications: Iterable[Classification],
-                            classes: list[str]) -> ClassificationMetrics:
+def evaluate_classification(
+    gt_classifications: Iterable[Classification],
+    pred_classifications: Iterable[Classification],
+    classes: list[str],
+) -> ClassificationMetrics:
     """Evaluates classification predictions
 
     The iterables should return one classification per iteration and
@@ -81,22 +87,30 @@ def evaluate_classification(gt_classifications: Iterable[Classification],
 
     confusion_matrix = np.zeros((len(classes), len(classes)), int)
 
-    for (curr_gt_classification, curr_pred_classification) in tqdm(zip(gt_classifications,
-                                                                       pred_classifications),
-                                                                   unit=' samples'):
-        confusion_matrix[curr_pred_classification.cls,
-                         curr_gt_classification.cls] += 1
+    for (curr_gt_classification, curr_pred_classification) in tqdm(
+        zip(
+            gt_classifications,
+            pred_classifications,
+        ),
+        unit=' samples',
+    ):
+        confusion_matrix[
+            curr_pred_classification.cls,
+            curr_gt_classification.cls,
+        ] += 1
 
     metrics = ClassificationMetrics(classes, confusion_matrix)
 
     return metrics
 
 
-def evaluate_detection(gt_bboxes: Iterable[list[BBox]],
-                       pred_bboxes: Iterable[list[BBox]],
-                       classes: list[str],
-                       iou_threshold: float = .5,
-                       undetected_cls_name: str = '_undetected_') -> DetectionMetrics:
+def evaluate_detection(
+    gt_bboxes: Iterable[list[BBox]],
+    pred_bboxes: Iterable[list[BBox]],
+    classes: list[str],
+    iou_threshold: float = .5,
+    undetected_cls_name: str = '_undetected_',
+) -> DetectionMetrics:
     """Evaluates detection predictions
 
     The iterables should return the bboxes of one image per iteration
@@ -121,16 +135,19 @@ def evaluate_detection(gt_bboxes: Iterable[list[BBox]],
     undetected_idx = classes_count
     # Tracks detection scores to calculate the Precision x Recall curve and the Average Precision metric
     predictions_by_class: list[list[PredictionResult]] = [
-        [] for i in range(len(classes))]
+        [] for i in range(len(classes))
+    ]
 
     # For each image GT and predicted bbox set
     for (curr_gt_bboxes, curr_pred_bboxes) in tqdm(zip(gt_bboxes, pred_bboxes), unit=' samples'):
         pairwise_bbox_ious = calculate_pairwise_bbox_ious(
-            curr_gt_bboxes, curr_pred_bboxes)
+            curr_gt_bboxes, curr_pred_bboxes,
+        )
 
         # Sums classes' IoUs by image to calculate the average at the end
         curr_img_cls_ious = calculate_iou_by_class(
-            curr_gt_bboxes, curr_pred_bboxes, classes_count)
+            curr_gt_bboxes, curr_pred_bboxes, classes_count,
+        )
         cls_ious_sum = np.add(cls_ious_sum, curr_img_cls_ious)
         tot_images += 1
 
@@ -142,8 +159,10 @@ def evaluate_detection(gt_bboxes: Iterable[list[BBox]],
             gt_cls_idx = curr_gt_bboxes[i].cls
 
             # Removes already matched predictions
-            gt_ious = [0 if i not in no_hit_idxs else iou for i,
-                       iou in enumerate(gt_ious)]
+            gt_ious = [
+                0 if i not in no_hit_idxs else iou for i,
+                iou in enumerate(gt_ious)
+            ]
 
             if len(gt_ious) > 0:
                 max_iou_idx = np.argmax(gt_ious)
@@ -176,13 +195,16 @@ def evaluate_detection(gt_bboxes: Iterable[list[BBox]],
         classes + [undetected_cls_name],
         confusion_matrix,
         cls_ious_sum / tot_images,
-        predictions_by_class)
+        predictions_by_class,
+    )
 
     return metrics
 
 
-def calculate_pairwise_bbox_ious(gt_bboxes: list[BBox],
-                                 pred_bboxes: list[BBox]) -> list[list[float]]:
+def calculate_pairwise_bbox_ious(
+    gt_bboxes: list[BBox],
+    pred_bboxes: list[BBox],
+) -> list[list[float]]:
     """Calculates the [gt x pred] matrix of pairwise IoUs of GT and predicted bboxes of an image.
 
     Args:
@@ -219,9 +241,11 @@ def calculate_bbox_iou(bbox_a: BBox, bbox_b: BBox) -> float:
     return float(intersect_area) / float(union_area)
 
 
-def calculate_iou_by_class(gt_bboxes: list[BBox],
-                           pred_bboxes: list[BBox],
-                           classes_count: int) -> list[float]:
+def calculate_iou_by_class(
+    gt_bboxes: list[BBox],
+    pred_bboxes: list[BBox],
+    classes_count: int,
+) -> list[float]:
     """Calculates the array of IoUs between GT and predicted bboxes of an image by class.
     This method considers bbox as segmentation masks to calculate the IoUs.
 
@@ -237,14 +261,18 @@ def calculate_iou_by_class(gt_bboxes: list[BBox],
     ious = np.zeros(classes_count, float)
 
     for i in range(classes_count):
-        ious[i] = __calculate_binary_iou([gt_bbox for gt_bbox in gt_bboxes if gt_bbox.cls == i],
-                                         [pred_bbox for pred_bbox in pred_bboxes if pred_bbox.cls == i])
+        ious[i] = __calculate_binary_iou(
+            [gt_bbox for gt_bbox in gt_bboxes if gt_bbox.cls == i],
+            [pred_bbox for pred_bbox in pred_bboxes if pred_bbox.cls == i],
+        )
 
     return ious
 
 
-def __calculate_binary_iou(gt_bboxes: list[BBox],
-                           pred_bboxes: list[BBox]) -> float:
+def __calculate_binary_iou(
+    gt_bboxes: list[BBox],
+    pred_bboxes: list[BBox],
+) -> float:
     if len(gt_bboxes) == 0 or len(pred_bboxes) == 0:
         return .0
 
@@ -274,7 +302,7 @@ def __draw_bboxes(mask_shape: tuple[int, int], bboxes: list[BBox]) -> list[list[
     for bbox in bboxes:
         mask[
             bbox.upper_left_point[0]:bbox.bottom_right_point[0] + 1,
-            bbox.upper_left_point[1]:bbox.bottom_right_point[1] + 1
+            bbox.upper_left_point[1]:bbox.bottom_right_point[1] + 1,
         ] = 1
 
     return mask

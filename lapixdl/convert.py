@@ -106,7 +106,7 @@ def __lbox_cast_geometries(labelbox_df: pd.DataFrame) -> pd.DataFrame:
 
 def labelbox_to_lapix(
     labelbox_df: pd.DataFrame,
-    schematic_to_id: dict[str, int]
+    schematic_to_id: dict[str, int],
 ) -> LapixDataFrame:
     '''Transform the raw dataframe from LabelBox data to Lapix dataframe'''
 
@@ -220,7 +220,7 @@ def __lapix_to_od_coco_annotations(
 def lapix_to_od_coco_annotations(
     lapix_df: LapixDataFrame,
     decimals: int = 2,
-    processes: int = 1
+    processes: int = 1,
 ) -> list[dict[str, Any]]:
     """Convert lapix dataframe annotations into object detection
     annotations in a multiprocesses
@@ -269,7 +269,7 @@ def __generate_coco_od_file(
     categories_coco: list[dict[str, str]],
     decimals: int = 2,
     processes: int = 1,
-    info_coco: dict[str, Any] | None = None
+    info_coco: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create the object detection COCO data
 
@@ -302,7 +302,7 @@ def __generate_coco_od_file(
         'categories': categories_coco,
         'images': images_coco,
         'annotations': annotations_coco,
-        'info': info_coco if isinstance(info_coco, dict) else {}
+        'info': info_coco if isinstance(info_coco, dict) else {},
     }
 
     return coco_od
@@ -315,7 +315,7 @@ def lapix_to_annotations(lapix_df: LapixDataFrame) -> list[Annotation]:
         Annotation(
             row['geometry'],
             row['category_id'],
-            row['iscrowd'] if 'iscrowd' in row else 0
+            row['iscrowd'] if 'iscrowd' in row else 0,
         )
         for _, row in lapix_df.iterrows()
     ]
@@ -335,7 +335,7 @@ def lapix_to_masks(
 
         yield (
             image_name,
-            annotations_to_mask(annotations, int(w), int(h), draw_order)
+            annotations_to_mask(annotations, int(w), int(h), draw_order),
         )
 
 
@@ -343,7 +343,7 @@ def lapix_to_masks(
 # Functions to generate masks
 def sort_annotations_to_draw(
     annotations: list[Annotation],
-    draw_order: tuple[int, ...] | None = None
+    draw_order: tuple[int, ...] | None = None,
 ) -> list[Annotation]:
     '''Sorts the annotations based on the draw_order. If draw_order
     is None sorts in ascending order based on the category value'''
@@ -404,7 +404,7 @@ def __save_masks_as_files(
     for image_name, mask in lapix_to_masks(lapix_df, draw_order):
         out_path = os.path.join(
             output_directory,
-            image_name + mask_extension
+            image_name + mask_extension,
         )
         mask.save(out_path)
 
@@ -414,7 +414,7 @@ def save_lapixdf_as_masks(
     output_directory: str,
     mask_extension: str = '.png',
     draw_order: tuple[int, ...] | None = None,
-    processes: int = 1
+    processes: int = 1,
 ) -> None:
     '''Saves masks as files based on the annotations from a Lapix DataFrame
 
@@ -467,7 +467,7 @@ def labelbox_to_coco(
     decimals: int = 2,
     processes: int = 1,
     info_coco: dict[str, Any] | None = None,
-    image_shape: tuple[int, int] | None = None
+    image_shape: tuple[int, int] | None = None,
 ) -> dict[str, Any]:
     """Generate dictionary into COCO format from labelbox
 
@@ -518,7 +518,7 @@ def labelbox_to_coco(
             categories_coco,
             decimals,
             processes,
-            info_coco
+            info_coco,
         )
     else:
         raise NotImplementedError

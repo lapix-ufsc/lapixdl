@@ -18,12 +18,16 @@ def test_bbox():
     assert bbox.bottom_left_point == (0, 14)
     assert bbox.center_point == (4, 7)
     assert bbox.area == 150
-    assert bbox.coords == ((0, 0),
-                           (9, 0),
-                           (9, 14),
-                           (0, 14))
-    assert bbox.xy == ([0, 9, 9, 0],
-                       [0, 0, 14, 14])
+    assert bbox.coords == (
+        (0, 0),
+        (9, 0),
+        (9, 14),
+        (0, 14),
+    )
+    assert bbox.xy == (
+        [0, 9, 9, 0],
+        [0, 0, 14, 14],
+    )
     assert bbox.slice_x == slice(0, 9)
     assert bbox.slice_y == slice(0, 14)
 
@@ -58,10 +62,12 @@ def test_bbox_to_polygon():
 
     out = bbox_A.to_polygon()
 
-    coords = [(0, 0),
-              (9, 0),
-              (9, 14),
-              (0, 14)]
+    coords = [
+        (0, 0),
+        (9, 0),
+        (9, 14),
+        (0, 14),
+    ]
     assert out.equals_exact(Polygon(coords), 0)
 
 
