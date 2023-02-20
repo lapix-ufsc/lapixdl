@@ -26,7 +26,8 @@ def show_classifications(
         results: list[Result[Classification]],
         class_names: list[str],
         cols: int = 3,
-        diff_correct_incorect: bool = True) -> tuple[Figure, Axes]:
+        diff_correct_incorect: bool = True,
+) -> tuple[Figure, Axes]:
     """Shows multiple classification results.
 
     Args:
@@ -48,13 +49,15 @@ def show_classifications(
 
     for i, result in enumerate(results):
         axe = axes[i // cols][i % cols]
-        pred_s = (f'\nPred: {class_names[result.prediction.cls]} ({result.prediction.score})' if result.prediction is not None
-                  else '')
+        pred_s = (
+            f'\nPred: {class_names[result.prediction.cls]} ({result.prediction.score})' if result.prediction is not None
+            else ''
+        )
         axe.set_title(
             f'GT: {class_names[result.gt.cls]}' + pred_s,
             fontsize='small',
             color='#333' if result.prediction is None or not diff_correct_incorect
-            else (correct_color if result.prediction.cls == result.gt.cls else incorrect_color)
+            else (correct_color if result.prediction.cls == result.gt.cls else incorrect_color),
         )
         axe.axis('off')
         axe.imshow(result.image)
@@ -73,7 +76,8 @@ def show_segmentations(
         results: list[Result[Mask]],
         class_names: list[str],
         cmap: ColorMap = 'tab10',
-        mask_alpha: float = .3) -> tuple[Figure, Axes]:
+        mask_alpha: float = .3,
+) -> tuple[Figure, Axes]:
     """Shows segmentation results
 
     Args:
@@ -89,7 +93,8 @@ def show_segmentations(
     cmap_colors = cm.get_cmap(cmap).colors
 
     assert len(cmap_colors) >= len(
-        class_names), 'The color map length must be greater or equal the length of the class names.'
+        class_names,
+    ), 'The color map length must be greater or equal the length of the class names.'
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
@@ -97,10 +102,14 @@ def show_segmentations(
         axes = [axes]
 
     fig.suptitle(' ', fontsize=40)  # To keep space for the legend
-    lengend_handles = [mpatches.Patch(color=cmap_colors[i], label=code)
-                       for i, code in enumerate(class_names)]
-    fig.legend(handles=lengend_handles, fontsize='small',
-               ncol=min(8, len(class_names)), loc='upper center')
+    lengend_handles = [
+        mpatches.Patch(color=cmap_colors[i], label=code)
+        for i, code in enumerate(class_names)
+    ]
+    fig.legend(
+        handles=lengend_handles, fontsize='small',
+        ncol=min(8, len(class_names)), loc='upper center',
+    )
 
     for i, result in enumerate(results):
         axe_img = axes[i][0]
@@ -114,15 +123,19 @@ def show_segmentations(
         axe_GT.set_title('GT', fontsize='small')
         axe_GT.axis('off')
         axe_GT.imshow(result.image)
-        axe_GT.imshow(result.gt, cmap=cmap, alpha=mask_alpha,
-                      interpolation='none', vmin=0, vmax=len(cmap_colors) - 1)
+        axe_GT.imshow(
+            result.gt, cmap=cmap, alpha=mask_alpha,
+            interpolation='none', vmin=0, vmax=len(cmap_colors) - 1,
+        )
 
         axe_pred.axis('off')
         if result.prediction is not None:
             axe_pred.set_title('Prediction', fontsize='small')
             axe_pred.imshow(result.image)
-            axe_pred.imshow(result.prediction, cmap=cmap, alpha=mask_alpha,
-                            interpolation='none', vmin=0, vmax=len(cmap_colors) - 1)
+            axe_pred.imshow(
+                result.prediction, cmap=cmap, alpha=mask_alpha,
+                interpolation='none', vmin=0, vmax=len(cmap_colors) - 1,
+            )
 
     fig.set_size_inches((20, 10), forward=True)
     plt.tight_layout(w_pad=.2, h_pad=3)
@@ -131,10 +144,12 @@ def show_segmentations(
     return fig, axes
 
 
-def show_detections(results: list[Result[list[BBox]]],
-                    class_names: list[str],
-                    cmap: ColorMap = 'tab10',
-                    show_bbox_label: bool = True) -> tuple[Figure, Axes]:
+def show_detections(
+    results: list[Result[list[BBox]]],
+    class_names: list[str],
+    cmap: ColorMap = 'tab10',
+    show_bbox_label: bool = True,
+) -> tuple[Figure, Axes]:
     """Shows detection results.
 
     Args:
@@ -150,7 +165,8 @@ def show_detections(results: list[Result[list[BBox]]],
     cmap_colors = cm.get_cmap(cmap).colors
 
     assert len(cmap_colors) >= len(
-        class_names), 'The color map length must be greater or equal the length of the class names.'
+        class_names,
+    ), 'The color map length must be greater or equal the length of the class names.'
 
     rows = len(results)
     fig, axes = plt.subplots(rows, 3)
@@ -158,10 +174,14 @@ def show_detections(results: list[Result[list[BBox]]],
         axes = [axes]
 
     fig.suptitle(' ', fontsize=40)  # To keep space for the legend
-    lengend_handles = [mpatches.Patch(color=cmap_colors[i], label=code)
-                       for i, code in enumerate(class_names)]
-    fig.legend(handles=lengend_handles, fontsize='small',
-               ncol=min(8, len(class_names)), loc='upper center')
+    lengend_handles = [
+        mpatches.Patch(color=cmap_colors[i], label=code)
+        for i, code in enumerate(class_names)
+    ]
+    fig.legend(
+        handles=lengend_handles, fontsize='small',
+        ncol=min(8, len(class_names)), loc='upper center',
+    )
 
     for i, result in enumerate(results):
         axe_img = axes[i][0]
@@ -175,15 +195,19 @@ def show_detections(results: list[Result[list[BBox]]],
         axe_GT.set_title('GT', fontsize='small')
         axe_GT.axis('off')
         axe_GT.imshow(result.image)
-        __draw_bboxes(axe_GT, result.gt, cmap_colors,
-                      class_names, show_bbox_label)
+        __draw_bboxes(
+            axe_GT, result.gt, cmap_colors,
+            class_names, show_bbox_label,
+        )
 
         axe_pred.axis('off')
         if result.prediction is not None:
             axe_pred.set_title('Prediction', fontsize='small')
             axe_pred.imshow(result.image)
-            __draw_bboxes(axe_pred, result.prediction,
-                          cmap_colors, class_names, show_bbox_label)
+            __draw_bboxes(
+                axe_pred, result.prediction,
+                cmap_colors, class_names, show_bbox_label,
+            )
 
     fig.set_size_inches((20, 10), forward=True)
     plt.tight_layout(w_pad=.2, h_pad=3)
@@ -197,17 +221,23 @@ def __draw_bboxes(axe: plt.Axes, bboxes: list[BBox], cmap_colors: list[str], cla
         color = cmap_colors[bbox.cls]
         label = (f'{class_names[bbox.cls]}' if show_bbox_label else '') + \
             (f' ({round(bbox.score, 3)})' if bbox.score else '')
-        rect = mpatches.Rectangle(bbox.upper_left_point,
-                                  bbox.width, bbox.height,
-                                  linewidth=2,
-                                  edgecolor=color,
-                                  facecolor='none')
+        rect = mpatches.Rectangle(
+            bbox.upper_left_point,
+            bbox.width, bbox.height,
+            linewidth=2,
+            edgecolor=color,
+            facecolor='none',
+        )
         axe.add_patch(rect)
-        axe.annotate(label.strip(),
-                     (bbox.upper_left_point[0] + 5,
-                      bbox.upper_left_point[1] - 5),
-                     color='w',
-                     weight='bold',
-                     fontsize=10,
-                     ha='left', va='bottom',
-                     bbox=dict(facecolor=color, edgecolor='none', pad=1.5))
+        axe.annotate(
+            label.strip(),
+            (
+                bbox.upper_left_point[0] + 5,
+                bbox.upper_left_point[1] - 5,
+            ),
+            color='w',
+            weight='bold',
+            fontsize=10,
+            ha='left', va='bottom',
+            bbox=dict(facecolor=color, edgecolor='none', pad=1.5),
+        )

@@ -42,29 +42,37 @@ def evaluate_segmentation_example():
     # Creating fake data
     # Creates a rectangle of 1s in a 0s array
     gt_bbox_1 = BBox(10, 10, 10, 10, 1)
-    mask_bin_GT_1 = draw_rectangle(np.zeros(mask_shape, np.int),
-                                   gt_bbox_1.upper_left_point,
-                                   gt_bbox_1.bottom_right_point,
-                                   1)
+    mask_bin_GT_1 = draw_rectangle(
+        np.zeros(mask_shape, np.int),
+        gt_bbox_1.upper_left_point,
+        gt_bbox_1.bottom_right_point,
+        1,
+    )
 
     pred_bbox_1 = BBox(10, 10, 10, 10, 1)
-    mask_bin_pred_1 = draw_rectangle(np.zeros(mask_shape, np.int),
-                                     pred_bbox_1.upper_left_point,
-                                     pred_bbox_1.bottom_right_point,
-                                     1)
+    mask_bin_pred_1 = draw_rectangle(
+        np.zeros(mask_shape, np.int),
+        pred_bbox_1.upper_left_point,
+        pred_bbox_1.bottom_right_point,
+        1,
+    )
 
     # Creates a rectangle of 2s in a 0s array
     gt_bbox_2 = BBox(110, 110, 320, 280, 2)
-    mask_bin_GT_2 = draw_rectangle(np.zeros(mask_shape, np.int),
-                                   gt_bbox_2.upper_left_point,
-                                   gt_bbox_2.bottom_right_point,
-                                   2)
+    mask_bin_GT_2 = draw_rectangle(
+        np.zeros(mask_shape, np.int),
+        gt_bbox_2.upper_left_point,
+        gt_bbox_2.bottom_right_point,
+        2,
+    )
 
     pred_bbox_2 = BBox(70, 50, 240, 220, 2)
-    mask_bin_pred_2 = draw_rectangle(np.zeros(mask_shape, np.int),
-                                     pred_bbox_2.upper_left_point,
-                                     pred_bbox_2.bottom_right_point,
-                                     2)
+    mask_bin_pred_2 = draw_rectangle(
+        np.zeros(mask_shape, np.int),
+        pred_bbox_2.upper_left_point,
+        pred_bbox_2.bottom_right_point,
+        2,
+    )
 
     # Merging masks
     mask_GT = np.maximum(mask_bin_GT_1, mask_bin_GT_2)
@@ -121,11 +129,17 @@ def evaluate_classification_example():
     classes = ['a', 'b', 'c']
 
     # Classifications based in array
-    gt_class = [Classification(x) for x in [
-        0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2]]
+    gt_class = [
+        Classification(x) for x in [
+            0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        ]
+    ]
     # All predictions with .8 score
-    pred_class = [Classification(x, .8) for x in [
-        0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2, 2, 2, 2, 2]]
+    pred_class = [
+        Classification(x, .8) for x in [
+            0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2, 2, 2, 2, 2,
+        ]
+    ]
 
     # Calculates and shows metrics
     metrics = evaluate_classification(gt_class, pred_class, classes)
@@ -142,15 +156,23 @@ def show_classification_example():
     classes = ['a', 'b', 'c']
 
     # Classifications based in array
-    gt_class = [Classification(x) for x in [
-        0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2]]
+    gt_class = [
+        Classification(x) for x in [
+            0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
+        ]
+    ]
     # All predictions with .8 score
-    pred_class = [Classification(x, .8) for x in [
-        0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2]]
+    pred_class = [
+        Classification(x, .8) for x in [
+            0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 2, 2, 1, 1, 0, 0, 0, 2, 2,
+        ]
+    ]
 
     # Convert to results
-    results = [Result(random_image(), gt, pred)
-               for gt, pred in zip(gt_class, pred_class)]
+    results = [
+        Result(random_image(), gt, pred)
+        for gt, pred in zip(gt_class, pred_class)
+    ]
 
     # GT only result
     results = [Result(random_image(), Classification(2))] + results
@@ -182,17 +204,25 @@ def show_segmentation_example():
     gt_bbox_3 = BBox(300, 300, 100, 100, 3)
     mask_bin_GT_3 = draw_bboxes(mask_shape, [gt_bbox_3])
 
-    mask_multi_GT = np.maximum(np.maximum(
-        mask_bin_GT_1, mask_bin_GT_2 * 2), mask_bin_GT_3 * 3)
+    mask_multi_GT = np.maximum(
+        np.maximum(
+            mask_bin_GT_1, mask_bin_GT_2 * 2,
+        ), mask_bin_GT_3 * 3,
+    )
     mask_multi_pred = np.maximum(mask_bin_pred_1, mask_bin_pred_2 * 2)
 
     # Convert to results
-    results = [Result(random_image(mask_shape[0], mask_shape[1]),
-                      mask_multi_GT, mask_multi_pred)]
+    results = [
+        Result(
+            random_image(mask_shape[0], mask_shape[1]),
+            mask_multi_GT, mask_multi_pred,
+        ),
+    ]
 
     # GT only result
     results = [
-        Result(random_image(mask_shape[0], mask_shape[1]), mask_multi_GT)] + results
+        Result(random_image(mask_shape[0], mask_shape[1]), mask_multi_GT),
+    ] + results
 
     # Custom color map
     cmap = ListedColormap(['#ff0000', '#00ff00', '#0000ff', '#ffffff'])
@@ -218,12 +248,22 @@ def show_detection_example():
     gt_bbox_3 = BBox(300, 300, 100, 100, 2)
 
     # Convert to results
-    results = [Result(random_image(img_shape[0], img_shape[1]), [
-                      gt_bbox_1, gt_bbox_2, gt_bbox_3], [pred_bbox_1, pred_bbox_2])]
+    results = [
+        Result(
+            random_image(img_shape[0], img_shape[1]), [
+                gt_bbox_1, gt_bbox_2, gt_bbox_3,
+            ], [pred_bbox_1, pred_bbox_2],
+        ),
+    ]
 
     # GT only result
-    results = [Result(random_image(img_shape[0], img_shape[1]), [
-                      gt_bbox_1, gt_bbox_2, gt_bbox_3])] + results
+    results = [
+        Result(
+            random_image(img_shape[0], img_shape[1]), [
+                gt_bbox_1, gt_bbox_2, gt_bbox_3,
+            ],
+        ),
+    ] + results
 
     # Shows results and returns its Figure and Axes
     fig, axes = show_detections(results, classes, show_bbox_label=False)
@@ -243,7 +283,7 @@ def draw_bboxes(mask_shape, bboxes):
     for bbox in bboxes:
         mask[
             bbox.upper_left_point[0]:bbox.bottom_right_point[0] + 1,
-            bbox.upper_left_point[1]:bbox.bottom_right_point[1] + 1
+            bbox.upper_left_point[1]:bbox.bottom_right_point[1] + 1,
         ] = 1
 
     return mask

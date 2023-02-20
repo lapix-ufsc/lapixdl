@@ -17,7 +17,7 @@ def polygon_example():
         (15, 28),
         (15, 15),
         (10, 5),
-        (5, 5)
+        (5, 5),
     ])
 
 
@@ -57,7 +57,7 @@ def labelbox_filename(labelbox_raw, tmpdir):
 @pytest.fixture
 def labelbox_map_categories():
     return {
-        'Unique_schematicID_for_category_square': 1
+        'Unique_schematicID_for_category_square': 1,
     }
 
 
@@ -72,8 +72,8 @@ def lapix_raw(polygon_example):
             'image_id': [1, 2],
             'iscrowd': [0, 0],
             'image_width': [1000, 1000],
-            'image_height': [2000, 2000]
-        }
+            'image_height': [2000, 2000],
+        },
     )
 
 

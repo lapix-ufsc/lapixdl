@@ -9,10 +9,12 @@ def bin_mask_from_bb(mask_shape: tuple[int, int], bbox: BBox):
     '''
       Draws a mask from a bounding box
     '''
-    return draw_rectangle(np.zeros(mask_shape, int),
-                          bbox.upper_left_point,
-                          bbox.bottom_right_point,
-                          1)
+    return draw_rectangle(
+        np.zeros(mask_shape, int),
+        bbox.upper_left_point,
+        bbox.bottom_right_point,
+        1,
+    )
 
 
 def draw_rectangle(img: np.ndarray, pt1: tuple[int, int], pt2: tuple[int, int], fill: int):

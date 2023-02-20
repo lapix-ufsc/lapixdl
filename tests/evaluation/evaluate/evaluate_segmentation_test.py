@@ -17,8 +17,8 @@ def test_evaluation_classification_metrics():
             [0, 1, 1, 1, 1],
             [1, 1, 1, 1, 1],
             [1, 2, 2, 2, 2],
-            [2, 2, 2, 2, 2]
-        ]
+            [2, 2, 2, 2, 2],
+        ],
     ]
     pred_masks = [
         [
@@ -26,8 +26,8 @@ def test_evaluation_classification_metrics():
             [1, 0, 0, 0, 0],
             [0, 0, 2, 2, 1],
             [1, 0, 0, 0, 2],
-            [2, 2, 2, 2, 2]
-        ]
+            [2, 2, 2, 2, 2],
+        ],
     ]
 
     metrics = evaluate_segmentation(gt_masks, pred_masks, classes)

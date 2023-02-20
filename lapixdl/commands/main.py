@@ -13,7 +13,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog='LapixDL CLI tools',
         usage='lapixdl <command> [<args>]',
-        description='This tool will help you to convert datasets between different formats.'
+        description='This tool will help you to convert datasets between different formats.',
     )
 
     subparsers = parser.add_subparsers(

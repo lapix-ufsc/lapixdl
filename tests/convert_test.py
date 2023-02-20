@@ -125,14 +125,14 @@ def test_labelbox_to_coco_od(labelbox_filename, labelbox_map_categories):
     categories_coco = [{
         'supercategory': None,
         'name': 'example_category',
-        'id': 1
+        'id': 1,
     }]
 
     coco_od = labelbox_to_coco(
         labelbox_filename,
         labelbox_map_categories,
         categories_coco,
-        image_shape=(1000, 1000)
+        image_shape=(1000, 1000),
     )
 
     coco_od_labels = ['categories', 'images', 'annotations']
@@ -152,7 +152,7 @@ def test_labelbox_to_coco_od(labelbox_filename, labelbox_map_categories):
         labelbox_map_categories,
         categories_coco,
         info_coco=info_coco,
-        image_shape=(1000, 1000)
+        image_shape=(1000, 1000),
     )
 
     assert coco_od['info'] == info_coco
@@ -186,33 +186,33 @@ def labelbox_example(tmpdir):
                         'polygon': [
                             {
                                 'x': 42,
-                                'y': 894
+                                'y': 894,
                             },
                             {
                                 'x': 41,
-                                'y': 895
+                                'y': 895,
                             },
                             {
                                 'x': 74,
-                                'y': 919
+                                'y': 919,
                             },
                             {
                                 'x': 67,
-                                'y': 908
+                                'y': 908,
                             },
                             {
                                 'x': 48,
-                                'y': 896
+                                'y': 896,
                             },
                             {
                                 'x': 44,
-                                'y': 894
-                            }
+                                'y': 894,
+                            },
                         ],
-                        'instanceURI': 'asasasasasdasd'
+                        'instanceURI': 'asasasasasdasd',
                     },
                 ],
-                'classifications': []
+                'classifications': [],
             },
             'Created By': 'xxx@xxx.xxx',
             'Project Name': 'Papanicolaou',
@@ -229,11 +229,11 @@ def labelbox_example(tmpdir):
                     'score': 1,
                     'ID': 'asasasasasdasd',
                     'createdAt': '2020-09-25T17:21:16.000Z',
-                    'instanceURI': 'aaaa@aaaa.aaa'
-                }
+                    'instanceURI': 'aaaa@aaaa.aaa',
+                },
             ],
-            'View Label': 'xxx.xxx.xxx'
-        }
+            'View Label': 'xxx.xxx.xxx',
+        },
     ]
 
     filename = str(tmpdir.join('labelbox_real_example.json'))
@@ -251,15 +251,17 @@ def object_detection_coco_example():
         'categories': [{'supercategory': None, 'name': 'example_category', 'id': 1}],
         'images': [{'file_name': 'filename_example_image', 'height': 1000, 'width': 1000, 'id': 1}],
         'annotations': [
-            {'id': 1,
-             'image_id': 1,
-             'category_id': 1,
-             'bbox': [41.0, 894.0, 33.0, 25.0],
-             'segmentation': [[42.0, 894.0, 41.0, 895.0, 74.0, 919.0, 67.0, 908.0, 48.0, 896.0, 44.0, 894.0, 42.0, 894.0]],
-             'area': 136.0,
-             'iscrowd': 0}
+            {
+                'id': 1,
+                'image_id': 1,
+                'category_id': 1,
+                'bbox': [41.0, 894.0, 33.0, 25.0],
+                'segmentation': [[42.0, 894.0, 41.0, 895.0, 74.0, 919.0, 67.0, 908.0, 48.0, 896.0, 44.0, 894.0, 42.0, 894.0]],
+                'area': 136.0,
+                'iscrowd': 0,
+            },
         ],
-        'info': {}
+        'info': {},
     }
 
 
@@ -269,14 +271,14 @@ def test_labelbox_to_coco_od_complete(labelbox_example, object_detection_coco_ex
     categories_coco = [{
         'supercategory': None,
         'name': 'example_category',
-        'id': 1
+        'id': 1,
     }]
 
     coco_od = labelbox_to_coco(
         labelbox_filename,
         labelbox_map_categories,
         categories_coco,
-        image_shape=(1000, 1000)
+        image_shape=(1000, 1000),
     )
 
     assert coco_od == object_detection_coco_example

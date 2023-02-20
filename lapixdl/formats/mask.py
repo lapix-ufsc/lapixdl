@@ -33,6 +33,6 @@ class Mask:
     def save(
         self,
         filename: str,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         Image.fromarray(self.categorical).save(filename, **kwargs)

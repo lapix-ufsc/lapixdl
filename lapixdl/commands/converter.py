@@ -71,7 +71,7 @@ def converter_command(args: argparse.Namespace | None = None) -> int:
         out_path=os.path.abspath(args.out_path),
         mask_extension=args.mask_extension,
         draw_order=draw_order,
-        processes=args.jobs
+        processes=args.jobs,
     )
 
 

@@ -30,7 +30,7 @@ predictions = [
     PredictionResult(.84, PredictionResultType.FP),
     PredictionResult(.43, PredictionResultType.FP),
     PredictionResult(.48, PredictionResultType.TP),
-    PredictionResult(.95, PredictionResultType.FP)
+    PredictionResult(.95, PredictionResultType.FP),
 ]
 
 TP = len([prediction for prediction in predictions if prediction.type == PredictionResultType.TP])
@@ -63,8 +63,10 @@ def test_precision_recall_curve():
     bin_class = BinaryClassificationMetrics(cls='a', FN=FN, TP=TP, FP=FP)
     metrics = BinaryDetectionMetrics(bin_class, 10, predictions)
 
-    rounded_pr_curve = [(round(rp[0], 4), round(rp[1], 4))
-                        for rp in metrics.precision_recall_curve]
+    rounded_pr_curve = [
+        (round(rp[0], 4), round(rp[1], 4))
+        for rp in metrics.precision_recall_curve
+    ]
     expected_curve = [
         (0.0667, 1.0000),
         (0.0667, 0.5000),
