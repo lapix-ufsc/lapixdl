@@ -37,8 +37,8 @@ def load(
     lapix_df = LapixDataFrame(df)
 
     if 'geometry' in df.columns:
-        # buffer(0) applied to fix invalid geomtries. From shapely issue #278
-        df['geometry'] = df['geometry'].apply(lambda x: shapely.wkt.loads(x).buffer(0))
+        # buffer(0) applied to fix invalid geometries. From shapely issue #278
+        lapix_df['geometry'] = lapix_df['geometry'].apply(lambda x: shapely.wkt.loads(x).buffer(0))
 
     return lapix_df
 
