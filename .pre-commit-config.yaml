@@ -15,7 +15,7 @@ repos:
     -   id: requirements-txt-fixer
 
 -   repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.0.0
+    rev: v3.0.1
     hooks:
     -   id: add-trailing-comma
 
@@ -25,7 +25,7 @@ repos:
     -   id: autopep8
 
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.9.0
+    rev: v3.10.1
     hooks:
     -   id: pyupgrade
         args: [--py38-plus]
@@ -43,7 +43,7 @@ repos:
     -   id: setup-cfg-fmt
 
 -   repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
+    rev: 6.1.0
     hooks:
     -   id: flake8
         exclude: ^data/
