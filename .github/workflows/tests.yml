@@ -18,7 +18,7 @@ jobs:
       fail-fast: true
       matrix:
         os: ['Ubuntu', 'MacOs', 'Windows']
-    uses: asottile/workflows/.github/workflows/tox.yml@v1.2.0
+    uses: asottile/workflows/.github/workflows/tox.yml@v1.6.1
     with:
       env: '["py38", "py39", "py310", "py311"]'
       os: ${{ matrix.os }}-latest
