@@ -37,7 +37,7 @@ def lbox_geo_to_shapely(object: dict[str, Any]) -> Polygon | Point | float:
         point = object['point']
         geometry = Point(np.array([point['x'], point['y']]))
     else:
-        geometry = np.NaN
+        geometry = np.nan
     return geometry
 
 
