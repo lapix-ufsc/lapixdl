@@ -85,3 +85,24 @@ def lapix_filename(lapix_raw, tmpdir):
     lapix_raw.to_parquet(filename, index=False, compression='gzip')
 
     return filename
+
+
+def pytest_report_header(config):
+    import numpy as np
+    import matplotlib
+    import pandas as pd
+    import PIL
+    import pyarrow
+    import seaborn as sbn
+    import shapely
+
+    return f"""\
+    main deps:
+        - numpy-{np.__version__}
+        - matplotlib-{matplotlib.__version__}
+        - pandas-{pd.__version__}
+        - pillow-{PIL.__version__}
+        - pyarrow-{pyarrow.__version__}
+        - seaborn-{sbn.__version__}
+        - shapely-{shapely.__version__}
+"""
