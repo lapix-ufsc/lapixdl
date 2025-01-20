@@ -20,7 +20,7 @@ repos:
     -   id: add-trailing-comma
 
 -   repo: https://github.com/hhatto/autopep8
-    rev: v2.3.1
+    rev: v2.3.2
     hooks:
     -   id: autopep8
 
@@ -50,7 +50,7 @@ repos:
         additional_dependencies: [flake8-typing-imports==1.12.0]
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.14.0
+    rev: v1.14.1
     hooks:
     -   id: mypy
         additional_dependencies: [types-all]
